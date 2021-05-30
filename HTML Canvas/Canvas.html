@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <link rel="stylesheet" href="Canvas.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="Canvas.js"></script>
     <title>Arkanoid</title>
 </head>
 <body>
@@ -18,9 +20,20 @@
             <p class="ui-lives">Lives:</p>
 
             <div id="menu" class="container-fluid">
-                <p class="menu-text">Resume</p>
-                <p class="menu-text">Settings</p>
-                <p class="menu-text">Quit</p>
+                <p class="menu-text"><a id="resume" href="#">Resume</a></p>
+                <p class="menu-text"><a id="settings" href="#">Settings</a></p>
+                <p class="menu-text"><a id="quit-menu" href="#">Quit</a></p>
+            </div>
+
+            <div id="settings-screen" class="container-fluid">
+                <h1 class="settings-title">Settings</h1>
+                <p class="menu-text"><a id="back-to-menu" href="#">Back</a></p>
+            </div>
+            
+            <div id="victory-screen" class="container-fluid">
+                <h1 class="victory-msg">You won!</h1>
+                <p class="menu-text"><a id="restart-game" href="#">Play again</a></p>
+                <p class="menu-text"><a id="endgame" href="#">Quit</a></p>
             </div>
         </div>
         
