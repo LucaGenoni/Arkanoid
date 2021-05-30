@@ -1,7 +1,60 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <script src="lib/m4.js"></script>
+        <script src="lib/twgl-full.min4.js"></script>
+        <script src="lib/utils.js"></script>
         <script src="gameModel.js"></script>
     </head>
-    <div></div>
+    <body>
+        <canvas id="canvas"></canvas>
+        <script>       
+            map = []
+            row = 10 
+            column = 10
+            for (x=0;x<row;x++) {                
+                map[x] = []
+                for (y = 0; y < column; y++) map[x][y] = 0
+            }
+            for (x=3;x<row-1;x++) for (y = 0;y<column;y++) map[x][y] = 1
+            stringa ="["
+            for (x=0;x<row;x++){
+                stringa += "["
+                console.log("dude");   
+                for (y = 0;y<column;y++){
+                    stringa += map[y][x] + ","
+                }
+                stringa += "],\n"
+            }
+            stringa += "]"
+            console.log(stringa);
+            map = [
+                [0,0,0,1,1,1,1,1,1,0,],
+                [0,0,0,1,1,1,1,1,1,0,],
+                [0,0,0,1,1,1,1,1,1,0,],
+                [0,0,0,1,1,1,1,1,1,0,],
+                [0,0,0,1,1,1,1,1,1,0,],
+                [0,0,0,1,1,1,1,1,1,0,],
+                [0,0,0,1,1,1,1,1,1,0,],
+                [0,0,0,1,1,1,1,1,1,0,],
+                [0,0,0,1,1,1,1,1,1,0,],
+                [0,0,0,1,1,1,1,1,1,0,],
+            ]
+            var canvas = document.getElementById("canvas");
+            gl = canvas.getContext("webgl2");
+            if (!gl) {
+                console.log("webGL not supported");
+                alert("webGL not supported")
+            }
+            //set some state of gl
+            gl.clearColor(0, 0, 0, 0);
+            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+            //remove faces that can't be seen
+            gl.enable(gl.DEPTH_TEST);
+            gl.enable(gl.CULL_FACE); 
+            gl.cullFace(gl.BACK);
+            const game = new Arkanoid(map,1);
+            game.play()
+        </script>
+    </body>
 </html>
