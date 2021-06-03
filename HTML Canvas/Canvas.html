@@ -7,6 +7,10 @@
     <link rel="stylesheet" href="Canvas.css">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.0/css/all.css" integrity="sha384-lZN37f5QGtY3VHgisS14W3ExzMWZxybE1SJSEsQp9S+oqd12jhcu+A56Ebc1zFSJ" crossorigin="anonymous">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="./../lib/m4.js"></script>
+    <script src="./../lib/twgl-full.min4.js"></script>
+    <script src="./../lib/utils.js"></script>
+    <script src="./../gameModel.js"></script>
     <script src="Canvas.js"></script>
     <title>Arkanoid</title>
 </head>
@@ -15,14 +19,62 @@
         
         <div id="container-row" class="row mt-3">
             <canvas id="arkanoid-canvas"></canvas>
+            <script>
+                map = []
+                row = 10
+                column = 10
+                for (x=0;x<row;x++) {
+                    map[x] = []
+                    for (y = 0; y < column; y++) map[x][y] = 0
+                }
+                for (x=3;x<row-1;x++) for (y = 0;y<column;y++) map[x][y] = 1
+                stringa ="["
+                for (x=0;x<row;x++){
+                    stringa += "["
+                    for (y = 0;y<column;y++){
+                        stringa += map[y][x] + ","
+                    }
+                    stringa += "],\n"
+                }
+                stringa += "]"
+                console.log(stringa);
+                map = [
+                    [0,0,0,1,1,1,1,1,1,0,],
+                    [0,0,0,1,1,1,1,1,1,0,],
+                    [0,0,0,1,1,1,1,1,1,0,],
+                    [0,0,0,1,1,1,1,1,1,0,],
+                    [0,0,0,1,1,1,1,1,1,0,],
+                    [0,0,0,1,1,1,1,1,1,0,],
+                    [0,0,0,1,1,1,1,1,1,0,],
+                    [0,0,0,1,1,1,1,1,1,0,],
+                    [0,0,0,1,1,1,1,1,1,0,],
+                    [0,0,0,1,1,1,1,1,1,0,],
+                ]
+                var canvas = document.getElementById("arkanoid-canvas");
+                gl = canvas.getContext("webgl2");
+                if (!gl) {
+                    console.log("webGL not supported");
+                    alert("webGL not supported")
+                }
+                //set some state of gl
+                gl.clearColor(0, 0, 0, 0);
+                gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+                //remove faces that can't be seen
+                gl.enable(gl.DEPTH_TEST);
+                gl.enable(gl.CULL_FACE);
+                gl.cullFace(gl.BACK);
+                const game = new Arkanoid(map,1);
+                game.play()
+            </script>
             
-            <p class="ui-score">Score:</p>
-            
-            <p class="ui-lives">Lives:
-                <i class="fa fa-heart"></i>
-                <i class="fa fa-heart"></i>
-                
-            </p>
+            <div id="ui-container">
+                <p class="ui-score">Score:</p>
+                <p class="ui-lives">Lives:
+                    <i class="fa fa-heart"></i>
+                    <i class="fa fa-heart"></i>
+                    <i class="fa fa-heart"></i>
+                </p>
+            </div>
 
             <div id="menu" class="container-fluid">
                 <p class="menu-text"><a id="resume" href="#">Resume</a></p>
