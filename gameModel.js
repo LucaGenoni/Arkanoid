@@ -45,6 +45,8 @@ class Arkanoid {
 		this.bar = {
 			//uniforms like color, textures and other things
 			
+			center:[this.barPosition[0],this.barPosition[1],0],
+			dimensions: [0.2,0.1,0.1],
 			uniforms: { 
 				u_color: [185/255, 122/255, 87/255, 1],
 				// u_matrix: utils.MakeTranslateMatrix((2*x-map.length)/map.length,(2*y-map[x].length)/map[x].length,0)
@@ -61,7 +63,8 @@ class Arkanoid {
 
 		this.ball = {
 			//uniforms like color, textures and other things
-			
+			direction:[Math.cos(utils.degToRad(this.ballAngle)),Math.sin(utils.degToRad(this.ballAngle)),0],
+			radius:0.1,
 			uniforms: { 
 				u_color: [1, 1, 1, 1],
 				// u_matrix: utils.MakeTranslateMatrix((2*x-map.length)/map.length,(2*y-map[x].length)/map[x].length,0)
@@ -84,14 +87,17 @@ class Arkanoid {
 				if (typeBlock!=0){					
 					var signleColor = Math.floor(Math.random() * colors.length);
 					console.log((2*x-map.length+1)/map.length,(2*y-map[x].length+1)/map[x].length);
+					var coordinate = [(2*x-map.length+1)/map.length,(2*y-map[x].length+1)/map[x].length,0]
+					var scaling = 0.1
 					this.block.push({
 						//uniforms like color, textures and other things
-						
+						center:coordinate,
+						dimensions: [scaling,scaling,scaling],
 						uniforms: {
 							u_color: colors[signleColor],
 							// u_matrix: utils.MakeTranslateMatrix((2*x-map.length)/map.length,(2*y-map[x].length)/map[x].length,0)
 							u_matrix: utils.transposeMatrix(utils.multiplyMatrices(
-								utils.MakeTranslateMatrix((2*x-map.length+1)/map.length,(2*y-map[x].length+1)/map[x].length,0),
+								utils.MakeTranslateMatrix(coordinate[0],coordinate[1],0),
 								utils.MakeScaleMatrix(0.1)
 							))
 						},
@@ -138,12 +144,14 @@ class Arkanoid {
 					// starting position bar to right
 					case "ArrowLeft":
 					case "KeyA":
-						this.barPosition[0]--;
+						this.barPosition[0]-=0.01;
+						this.ballPosition[0]-=0.01;
 						break;
 					// starting position bar to left
 					case "KeyD":
 					case "ArrowRight":
-						this.barPosition[0]++;
+						this.barPosition[0]+=0.01;
+						this.ballPosition[0]+=0.01;
 						break;
 					// starting direction ball counter-clockwise
 					case "ArrowUp":
@@ -166,12 +174,12 @@ class Arkanoid {
 					// position bar
 					case "ArrowLeft":
 					case "KeyA":
-						this.barPosition[0]--;
+						this.barPosition[0]-=0.01;
 						break;
 					// position bar
 					case "KeyD":
 					case "ArrowRight":
-						this.barPosition[0]++;
+						this.barPosition[0]+=0.01;
 						break;
 				}
 				break;	
@@ -205,6 +213,28 @@ class Arkanoid {
 		//this function must work with globals   
 		switch (game.state) {
 			case "Starting":
+				
+				game.ballPosition[0] = game.ballPosition[0] 
+				game.ballPosition[1] = game.ballPosition[1] 
+				
+				game.ball.uniforms.u_matrix = utils.transposeMatrix(utils.multiplyMatrices(
+					utils.MakeTranslateMatrix(game.ballPosition[0],game.ballPosition[1],0),
+					utils.MakeScaleNuMatrix(0.1,0.1,0.1)
+				))
+				
+				game.bar.uniforms.u_matrix = utils.transposeMatrix(utils.multiplyMatrices(
+					utils.MakeTranslateMatrix(game.barPosition[0],game.barPosition[1],0),
+					utils.MakeScaleNuMatrix(0.2,0.1,0.1)
+				))
+				twgl.resizeCanvasToDisplaySize(gl.canvas);
+				gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+			
+				game.drawSingleObject(game.bar);
+				game.drawSingleObject(game.ball);
+				twgl.drawObjectList(gl, game.block);
+			
+				requestAnimationFrame(game.render);
+				break;     
 			case "Playing":
 				console.log(game.state,game.ballPosition,game.ballAngle,game.barPosition)
 				// rendering
@@ -218,13 +248,53 @@ class Arkanoid {
 				// 			e.drawDetectionColor.uniforms.u_matrix = e.drawInfo.uniforms.u_matrix					
 				// 		}
 				// });
-				game.ballPosition[0] = game.ballPosition[0] + Math.cos(utils.degToRad(game.ballAngle))*0.001
-				game.ballPosition[1] = game.ballPosition[1] + Math.sin(utils.degToRad(game.ballAngle))*0.001
+				
+				game.ballPosition[0] = game.ballPosition[0] + game.ball.direction[0]*0.01
+				game.ballPosition[1] = game.ballPosition[1] + game.ball.direction[1]*0.01
+
+				// check collisioni con sponde
+					if(Math.abs(game.ballPosition[0])>1-game.ball.radius) game.ball.direction[0] = -game.ball.direction[0]
+					if(game.ballPosition[1]>1-game.ball.radius) game.ball.direction[1] = -game.ball.direction[1]
+					if(game.ballPosition[1]<-1+game.ball.radius) {
+						console.log("lost a life or the game");
+						game.state = "Pause"
+						break;
+					}
+				// check collisioni con barra
+				var xaxis = Math.abs(game.ballPosition[0] - game.barPosition[0]) - game.ball.radius - game.bar.dimensions[0]
+				var yaxis = Math.abs(game.ballPosition[1] - game.barPosition[1]) - game.ball.radius - game.bar.dimensions[1]
+				if(xaxis<0 &&yaxis<0){
+					// non preciso con gli spigoli
+					console.log("collision detected with bar ");
+					game.ball.direction[0] = -game.ball.direction[0]
+					game.ball.direction[1] = -game.ball.direction[1]
+				}
+				// check collisioni con sponde
+				for (let i = 0; i < game.block.length; i++) {
+					const e = game.block[i];
+					var xaxis = Math.abs(game.ballPosition[0] - e.center[0]) - game.ball.radius - e.dimensions[0]
+					var yaxis = Math.abs(game.ballPosition[1] - e.center[1]) - game.ball.radius - e.dimensions[1]
+					if(xaxis<0 &&yaxis<0){
+						// non preciso con gli spigoli
+						console.log("collision detected with block ",i);
+						game.ball.direction[0] = -game.ball.direction[0]
+						game.ball.direction[1] = -game.ball.direction[1]
+						
+						game.ballPosition[0] = game.ballPosition[0] + game.ball.direction[0]*0.01
+						game.ballPosition[1] = game.ballPosition[1] + game.ball.direction[1]*0.01
+
+					}
+				}
 				game.ball.uniforms.u_matrix = utils.transposeMatrix(utils.multiplyMatrices(
 					utils.MakeTranslateMatrix(game.ballPosition[0],game.ballPosition[1],0),
 					utils.MakeScaleNuMatrix(0.1,0.1,0.1)
 				))
-				// check collisioni con i blocci e barra e sponde
+				
+				game.bar.uniforms.u_matrix = utils.transposeMatrix(utils.multiplyMatrices(
+					utils.MakeTranslateMatrix(game.barPosition[0],game.barPosition[1],0),
+					utils.MakeScaleNuMatrix(0.2,0.1,0.1)
+				))
+				
 				twgl.resizeCanvasToDisplaySize(gl.canvas);
 				gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 			
