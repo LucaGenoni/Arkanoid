@@ -10,22 +10,30 @@
     max-width: 100%;
 }
 
-.ui-score {
-    position: fixed;
-    font-size: 1.5rem;
+#ui-container {
+    position: absolute;
+    text-align : left;
     top: 1%;
-    right: 3%;
+    right: 1%;
     margin-bottom: 0;
     z-index: 1;
 }
 
-.ui-lives {
-    position: fixed;
+.ui-score {
     font-size: 1.5rem;
-    top: 5%;
-    right: 3%;
-    margin-bottom: 0;
-    z-index: 1;
+    font-family: "Courier New", monospace;
+    font-weight: bold;
+}
+
+.ui-lives {
+    font-size: 1.5rem;
+    font-family: "Courier New", monospace;
+    font-weight: bold;
+}
+
+.ui-lives > i {
+    font-size: 1.5rem;
+    color: crimson;
 }
 
 #arkanoid-canvas {
@@ -75,13 +83,26 @@
 .menu-text {
     position: relative;
     font-size: 2rem;
+    font-family: "Courier New", monospace;
+    font-weight: bold;
     color: azure;
     top: 40%;
     margin-bottom: 0.5%;
 }
 
+.menu-text > a {
+    text-decoration: none;
+    color: aqua;
+}
+
+.menu-text > a:hover {
+    color: #00cccc;
+}
+
 .settings-title {
     font-size: 3rem;
+    font-family: "Courier New", monospace;
+    font-weight: bolder;
     color: azure;
     margin-top: 3%;
 }

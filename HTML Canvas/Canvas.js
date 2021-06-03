@@ -40,6 +40,3 @@ $(document).ready(function(){
         //exit from the game
     });
 });
-
-
-//document.getElementById('menu').style.display === "none" && document.getElementById('settings-screen').style.display === "none"
