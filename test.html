@@ -7,7 +7,7 @@
         <script src="gameModel.js"></script>
     </head>
     <body>
-        <canvas id="canvas" style="background-color:black;width: 200px;height: 200px;"></canvas>
+        <canvas id="arkanoid-canvas" style="background-color:black;width: 200px;height: 200px;"></canvas>
         <script>       
             map = []
             row = 10 
@@ -39,7 +39,7 @@
                 [0,0,0,1,1,1,1,1,1,0,],
                 [0,0,0,1,1,1,1,1,1,0,],
             ]
-            var canvas = document.getElementById("canvas");
+            var canvas = document.getElementById("arkanoid-canvas");
             gl = canvas.getContext("webgl2");
             if (!gl) {
                 console.log("webGL not supported");
