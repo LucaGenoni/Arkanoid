@@ -7,7 +7,7 @@
         <script src="gameModel.js"></script>
     </head>
     <body>
-        <canvas id="canvas"></canvas>
+        <canvas id="canvas" style="background-color:black;width: 200px;height: 200px;"></canvas>
         <script>       
             map = []
             row = 10 
@@ -20,7 +20,6 @@
             stringa ="["
             for (x=0;x<row;x++){
                 stringa += "["
-                console.log("dude");   
                 for (y = 0;y<column;y++){
                     stringa += map[y][x] + ","
                 }
