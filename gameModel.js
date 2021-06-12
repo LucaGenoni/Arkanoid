@@ -148,14 +148,18 @@ class Arkanoid {
 					// starting position bar to right
 					case "ArrowLeft":
 					case "KeyA":
-						this.barPosition[0]-=this.velocityBar;
-						this.ballPosition[0]-=this.velocityBar;
+						var tempChange = this.barPosition[0] - this.velocityBar;
+						if(tempChange>-1+this.bar.dimensions[0]) this.barPosition[0] = tempChange;
+						else this.barPosition[0] = -1 + this.bar.dimensions[0];
+						this.ballPosition[0] = this.barPosition[0];
 						break;
 					// starting position bar to left
 					case "KeyD":
 					case "ArrowRight":
-						this.barPosition[0]+=this.velocityBar;
-						this.ballPosition[0]+=this.velocityBar;
+						var tempChange = this.barPosition[0] + this.velocityBar;
+						if(tempChange<1-this.bar.dimensions[0]) this.barPosition[0] = tempChange;
+						else this.barPosition[0] = 1 - this.bar.dimensions[0];
+						this.ballPosition[0] = this.barPosition[0];
 						break;
 					// starting direction ball counter-clockwise
 					case "ArrowUp":
@@ -179,12 +183,16 @@ class Arkanoid {
 					// position bar
 					case "ArrowLeft":
 					case "KeyA":
-						this.barPosition[0]-=this.velocityBar;
+						var tempChange = this.barPosition[0] - this.velocityBar;
+						if(tempChange>-1+this.bar.dimensions[0]) this.barPosition[0] = tempChange;
+						else this.barPosition[0] = -1 + this.bar.dimensions[0];
 						break;
 					// position bar
 					case "KeyD":
 					case "ArrowRight":
-						this.barPosition[0]+=this.velocityBar;
+						var tempChange = this.barPosition[0] + this.velocityBar;
+						if(tempChange<1-this.bar.dimensions[0]) this.barPosition[0] = tempChange;
+						else this.barPosition[0] = 1 - this.bar.dimensions[0];
 						break;
 				}
 				break;	
