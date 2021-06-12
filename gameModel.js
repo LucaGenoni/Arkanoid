@@ -22,14 +22,15 @@ void main() {
 `;
 class Arkanoid {
 	constructor(params) {
-		console.log("Preparing the game...")
-		this.params = params
-		this.state = "Starting"
-		this.ballAngle = 90
-		this.ballPosition = [0.0,-0.8]
-		this.barPosition = [0,-1]
-		this.isGameStopped = true
-		document.onkeydown = (keyDownEvent) => this.keyDown(keyDownEvent)
+		console.log("Preparing the game...");
+		this.params = params;
+		this.state = "Starting";
+		this.ballAngle = 90;
+		this.ballPosition = [0.0,-0.8];
+		this.barPosition = [0,-1];
+		this.score = 0;
+		this.isGameStopped = true;
+		document.onkeydown = (keyDownEvent) => this.keyDown(keyDownEvent);
 		// window.addEventListener("keydown", this.keyDown, false);
 		// 
 		this.geometryBlock = {	//block
@@ -79,16 +80,16 @@ class Arkanoid {
 			bufferInfo: twgl.createBufferInfoFromArrays(gl, this.geometryBlock),
 		}
 
-		this.block = []
+		this.block = [];
 		// loading meshes blocks
 		for (x=0;x<map.length;x++){
 			for (y=0;y<map[x].length;y++){
-				var typeBlock = map[x][y]
-				if (typeBlock!=0){					
+				var typeBlock = map[x][y];
+				if (typeBlock != 0){					
 					var signleColor = Math.floor(Math.random() * colors.length);
 					console.log((2*x-map.length+1)/map.length,(2*y-map[x].length+1)/map[x].length);
-					var coordinate = [(2*x-map.length+1)/map.length,(2*y-map[x].length+1)/map[x].length,0]
-					var scaling = 0.1
+					var coordinate = [(2*x-map.length+1)/map.length,(2*y-map[x].length+1)/map[x].length,0];
+					var scaling = 0.1;
 					this.block.push({
 						//uniforms like color, textures and other things
 						center:coordinate,
@@ -105,7 +106,7 @@ class Arkanoid {
 						programInfo: this.programInfo,
 						//geometry
 						bufferInfo: twgl.createBufferInfoFromArrays(gl, this.geometryBlock),
-					})
+					});
 				}
 				// else{
 				// 	this.block.push({
@@ -214,8 +215,8 @@ class Arkanoid {
 		switch (game.state) {
 			case "Starting":
 				
-				game.ballPosition[0] = game.ballPosition[0] 
-				game.ballPosition[1] = game.ballPosition[1] 
+				game.ballPosition[0] = game.ballPosition[0]; 
+				game.ballPosition[1] = game.ballPosition[1];
 				
 				game.ball.uniforms.u_matrix = utils.transposeMatrix(utils.multiplyMatrices(
 					utils.MakeTranslateMatrix(game.ballPosition[0],game.ballPosition[1],0),
@@ -236,7 +237,7 @@ class Arkanoid {
 				requestAnimationFrame(game.render);
 				break;     
 			case "Playing":
-				console.log(game.state,game.ballPosition,game.ballAngle,game.barPosition)
+				console.log(game.state,game.ballPosition,game.ballAngle,game.barPosition);
 				// rendering
 				// scene.updateWorldMatrices();	
 				// var viewProj = m4.multiply(proj,view)
@@ -249,40 +250,50 @@ class Arkanoid {
 				// 		}
 				// });
 				
-				game.ballPosition[0] = game.ballPosition[0] + game.ball.direction[0]*0.01
-				game.ballPosition[1] = game.ballPosition[1] + game.ball.direction[1]*0.01
+				game.ballPosition[0] = game.ballPosition[0] + game.ball.direction[0]*0.01;
+				game.ballPosition[1] = game.ballPosition[1] + game.ball.direction[1]*0.01;
 
 				// check collisioni con sponde
-					if(Math.abs(game.ballPosition[0])>1-game.ball.radius) game.ball.direction[0] = -game.ball.direction[0]
-					if(game.ballPosition[1]>1-game.ball.radius) game.ball.direction[1] = -game.ball.direction[1]
+					if(Math.abs(game.ballPosition[0])>1-game.ball.radius) game.ball.direction[0] = -game.ball.direction[0];
+					if(game.ballPosition[1]>1-game.ball.radius) game.ball.direction[1] = -game.ball.direction[1];
 					if(game.ballPosition[1]<-1+game.ball.radius) {
 						console.log("lost a life or the game");
-						game.state = "Pause"
+						game.state = "Pause";
 						break;
 					}
 				// check collisioni con barra
-				var xaxis = Math.abs(game.ballPosition[0] - game.barPosition[0]) - game.ball.radius - game.bar.dimensions[0]
-				var yaxis = Math.abs(game.ballPosition[1] - game.barPosition[1]) - game.ball.radius - game.bar.dimensions[1]
+				var xaxis = Math.abs(game.ballPosition[0] - game.barPosition[0]) - game.ball.radius - game.bar.dimensions[0];
+				var yaxis = Math.abs(game.ballPosition[1] - game.barPosition[1]) - game.ball.radius - game.bar.dimensions[1];
 				if(xaxis<0 &&yaxis<0){
 					// non preciso con gli spigoli
 					console.log("collision detected with bar ");
-					game.ball.direction[0] = -game.ball.direction[0]
-					game.ball.direction[1] = -game.ball.direction[1]
+					game.ball.direction[0] = -game.ball.direction[0];
+					game.ball.direction[1] = -game.ball.direction[1];
 				}
 				// check collisioni con sponde
 				for (let i = 0; i < game.block.length; i++) {
 					const e = game.block[i];
-					var xaxis = Math.abs(game.ballPosition[0] - e.center[0]) - game.ball.radius - e.dimensions[0]
-					var yaxis = Math.abs(game.ballPosition[1] - e.center[1]) - game.ball.radius - e.dimensions[1]
+					var xaxis = Math.abs(game.ballPosition[0] - e.center[0]) - game.ball.radius - e.dimensions[0];
+					var yaxis = Math.abs(game.ballPosition[1] - e.center[1]) - game.ball.radius - e.dimensions[1];
 					if(xaxis<0 &&yaxis<0){
 						// non preciso con gli spigoli
 						console.log("collision detected with block ",i);
-						game.ball.direction[0] = -game.ball.direction[0]
-						game.ball.direction[1] = -game.ball.direction[1]
-						
-						game.ballPosition[0] = game.ballPosition[0] + game.ball.direction[0]*0.01
-						game.ballPosition[1] = game.ballPosition[1] + game.ball.direction[1]*0.01
+						game.ball.direction[0] = -game.ball.direction[0];
+						game.ball.direction[1] = -game.ball.direction[1];
 
+						game.ballPosition[0] = game.ballPosition[0] + game.ball.direction[0]*0.01;
+						game.ballPosition[1] = game.ballPosition[1] + game.ball.direction[1]*0.01;
+						
+						//delete the block that was hit and update the player's score
+						game.block.splice(i, 1);
+						game.updateScore();
+					}
+					
+					//check win condition (no more blocks to destroy)
+					if (game.block.length === 0){
+						console.log("You won the game!");
+						game.state = "Won";
+						break;
 					}
 				}
 				game.ball.uniforms.u_matrix = utils.transposeMatrix(utils.multiplyMatrices(
@@ -309,12 +320,22 @@ class Arkanoid {
 				break;
 		}
 	}
+	
 	drawSingleObject(item){		
 		gl.useProgram(item.programInfo.program);
 		twgl.setBuffersAndAttributes(gl, item.programInfo, item.bufferInfo);
 		twgl.setUniforms(item.programInfo, item.uniforms);
 		twgl.drawBufferInfo(gl, item.bufferInfo);
 	}
+
+	updateScore(){
+		//TODO: score modification to be changed considering the time spent playing, 
+		// the active upgrade's score multiplier and whatever else we feel is needed
+		
+		this.score+=10;
+		$(".ui-score").text("Score: " + this.score);
+	}
+	
 	// drawScene() {
 	// 	//this function must work with globals   
 	// 	switch (game.state) {
