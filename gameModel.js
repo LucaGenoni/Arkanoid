@@ -272,14 +272,17 @@ class Arkanoid {
 					if(game.ballPosition[1]<-1+game.ball.radius) {
 						console.log("lost a life or the game")
 						game.handleLifeLoss();
-						game.state = "Pause";
-						break;
+						game.ballAngle = 90;
+						game.ballPosition = [0.0,-0.8];
+						game.barPosition = [0,-1];
+						game.state = "Starting";
+						game.play(); 
 					}
 				// check collisioni con barra
 				var xaxis = Math.abs(game.ballPosition[0] - game.barPosition[0]) - game.bar.dimensions[0];
 				var yaxis = Math.abs(game.ballPosition[1] - game.barPosition[1]) - game.bar.dimensions[1];
 				
-				if(xaxis<=0 && yaxis<game.ball.radius){
+				if(xaxis<=0 && yaxis<game.ball.radius && game.state !== "Starting"){
 					// collision on xaxis
 					console.log("collision detected on yaxis bar");
 					game.ball.direction[1] = -game.ball.direction[1];
