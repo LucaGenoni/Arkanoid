@@ -29,8 +29,9 @@ class Arkanoid {
 		this.ballPosition = [0.0,-0.8];
 		this.barPosition = [0,-1];
 		this.score = 0;
-		this.velocity = 0.02
-		this.velocityBar = 0.02
+		this.lives = 3;
+		this.velocity = 0.02;
+		this.velocityBar = 0.02;
 		this.isGameStopped = true;
 		document.onkeydown = (keyDownEvent) => this.keyDown(keyDownEvent);
 		// window.addEventListener("keydown", this.keyDown, false);
@@ -269,7 +270,8 @@ class Arkanoid {
 					if(Math.abs(game.ballPosition[0])>1-game.ball.radius) game.ball.direction[0] = -game.ball.direction[0];
 					if(game.ballPosition[1]>1-game.ball.radius) game.ball.direction[1] = -game.ball.direction[1];
 					if(game.ballPosition[1]<-1+game.ball.radius) {
-						console.log("lost a life or the game");
+						console.log("lost a life or the game")
+						game.handleLifeLoss();
 						game.state = "Pause";
 						break;
 					}
@@ -393,6 +395,8 @@ class Arkanoid {
 		twgl.drawBufferInfo(gl, item.bufferInfo);
 	}
 
+	/* <----------------- Functions for UI -----------------> */
+	
 	updateScore(){
 		//TODO: score modification to be changed considering the time spent playing, 
 		// the active upgrade's score multiplier and whatever else we feel is needed
@@ -400,7 +404,26 @@ class Arkanoid {
 		this.score+=10;
 		$(".ui-score").text("Score: " + this.score);
 	}
-	
+
+	handleLifeLoss(){
+		this.lives-=1;
+
+		//handling cases where player still has 1-2 lives left
+		if (this.lives + 1 === 3){
+			document.getElementById('life-3').style.display = "none";
+		}
+
+		else if (this.lives + 1 === 2){
+			document.getElementById('life-2').style.display = "none";
+		}
+
+		//handling case where the player has no lives left: LOSS
+		else if (this.lives + 1 === 1){
+			document.getElementById('life-1').style.display = "none";
+			game.state = "Pause";
+		}
+	}
+
 	// drawScene() {
 	// 	//this function must work with globals   
 	// 	switch (game.state) {

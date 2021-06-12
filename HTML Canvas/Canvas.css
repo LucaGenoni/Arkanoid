@@ -44,7 +44,7 @@
 }
 
 #arkanoid-canvas {
-    background-color: aqua;
+    background-color: black;
     min-width: 100%;
     height: inherit;
 }
