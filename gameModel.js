@@ -166,6 +166,7 @@ class Arkanoid {
 						break;
 					// start game
 					case "Space":
+						this.ball.direction = [Math.cos(utils.degToRad(this.ballAngle)),Math.sin(utils.degToRad(this.ballAngle)),0];
 						this.state = "Playing"
 						break;
 				}
@@ -270,30 +271,53 @@ class Arkanoid {
 					game.ball.direction[0] = -game.ball.direction[0];
 					game.ball.direction[1] = -game.ball.direction[1];
 				}
-				// check collisioni con sponde
 				for (let i = 0; i < game.block.length; i++) {
-					const e = game.block[i];
-					var xaxis = Math.abs(game.ballPosition[0] - e.center[0]) - game.ball.radius - e.dimensions[0];
-					var yaxis = Math.abs(game.ballPosition[1] - e.center[1]) - game.ball.radius - e.dimensions[1];
-					if(xaxis<0 &&yaxis<0){
-						// non preciso con gli spigoli
-						console.log("collision detected with block ",i);
-						game.ball.direction[0] = -game.ball.direction[0];
-						game.ball.direction[1] = -game.ball.direction[1];
-
-						game.ballPosition[0] = game.ballPosition[0] + game.ball.direction[0]*0.01;
-						game.ballPosition[1] = game.ballPosition[1] + game.ball.direction[1]*0.01;
-						
+					const e = game.block[i];					
+					var xaxis = Math.abs(game.ballPosition[0] - e.center[0]) - e.dimensions[0]
+					var yaxis = Math.abs(game.ballPosition[1] - e.center[1]) - e.dimensions[1]
+					if(xaxis<=0 && yaxis<game.ball.radius){
+						// collision on xaxis
+						console.log("collision detected on yaxis",i);
+						game.ball.direction[1] = -game.ball.direction[1]
+						game.ballPosition[1] = game.ballPosition[1] + game.ball.direction[1]*0.01
 						//delete the block that was hit and update the player's score
 						game.block.splice(i, 1);
 						game.updateScore();
-					}
-					
-					//check win condition (no more blocks to destroy)
-					if (game.block.length === 0){
-						console.log("You won the game!");
-						game.state = "Won";
-						break;
+
+					}else if(yaxis<0 && xaxis<game.ball.radius){
+						// collision on yaxis
+						console.log("collision detected on xaxis",i);
+						game.ball.direction[0] = -game.ball.direction[0]						
+						game.ballPosition[0] = game.ballPosition[0] + game.ball.direction[0]*0.01
+						//delete the block that was hit and update the player's score
+						game.block.splice(i, 1);
+						game.updateScore();
+						
+					}else if(xaxis<game.ball.radius &&yaxis<game.ball.radius){
+						// possible collision on the edge 
+						var spigoli =[
+							[(e.center[0] + e.dimensions[0]),(e.center[1] + e.dimensions[1]),0],
+							[(e.center[0] + e.dimensions[0]),(e.center[1] - e.dimensions[1]),0],
+							[(e.center[0] - e.dimensions[0]),(e.center[1] + e.dimensions[1]),0],
+							[(e.center[0] - e.dimensions[0]),(e.center[1] - e.dimensions[1]),0]
+						]
+						for(var j=0;j< spigoli.length;j++){
+							xaxis = game.ballPosition[0] - spigoli[j][0];
+							yaxis = game.ballPosition[1] - spigoli[j][1];
+							// pitagora
+							if((xaxis**2 + yaxis**2 - game.ball.radius**2)<0){
+								console.log("collision detected with block ",j);
+								game.ball.direction[0] = -game.ball.direction[0]
+								game.ball.direction[1] = -game.ball.direction[1]
+								
+								game.ballPosition[0] = game.ballPosition[0] + game.ball.direction[0]*0.01
+								game.ballPosition[1] = game.ballPosition[1] + game.ball.direction[1]*0.01
+								//delete the block that was hit and update the player's score
+								game.block.splice(i, 1);
+								game.updateScore();
+								break;		
+							};
+						}
 					}
 				}
 				game.ball.uniforms.u_matrix = utils.transposeMatrix(utils.multiplyMatrices(
