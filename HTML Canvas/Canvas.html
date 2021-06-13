@@ -21,23 +21,23 @@
         <div id="container-row" class="row mt-3">
             <canvas id="arkanoid-canvas"></canvas>
             <script>
-                map = []
-                row = 10
-                column = 10
-                for (x=0;x<row;x++) {
-                    map[x] = []
+                map = [];
+                row = 10;
+                column = 10;
+                for (x = 0; x < row; x++) {
+                    map[x] = [];
                     for (y = 0; y < column; y++) map[x][y] = 0
                 }
-                for (x=3;x<row-1;x++) for (y = 0;y<column;y++) map[x][y] = 1
-                stringa ="["
-                for (x=0;x<row;x++){
-                    stringa += "["
-                    for (y = 0;y<column;y++){
+                for (x = 3; x < row-1; x++) for (y = 0; y < column; y++) map[x][y] = 1;
+                stringa ="[";
+                for (x=0; x < row; x++){
+                    stringa += "[";
+                    for (y = 0; y < column; y++){
                         stringa += map[y][x] + ","
                     }
                     stringa += "],\n"
                 }
-                stringa += "]"
+                stringa += "]";
                 console.log(stringa);
                 map = [
                     [0,0,0,1,1,1,1,1,1,0,],
@@ -50,7 +50,7 @@
                     [0,0,0,1,1,1,1,1,1,0,],
                     [0,0,0,1,1,1,1,1,1,0,],
                     [0,0,0,1,1,1,1,1,1,0,],
-                ]
+                ];
                 var canvas = document.getElementById("arkanoid-canvas");
                 gl = canvas.getContext("webgl2");
                 if (!gl) {
@@ -89,9 +89,14 @@
             </div>
             
             <div id="victory-screen" class="container-fluid">
-                <h1 class="victory-msg">You won!</h1>
-                <p class="menu-text"><a id="restart-game" href="#">Play again</a></p>
-                <p class="menu-text"><a id="endgame" href="#">Quit</a></p>
+                <h1 class="result-msg">You won!</h1>
+                <p class="menu-text">Your score:</p>
+                <p class="menu-text"><a class="restart-game" href="#">Play again</a></p>
+            </div>
+
+            <div id="lost-screen" class="container-fluid">
+                <h1 class="result-msg">You lost</h1>
+                <p class="menu-text"><a class="restart-game" href="#">Play again</a></p>
             </div>
         </div>
         

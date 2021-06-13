@@ -86,11 +86,11 @@ class Arkanoid {
 
 		this.block = [];
 		// loading meshes blocks
-		for (x=0;x<map.length;x++){
-			for (y=0;y<map[x].length;y++){
+		for (x = 0; x < map.length; x++){
+			for (y = 0; y < map[x].length; y++){
 				var typeBlock = map[x][y];
-				if (typeBlock != 0){					
-					var signleColor = Math.floor(Math.random() * colors.length);
+				if (typeBlock !== 0){					
+					var singleColor = Math.floor(Math.random() * colors.length);
 					console.log((2*x-map.length+1)/map.length,(2*y-map[x].length+1)/map[x].length);
 					var coordinate = [(2*x-map.length+1)/map.length,(2*y-map[x].length+1)/map[x].length,0];
 					var scaling = 0.1;
@@ -99,7 +99,7 @@ class Arkanoid {
 						center:coordinate,
 						dimensions: [scaling,scaling,scaling],
 						uniforms: {
-							u_color: colors[signleColor],
+							u_color: colors[singleColor],
 							// u_matrix: utils.MakeTranslateMatrix((2*x-map.length)/map.length,(2*y-map[x].length)/map[x].length,0)
 							u_matrix: utils.transposeMatrix(utils.multiplyMatrices(
 								utils.MakeTranslateMatrix(coordinate[0],coordinate[1],0),
@@ -138,7 +138,7 @@ class Arkanoid {
 	
 	keyDown(e){
 		console.log(this.params,e);
-		if (e.code=="Escape") this.state = "Pause"
+		if (e.code === "Escape") this.state = "Pause";
 		switch (this.state) {
 			case "Pause":
 			case "Won":
@@ -175,7 +175,7 @@ class Arkanoid {
 					// start game
 					case "Space":
 						this.ball.direction = [Math.cos(utils.degToRad(this.ballAngle)),Math.sin(utils.degToRad(this.ballAngle)),0];
-						this.state = "Playing"
+						this.state = "Playing";
 						break;
 				}
 				break;
@@ -185,14 +185,14 @@ class Arkanoid {
 					case "ArrowLeft":
 					case "KeyA":
 						var tempChange = this.barPosition[0] - this.velocityBar;
-						if(tempChange>-1+this.bar.dimensions[0]) this.barPosition[0] = tempChange;
+						if (tempChange > -1 + this.bar.dimensions[0]) this.barPosition[0] = tempChange;
 						else this.barPosition[0] = -1 + this.bar.dimensions[0];
 						break;
 					// position bar
 					case "KeyD":
 					case "ArrowRight":
 						var tempChange = this.barPosition[0] + this.velocityBar;
-						if(tempChange<1-this.bar.dimensions[0]) this.barPosition[0] = tempChange;
+						if (tempChange < 1 - this.bar.dimensions[0]) this.barPosition[0] = tempChange;
 						else this.barPosition[0] = 1 - this.bar.dimensions[0];
 						break;
 				}
@@ -213,7 +213,7 @@ class Arkanoid {
 			case "Starting":
 			case "Playing":
 				if (this.isGameStopped) {
-					console.log(this.state)
+					console.log(this.state);
 					this.isGameStopped = ! this.isGameStopped
 				}
 				requestAnimationFrame(this.render);
@@ -234,12 +234,12 @@ class Arkanoid {
 				game.ball.uniforms.u_matrix = utils.transposeMatrix(utils.multiplyMatrices(
 					utils.MakeTranslateMatrix(game.ballPosition[0],game.ballPosition[1],0),
 					utils.MakeScaleNuMatrix(0.1,0.1,0.1)
-				))
+				));
 				
 				game.bar.uniforms.u_matrix = utils.transposeMatrix(utils.multiplyMatrices(
 					utils.MakeTranslateMatrix(game.barPosition[0],game.barPosition[1],0),
 					utils.MakeScaleNuMatrix(0.2,0.1,0.1)
-				))
+				));
 				twgl.resizeCanvasToDisplaySize(gl.canvas);
 				gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 			
@@ -267,53 +267,48 @@ class Arkanoid {
 				game.ballPosition[1] = game.ballPosition[1] + game.ball.direction[1]*game.velocity;
 
 				// check collisioni con sponde
-					if(Math.abs(game.ballPosition[0])>1-game.ball.radius) game.ball.direction[0] = -game.ball.direction[0];
-					if(game.ballPosition[1]>1-game.ball.radius) game.ball.direction[1] = -game.ball.direction[1];
-					if(game.ballPosition[1]<-1+game.ball.radius) {
-						console.log("lost a life or the game")
+					if (Math.abs(game.ballPosition[0]) > 1-game.ball.radius) game.ball.direction[0] = -game.ball.direction[0];
+					if (game.ballPosition[1] > 1-game.ball.radius) game.ball.direction[1] = -game.ball.direction[1];
+					if (game.ballPosition[1] < -1+game.ball.radius) {
+						console.log("lost a life or the game");
 						game.handleLifeLoss();
-						game.ballAngle = 90;
-						game.ballPosition = [0.0,-0.8];
-						game.barPosition = [0,-1];
-						game.state = "Starting";
-						game.play(); 
 					}
 				// check collisioni con barra
 				var xaxis = Math.abs(game.ballPosition[0] - game.barPosition[0]) - game.bar.dimensions[0];
 				var yaxis = Math.abs(game.ballPosition[1] - game.barPosition[1]) - game.bar.dimensions[1];
 				
-				if(xaxis<=0 && yaxis<game.ball.radius && game.state !== "Starting"){
+				if(xaxis <= 0 && yaxis < game.ball.radius && game.state !== "Starting"){
 					// collision on xaxis
 					console.log("collision detected on yaxis bar");
 					game.ball.direction[1] = -game.ball.direction[1];
 					game.ballPosition[1] = game.ballPosition[1] + game.ball.direction[1]*game.velocity;
 
-				}else if(yaxis<0 && xaxis<game.ball.radius){
+				}else if(yaxis < 0 && xaxis < game.ball.radius){
 					// collision on yaxis
 					console.log("collision detected on xaxis bar");
 					game.ball.direction[0] = -game.ball.direction[0];
 					game.ballPosition[0] = game.ballPosition[0] + game.ball.direction[0]*game.velocity;
 					
-				}else if(xaxis<game.ball.radius &&yaxis<game.ball.radius){
+				}else if(xaxis < game.ball.radius && yaxis < game.ball.radius){
 					// possible collision on the edge 
 					var spigoli =[
 						[(game.barPosition[0] + game.bar.dimensions[0]),(game.barPosition[1] + game.bar.dimensions[1]),0],
 						[(game.barPosition[0] + game.bar.dimensions[0]),(game.barPosition[1] - game.bar.dimensions[1]),0],
 						[(game.barPosition[0] - game.bar.dimensions[0]),(game.barPosition[1] + game.bar.dimensions[1]),0],
 						[(game.barPosition[0] - game.bar.dimensions[0]),(game.barPosition[1] - game.bar.dimensions[1]),0]
-					]
-					for(var j=0;j< spigoli.length;j++){
+					];
+					for(var j = 0; j < spigoli.length; j++){
 						xaxis = game.ballPosition[0] - spigoli[j][0];
 						yaxis = game.ballPosition[1] - spigoli[j][1];
 						// pitagora
-						if((xaxis**2 + yaxis**2 - game.ball.radius**2)<0){
+						if ((xaxis**2 + yaxis**2 - game.ball.radius**2)<0){
 							console.log("collision detected on spigolo bar");
 							game.ball.direction[0] = -game.ball.direction[0];
 							game.ball.direction[1] = -game.ball.direction[1];
 							
 							game.ballPosition[0] = game.ballPosition[0] + game.ball.direction[0]*game.velocity;
 							game.ballPosition[1] = game.ballPosition[1] + game.ball.direction[1]*game.velocity;
-						};
+						}
 					}
 				}
 				// collision with blocks
@@ -321,7 +316,7 @@ class Arkanoid {
 					const e = game.block[i];					
 					var xaxis = Math.abs(game.ballPosition[0] - e.center[0]) - e.dimensions[0];
 					var yaxis = Math.abs(game.ballPosition[1] - e.center[1]) - e.dimensions[1];
-					if(xaxis<=0 && yaxis<game.ball.radius){
+					if(xaxis <= 0 && yaxis < game.ball.radius){
 						// collision on xaxis
 						console.log("collision detected on yaxis",i);
 						game.ball.direction[1] = -game.ball.direction[1];
@@ -330,7 +325,7 @@ class Arkanoid {
 						game.block.splice(i, 1);
 						game.updateScore();
 
-					}else if(yaxis<0 && xaxis<game.ball.radius){
+					}else if(yaxis < 0 && xaxis < game.ball.radius){
 						// collision on yaxis
 						console.log("collision detected on xaxis",i);
 						game.ball.direction[0] = -game.ball.direction[0];
@@ -339,15 +334,15 @@ class Arkanoid {
 						game.block.splice(i, 1);
 						game.updateScore();
 						
-					}else if(xaxis<game.ball.radius &&yaxis<game.ball.radius){
+					}else if(xaxis < game.ball.radius && yaxis < game.ball.radius){
 						// possible collision on the edge 
 						var spigoli =[
 							[(e.center[0] + e.dimensions[0]),(e.center[1] + e.dimensions[1]),0],
 							[(e.center[0] + e.dimensions[0]),(e.center[1] - e.dimensions[1]),0],
 							[(e.center[0] - e.dimensions[0]),(e.center[1] + e.dimensions[1]),0],
 							[(e.center[0] - e.dimensions[0]),(e.center[1] - e.dimensions[1]),0]
-						]
-						for(var j=0;j< spigoli.length;j++){
+						];
+						for(var j = 0; j < spigoli.length; j++){
 							xaxis = game.ballPosition[0] - spigoli[j][0];
 							yaxis = game.ballPosition[1] - spigoli[j][1];
 							// pitagora
@@ -362,19 +357,19 @@ class Arkanoid {
 								game.block.splice(i, 1);
 								game.updateScore();
 								break;
-							};
+							}
 						}
 					}
 				}
 				game.ball.uniforms.u_matrix = utils.transposeMatrix(utils.multiplyMatrices(
 					utils.MakeTranslateMatrix(game.ballPosition[0],game.ballPosition[1],0),
 					utils.MakeScaleNuMatrix(0.1,0.1,0.1)
-				))
+				));
 				
 				game.bar.uniforms.u_matrix = utils.transposeMatrix(utils.multiplyMatrices(
 					utils.MakeTranslateMatrix(game.barPosition[0],game.barPosition[1],0),
 					utils.MakeScaleNuMatrix(0.2,0.1,0.1)
-				))
+				));
 				
 				twgl.resizeCanvasToDisplaySize(gl.canvas);
 				gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
@@ -414,16 +409,27 @@ class Arkanoid {
 		//handling cases where player still has 1-2 lives left
 		if (this.lives + 1 === 3){
 			document.getElementById('life-3').style.display = "none";
+			this.ballAngle = 90;
+			this.ballPosition = [0.0,-0.8];
+			this.barPosition = [0,-1];
+			this.state = "Starting";
+			this.play();
 		}
 
 		else if (this.lives + 1 === 2){
 			document.getElementById('life-2').style.display = "none";
+			this.ballAngle = 90;
+			this.ballPosition = [0.0,-0.8];
+			this.barPosition = [0,-1];
+			this.state = "Starting";
+			this.play();
 		}
 
 		//handling case where the player has no lives left: LOSS
 		else if (this.lives + 1 === 1){
 			document.getElementById('life-1').style.display = "none";
-			game.state = "Pause";
+			this.state = "Pause";
+			document.getElementById('lost-screen').style.display = "block";
 		}
 	}
 
