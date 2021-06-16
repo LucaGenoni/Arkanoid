@@ -82,7 +82,7 @@ class Arkanoid {
 			//shaders
 			programInfo: this.programInfo,
 			//geometry
-			bufferInfo: twgl.createBufferInfoFromArrays(gl, buildGeometry(5,8)),
+			bufferInfo: twgl.createBufferInfoFromArrays(gl, buildGeometry(15,15)),
 		}
 
 		this.block = [];
@@ -282,6 +282,7 @@ class Arkanoid {
 						// pitagora
 						if((xaxis**2 + yaxis**2 - game.ball.radius**2)<0){
 							console.log("collision detected on spigolo bar");
+							
 							game.ball.direction[0] = -game.ball.direction[0];
 							game.ball.direction[1] = -game.ball.direction[1];
 							

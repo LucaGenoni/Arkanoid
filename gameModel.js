@@ -33,7 +33,7 @@ class Arkanoid {
 		this.velocity = 0.02;
 		this.velocityBar = 0.02;
 		this.isGameStopped = true;
-		document.onkeydown = (keyDownEvent) => this.keyDown(keyDownEvent);
+		// document.onkeydown = (keyDownEvent) => this.keyDown(keyDownEvent);
 		// window.addEventListener("keydown", this.keyDown, false);
 		// 
 		this.geometryBlock = {	//block
@@ -81,7 +81,7 @@ class Arkanoid {
 			//shaders
 			programInfo: this.programInfo,
 			//geometry
-			bufferInfo: twgl.createBufferInfoFromArrays(gl, buildGeometry(5,8)),
+			bufferInfo: twgl.createBufferInfoFromArrays(gl, buildGeometry(30,30)),
 		}
 
 		this.block = [];
@@ -98,6 +98,10 @@ class Arkanoid {
 						//uniforms like color, textures and other things
 						center:coordinate,
 						dimensions: [scaling,scaling,scaling],
+						localMatrix : utils.multiplyMatrices(
+							utils.MakeTranslateMatrix(coordinate[0],coordinate[1],0),
+							utils.MakeScaleMatrix(scaling)
+						),
 						uniforms: {
 							u_color: colors[singleColor],
 							// u_matrix: utils.MakeTranslateMatrix((2*x-map.length)/map.length,(2*y-map[x].length)/map[x].length,0)
@@ -231,45 +235,18 @@ class Arkanoid {
 				game.ballPosition[0] = game.ballPosition[0]; 
 				game.ballPosition[1] = game.ballPosition[1];
 				
-				game.ball.uniforms.u_matrix = utils.transposeMatrix(utils.multiplyMatrices(
-					utils.MakeTranslateMatrix(game.ballPosition[0],game.ballPosition[1],0),
-					utils.MakeScaleNuMatrix(0.1,0.1,0.1)
-				));
-				
-				game.bar.uniforms.u_matrix = utils.transposeMatrix(utils.multiplyMatrices(
-					utils.MakeTranslateMatrix(game.barPosition[0],game.barPosition[1],0),
-					utils.MakeScaleNuMatrix(0.2,0.1,0.1)
-				));
-				twgl.resizeCanvasToDisplaySize(gl.canvas);
-				gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
-			
-				game.drawSingleObject(game.bar);
-				game.drawSingleObject(game.ball);
-				twgl.drawObjectList(gl, game.block);
-			
-				requestAnimationFrame(game.render);
+				game.drawGame();
 				break;     
 			case "Playing":
 				console.log(game.state,game.ballPosition,game.ballAngle,game.barPosition);
-				// rendering
-				// scene.updateWorldMatrices();	
-				// var viewProj = m4.multiply(proj,view)
-				// this.nodeObjects.forEach(e => {
-				// 	e.drawInfo.uniforms.u_matrix = m4.multiply(viewProj, e.worldMatrix)
-				// 	//extention for detection
-				// 		if(e.drawDetectionID) {
-				// 			e.drawDetectionID.uniforms.u_matrix = e.drawInfo.uniforms.u_matrix
-				// 			e.drawDetectionColor.uniforms.u_matrix = e.drawInfo.uniforms.u_matrix					
-				// 		}
-				// });
-				
+				// update position of the ball
 				game.ballPosition[0] = game.ballPosition[0] + game.ball.direction[0]*game.velocity;
 				game.ballPosition[1] = game.ballPosition[1] + game.ball.direction[1]*game.velocity;
 
 				// check collisioni con sponde
 					if (Math.abs(game.ballPosition[0]) > 1-game.ball.radius) game.ball.direction[0] = -game.ball.direction[0];
 					if (game.ballPosition[1] > 1-game.ball.radius) game.ball.direction[1] = -game.ball.direction[1];
-					if (game.ballPosition[1] < -1+game.ball.radius) {
+					if (game.ballPosition[1] < -1-game.ball.radius*3) {
 						console.log("lost a life or the game");
 						game.handleLifeLoss();
 					}
@@ -303,6 +280,7 @@ class Arkanoid {
 						// pitagora
 						if ((xaxis**2 + yaxis**2 - game.ball.radius**2)<0){
 							console.log("collision detected on spigolo bar");
+							dotProductVector(game.ballPosition,spigoli[j]);
 							game.ball.direction[0] = -game.ball.direction[0];
 							game.ball.direction[1] = -game.ball.direction[1];
 							
@@ -361,24 +339,7 @@ class Arkanoid {
 						}
 					}
 				}
-				game.ball.uniforms.u_matrix = utils.transposeMatrix(utils.multiplyMatrices(
-					utils.MakeTranslateMatrix(game.ballPosition[0],game.ballPosition[1],0),
-					utils.MakeScaleNuMatrix(0.1,0.1,0.1)
-				));
-				
-				game.bar.uniforms.u_matrix = utils.transposeMatrix(utils.multiplyMatrices(
-					utils.MakeTranslateMatrix(game.barPosition[0],game.barPosition[1],0),
-					utils.MakeScaleNuMatrix(0.2,0.1,0.1)
-				));
-				
-				twgl.resizeCanvasToDisplaySize(gl.canvas);
-				gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
-			
-				game.drawSingleObject(game.bar);
-				game.drawSingleObject(game.ball);
-				twgl.drawObjectList(gl, game.block);
-			
-				requestAnimationFrame(game.render);
+				game.drawGame();
 				break;                    
 			default:
 				console.log("Block refresh");
@@ -386,6 +347,35 @@ class Arkanoid {
 		}
 	}
 	
+	drawGame(){
+		
+		// var viewWorldMatrix = utils.multiplyMatrices(viewMatrix, cubeWorldMatrix[i]);
+		// var projectionMatrix = utils.multiplyMatrices(perspectiveMatrix, viewWorldMatrix);
+		// gl.uniformMatrix4fv(matrixLocation, gl.FALSE, utils.transposeMatrix(projectionMatrix));
+		// if(space.getView())
+		var VP = utils.multiplyMatrices(space.getPerspective(),space.getView())
+		game.ball.uniforms.u_matrix = utils.transposeMatrix(utils.multiplyMatrices(
+			VP,utils.multiplyMatrices(
+			utils.MakeTranslateMatrix(game.ballPosition[0],game.ballPosition[1],0),
+			utils.MakeScaleNuMatrix(0.1,0.1,0.1)
+		)))
+		
+		game.bar.uniforms.u_matrix = utils.transposeMatrix(utils.multiplyMatrices(
+			VP,utils.multiplyMatrices(
+			utils.MakeTranslateMatrix(game.barPosition[0],game.barPosition[1],0),
+			utils.MakeScaleNuMatrix(0.2,0.1,0.1)
+		)))
+		game.block.forEach(e => {
+			e.uniforms.u_matrix = utils.transposeMatrix(utils.multiplyMatrices(VP,e.localMatrix))
+		});
+		twgl.resizeCanvasToDisplaySize(gl.canvas);
+		gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+	
+		game.drawSingleObject(game.bar);
+		game.drawSingleObject(game.ball);
+		twgl.drawObjectList(gl, game.block);
+		requestAnimationFrame(game.render);
+	}
 	drawSingleObject(item){		
 		gl.useProgram(item.programInfo.program);
 		twgl.setBuffersAndAttributes(gl, item.programInfo, item.bufferInfo);
