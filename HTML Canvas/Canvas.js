@@ -32,7 +32,7 @@ $(document).ready(function(){
         document.getElementById('menu').style.display = "none";
     });
     
-    $(".restart-game").click(function(game){
+    $(".restart-game").click(function(){
         console.log("Restarting the game...");
         //if the player has won the game and wants to restart a new one, close the victory screen
         if ($("#victory-screen").css("display") !== "none" ){
@@ -44,11 +44,16 @@ $(document).ready(function(){
             document.getElementById('lost-screen').style.display = "none";
         }
         
-        //in any case, restart the game creating a new one
-        location.reload();
+        //in any case, restart the game creating a new one:
         
-        /*game = new Arkanoid(map,1);
-        console.log(game.lives);
-        game.play();*/
+        //first, reset the UI
+        $(".ui-score").text("Score: " + 0);
+        document.getElementById('life-1').style.display = "inline-block";
+        document.getElementById('life-2').style.display = "inline-block";
+        document.getElementById('life-3').style.display = "inline-block";
+        
+        //then, the game
+        game = new Arkanoid(map,1);
+        game.play();
     });
 });

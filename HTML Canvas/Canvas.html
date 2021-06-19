@@ -42,16 +42,16 @@
                 stringa += "]";
                 console.log(stringa);
                 map = [
+                    [0,0,0,0,0,0,0,0,0,0,],
+                    [0,0,0,0,0,0,0,0,0,0,],
+                    [0,0,0,0,0,0,0,0,0,0,],
+                    [0,0,0,0,0,0,0,0,0,0,],
                     [0,0,0,1,1,1,1,1,1,0,],
                     [0,0,0,1,1,1,1,1,1,0,],
-                    [0,0,0,1,1,1,1,1,1,0,],
-                    [0,0,0,1,1,1,1,1,1,0,],
-                    [0,0,0,1,1,1,1,1,1,0,],
-                    [0,0,0,1,1,1,1,1,1,0,],
-                    [0,0,0,1,1,1,1,1,1,0,],
-                    [0,0,0,1,1,1,1,1,1,0,],
-                    [0,0,0,1,1,1,1,1,1,0,],
-                    [0,0,0,1,1,1,1,1,1,0,],
+                    [0,0,0,0,0,0,0,0,0,0,],
+                    [0,0,0,0,0,0,0,0,0,0,],
+                    [0,0,0,0,0,0,0,0,0,0,],
+                    [0,0,0,0,0,0,0,0,0,0,],
                 ];
                 var canvas = document.getElementById("arkanoid-canvas");
                 gl = canvas.getContext("webgl2");
@@ -66,7 +66,7 @@
                 gl.enable(gl.DEPTH_TEST);
                 gl.enable(gl.CULL_FACE);
                 gl.cullFace(gl.BACK);
-                const game = new Arkanoid(map,1);
+                var game = new Arkanoid(map,1);
                 game.play()
             </script>
             
@@ -91,8 +91,8 @@
             </div>
             
             <div id="victory-screen" class="container-fluid">
-                <h1 class="result-msg">You won!</h1>
-                <p class="menu-text">Your score:</p>
+                <h1 class="result-msg">Congratulations: you won!</h1>
+                <p id="victory-score" class="menu-text">Your score</p>
                 <p class="menu-text"><a class="restart-game" href="#">Play again</a></p>
             </div>
 

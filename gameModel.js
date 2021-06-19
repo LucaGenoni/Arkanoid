@@ -391,6 +391,13 @@ class Arkanoid {
 		
 		this.score+=10;
 		$(".ui-score").text("Score: " + this.score);
+		
+		//check win condition
+		if (this.block.length === 0){
+			this.state = "Won";
+			$("#victory-score").text("Your score: " + this.score);
+			document.getElementById('victory-screen').style.display = "block";
+		}
 	}
 
 	handleLifeLoss(){

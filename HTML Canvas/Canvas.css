@@ -25,6 +25,9 @@
 }
 
 .ui-score {
+    position: -webkit-sticky;
+    position: sticky;
+    left: 0;
     font-size: 1.2rem;
     font-family: "Courier New", monospace;
     font-weight: bold;
@@ -32,6 +35,9 @@
 }
 
 .ui-lives {
+    position: -webkit-sticky;
+    position: sticky;
+    left: 0;
     font-size: 1.2rem;
     font-family: "Courier New", monospace;
     font-weight: bold;
@@ -86,6 +92,10 @@
     background-color: #2c222a;
     opacity: 0.8;
     z-index: 2;
+}
+
+#victory-score {
+    margin-bottom: 2%;
 }
 
 #lost-screen {
