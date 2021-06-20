@@ -22,16 +22,14 @@ void main() {
 `;
 class Arkanoid {
 	constructor(params) {
-		var ballPosition = [0.0,-0.8];
-		var barPosition = [0,-1];
 		console.log("Preparing the game...");
 		this.params = params;
 		this.state = "Starting";
 		this.ballAngle = 90;
 		this.score = 0;
 		this.lives = 3;
-		this.velocity = 0.02;
-		this.velocityBar = 0.02;
+		this.velocity = .03;
+		this.velocityBar = 0.1;
 		this.isGameStopped = true;
 		// window.addEventListener("keydown", this.keyDown, false);
 		// document.onkeydown = (keyDownEvent) => this.keyDown(keyDownEvent);
@@ -47,19 +45,21 @@ class Arkanoid {
 		this.programInfo = twgl.createProgramInfo(gl, [vs, fs]);
 		twgl.setAttributePrefix("a_");
 		var colors = [[1, 0.250980392, 0, 1],[1, 0.501960784, 0, 1],[1, 0.749019608, 0, 1],[1, 1, 0, 1],[0.749019608, 1, 0, 1],[0.501960784, 1, 0, 1],[0.250980392, 1, 0, 1],[0, 1, 0, 1],[0, 1, 0.250980392, 1],[0, 1, 0.501960784, 1],[0, 1, 0.749019608, 1],[0, 1, 1, 1],[0, 0.749019608, 1, 1],[0, 0.501960784, 1, 1],[0, 0.250980392, 1, 1],[0, 0, 1, 1],[0.250980392, 0, 1, 1],[0.501960784, 0, 1, 1],[0.749019608, 0, 1, 1],[1, 0, 1, 1],[1, 0, 0.749019608, 1],[1, 0, 0.501960784, 1],[1, 0, 0.250980392, 1],[1, 0, 0, 1],];
-		var dimensionsBAR = [0.2,0.1,0.1]
+		var dimensions = [1,0,0.1]
+		var barPosition = [0,-1];
 		this.bar = {
 			//uniforms like color, textures and other things
-			 
+			typeObj:"Bar",
 			center:[barPosition[0],barPosition[1],0],
-			dimensions: dimensionsBAR,
-			spigoli:[],
+			dimensions: dimensions,
+			min:[],
+			max:[],
 			uniforms: { 
 				u_color: [185/255, 122/255, 87/255, 1],
 				// u_matrix: utils.MakeTranslateMatrix((2*x-map.length)/map.length,(2*y-map[x].length)/map[x].length,0)
 				u_matrix: utils.transposeMatrix(utils.multiplyMatrices(
 					utils.MakeTranslateMatrix(barPosition[0],barPosition[1],0),
-					utils.MakeScaleNuMatrix(0.2,0.1,0.1)
+					utils.MakeScaleNuMatrix(dimensions[0],dimensions[1],dimensions[2])
 				))
 			},	
 			//shaders
@@ -67,18 +67,20 @@ class Arkanoid {
 			//geometry
 			bufferInfo: twgl.createBufferInfoFromArrays(gl, this.geometryBlock),
 		}
-		this.updateSpigoliObject(this.bar);
+		var radius = 0.1;
+		var ballPosition = [0.0,barPosition[1]+radius];
 		this.ball = {
 			//uniforms like color, textures and other things
+			typeObj:"Ball",
 			center: ballPosition,
 			direction:[Math.cos(utils.degToRad(this.ballAngle)),Math.sin(utils.degToRad(this.ballAngle)),0],
-			radius:0.1,
+			radius:radius,
 			uniforms: { 
 				u_color: [1, 1, 1, 1],
 				// u_matrix: utils.MakeTranslateMatrix((2*x-map.length)/map.length,(2*y-map[x].length)/map[x].length,0)
 				u_matrix: utils.transposeMatrix(utils.multiplyMatrices(
 					utils.MakeTranslateMatrix(ballPosition[0],ballPosition[1],0),
-					utils.MakeScaleNuMatrix(0.1,0.1,0.1)
+					utils.MakeScaleMatrix(radius)
 				))
 			},	
 			//shaders
@@ -88,29 +90,31 @@ class Arkanoid {
 		}
 
 		this.block = [];
+		var coordinate;
 		// loading meshes blocks
 		for (x=0;x<map.length;x++){
 			for (y=0;y<map[x].length;y++){
 				var typeBlock = map[x][y];
 				if (typeBlock != 0){ //to add different typeblock make more cases with 1,2,3 block
 					var signleColor = Math.floor(Math.random() * colors.length);
-					var coordinate = [(2*x-map.length+1)/map.length,(2*y-map[x].length+1)/map[x].length,0];
-					var scaling = 0.1;
+					coordinate = [(2*x-map.length+1)/map.length,(2*y-map[x].length+1)/map[x].length,0];
+					dimensions = [1/map.length,1/map[x].length,0.1];
 					this.block.push({
-						//uniforms like color, textures and other things						
+						//uniforms like color, textures and other things
+						typeObj:"Block "+this.block.length,
 						center:coordinate,
-						dimensions: [scaling,scaling,scaling],
-						spigoli:[],
+						dimensions: dimensions,
+						min:[],
+						max:[],
 						localMatrix : utils.multiplyMatrices(
 							utils.MakeTranslateMatrix(coordinate[0],coordinate[1],0),
-							utils.MakeScaleMatrix(scaling)
+							utils.MakeScaleNuMatrix(dimensions[0],dimensions[1],dimensions[2])
 						),
 						uniforms: {
 							u_color: colors[signleColor],
-							// u_matrix: utils.MakeTranslateMatrix((2*x-map.length)/map.length,(2*y-map[x].length)/map[x].length,0)
 							u_matrix: utils.transposeMatrix(utils.multiplyMatrices(
 								utils.MakeTranslateMatrix(coordinate[0],coordinate[1],0),
-								utils.MakeScaleMatrix(scaling)
+								utils.MakeScaleNuMatrix(dimensions[0],dimensions[1],dimensions[2])
 							))
 						},
 						//shaders
@@ -118,12 +122,62 @@ class Arkanoid {
 						//geometry
 						bufferInfo: twgl.createBufferInfoFromArrays(gl, this.geometryBlock),
 					});
-					this.updateSpigoliObject(this.block[x]);
 				}
 			}
 		}
+		this.sponde = [];
+		for (x=0;x<3;x++){
+			var name;
+			var signleColor = Math.floor(Math.random() * colors.length);
+			switch (x) {
+				case 0:
+					name = "sponda SX";
+					coordinate = [-1,0,0];
+					dimensions = [0,1,.1];
+					break;
+				case 1:
+					name = "sponda TOP";
+					coordinate = [0,1,0];
+					dimensions = [1,0,.1];
+					break;
+				case 2:
+					name = "sponda DX";
+					coordinate = [1,0,0];
+					dimensions = [0,1,.1];
+					break;
+				default:
+					break;
+			}
+			this.sponde.push({
+				//uniforms like color, textures and other things
+				typeObj:name,
+				center:coordinate,
+				dimensions: dimensions,
+				min:[],
+				max:[],
+				localMatrix : utils.multiplyMatrices(
+					utils.MakeTranslateMatrix(coordinate[0],coordinate[1],0),
+					utils.MakeScaleNuMatrix(dimensions[0],dimensions[1],dimensions[2])
+				),
+				uniforms: {
+					u_color: colors[signleColor],
+					// u_matrix: utils.MakeTranslateMatrix((2*x-map.length)/map.length,(2*y-map[x].length)/map[x].length,0)
+					u_matrix: utils.transposeMatrix(utils.multiplyMatrices(
+						utils.MakeTranslateMatrix(coordinate[0],coordinate[1],0),
+						utils.MakeScaleNuMatrix(dimensions[0],dimensions[1],dimensions[2])
+					))
+				},
+				//shaders
+				programInfo: this.programInfo,
+				//geometry
+				bufferInfo: twgl.createBufferInfoFromArrays(gl, this.geometryBlock),
+			});
+		}
 
-
+		// create attributes for collision detection
+		this.updateSpigoliObject(this.bar);
+		for (x=0;x<this.block.length;x++) this.updateSpigoliObject(this.block[x]);
+		for (x=0;x<this.sponde.length;x++) this.updateSpigoliObject(this.sponde[x]);
 	}
 	
 	
@@ -176,18 +230,22 @@ class Arkanoid {
 					// position bar
 					case "ArrowLeft":
 					case "KeyA":
-						var tempChange = this.bar.center[0] - this.velocityBar;
-						if(tempChange>-1+this.bar.dimensions[0]) this.bar.center[0] = tempChange;
-						else this.bar.center[0] = -1 + this.bar.dimensions[0];
-						this.updateSpigoliObject(this.bar);
+						if (this.collision(this.bar)==0){
+							var tempChange = this.bar.center[0] - this.velocityBar;
+							if(tempChange>-1+this.bar.dimensions[0]) this.bar.center[0] = tempChange;
+							else this.bar.center[0] = -1 + this.bar.dimensions[0];
+							this.updateSpigoliObject(this.bar);
+						}
 						break;
 					// position bar
 					case "KeyD":
 					case "ArrowRight":
-						var tempChange = this.bar.center[0] + this.velocityBar;
-						if(tempChange<1-this.bar.dimensions[0]) this.bar.center[0] = tempChange;
-						else this.bar.center[0] = 1 - this.bar.dimensions[0];
-						this.updateSpigoliObject(this.bar);
+						if (this.collision(this.bar)==0){
+							var tempChange = this.bar.center[0] + this.velocityBar;
+							if(tempChange<1-this.bar.dimensions[0]) this.bar.center[0] = tempChange;
+							else this.bar.center[0] = 1 - this.bar.dimensions[0];
+							this.updateSpigoliObject(this.bar);
+						}
 						break;
 				}
 				break;	
@@ -195,7 +253,6 @@ class Arkanoid {
 				break;
 		}
 	}
-
 	play() {
 		switch (this.state) {
 			case "Pause":
@@ -236,17 +293,20 @@ class Arkanoid {
 				game.ball.center[0] = game.ball.center[0] + game.ball.direction[0]*game.velocity;
 				game.ball.center[1] = game.ball.center[1] + game.ball.direction[1]*game.velocity;
 
-				// check collisioni con sponde
-				if(Math.abs(game.ball.center[0])>1-game.ball.radius) game.ball.direction[0] = -game.ball.direction[0];
-				if(game.ball.center[1]>1-game.ball.radius) game.ball.direction[1] = -game.ball.direction[1];
-				if(game.ball.center[1]<-1+game.ball.radius) {
+				// check lost condition
+				if(game.ball.center[1]<-1-game.ball.radius) {
 					console.log("lost a life or the game")
 					game.state = "Pause";
 					game.handleLifeLoss();
 					break;
 				}
-				// collisioni con prismi 
+				// collisions with objects
 				game.collision(game.bar);
+				for (let i = 0; i < game.sponde.length; i++) {
+					if(game.collision(game.sponde[i])>1){
+						// TODO correction of direction depending on the type of sponda 
+					}
+				}
 				for (let i = 0; i < game.block.length; i++) {
 					if(game.collision(game.block[i])>0){
 						game.block.splice(i, 1);
@@ -269,53 +329,36 @@ class Arkanoid {
 	}
 
 	updateSpigoliObject(obj){
-		if(obj){
-			obj.spigoli = [
-				[(obj.center[0] + obj.dimensions[0]),(obj.center[1] + obj.dimensions[1]),0],
-				[(obj.center[0] + obj.dimensions[0]),(obj.center[1] - obj.dimensions[1]),0],
-				[(obj.center[0] - obj.dimensions[0]),(obj.center[1] + obj.dimensions[1]),0],
-				[(obj.center[0] - obj.dimensions[0]),(obj.center[1] - obj.dimensions[1]),0]
-			];
+		if(obj){// check why i need to place it to avoid a BIG FUCKING CRASH!!!!!!!!!!!!!!ASJKFGHASKLGHASIGHAFGB 
+			obj.min = [obj.center[0] - obj.dimensions[0],obj.center[1] - obj.dimensions[1],0]
+			obj.max = [obj.center[0] + obj.dimensions[0],obj.center[1] + obj.dimensions[1],0]
 		}
 	}
-
 	collision(obj){
 		var xaxis = Math.abs(game.ball.center[0] - obj.center[0]) - obj.dimensions[0];
 		var yaxis = Math.abs(game.ball.center[1] - obj.center[1]) - obj.dimensions[1];
 		
-		if(xaxis<=0 && yaxis<game.ball.radius){
-			// collision on xaxis
-			console.log("collision detected on yaxis bar");
-			game.ball.direction[1] = -game.ball.direction[1];
-			game.ball.center[1] = game.ball.center[1] + game.ball.direction[1]*game.velocity;
-			return 1
+		if(xaxis<=game.ball.radius && yaxis<=game.ball.radius){
+			// collision detected
 
-		}else if(yaxis<0 && xaxis<game.ball.radius){
-			// collision on yaxis
-			console.log("collision detected on xaxis bar");
-			game.ball.direction[0] = -game.ball.direction[0];
-			game.ball.center[0] = game.ball.center[0] + game.ball.direction[0]*game.velocity;
-			return 2
-
-		}else if(xaxis<game.ball.radius &&yaxis<game.ball.radius){
-			// possible collision on the edge
-			for(var j=0;j< obj.spigoli.length;j++){
-				xaxis = game.ball.center[0] - obj.spigoli[j][0];
-				yaxis = game.ball.center[1] - obj.spigoli[j][1];
-				// pitagora
-				if((xaxis**2 + yaxis**2 - game.ball.radius**2)<0){
-					console.log("collision detected on spigolo bar");
-					var angle = Math.acos(game.ball.direction[0]);
-					
-					game.ball.direction[0] = -game.ball.direction[0];
-					game.ball.direction[1] = -game.ball.direction[1];
-					
-					game.ball.center[0] = game.ball.center[0] + game.ball.direction[0]*game.velocity;
-					game.ball.center[1] = game.ball.center[1] + game.ball.direction[1]*game.velocity;
-					// TODO correggere il rimbalzo in decente con i vettori
-					// TODO check con l'orizzontale cos(1)
-					return 3;
-				};
+			var x = Math.max(obj.min[0], Math.min(game.ball.center[0], obj.max[0]));
+			var y = Math.max(obj.min[1], Math.min(game.ball.center[1], obj.max[1]));
+			// var z = Math.max(box.minZ, Math.min(sphere.z, box.maxZ));
+			// distance between the closes point to the center of the sphere
+			// var distance = Math.sqrt((x - sphere.x) **2 + (y - sphere.y) **2 + (z - sphere.z) **2);
+			var distance = Math.sqrt((x - game.ball.center[0]) **2 + (y - game.ball.center[1]) **2);
+			if (distance<=game.ball.radius){
+				console.log("collision with",obj.typeObj);
+				var bounce = normalizeVector([x - game.ball.center[0],y - game.ball.center[1],0])
+				game.ball.center[0] = game.ball.center[0] - game.ball.direction[0]*game.velocity;
+				game.ball.center[1] = game.ball.center[1] - game.ball.direction[1]*game.velocity;
+				game.ball.direction = 
+					subVector(game.ball.direction,
+					scalarVector(2 * dotProductVector(bounce,game.ball.direction)/dotProductVector(bounce,bounce),bounce))
+				
+				game.ball.center[0] = game.ball.center[0] + 2*game.ball.direction[0]*game.velocity;
+				game.ball.center[1] = game.ball.center[1] + 2*game.ball.direction[1]*game.velocity;
+				return 1;
 			}
 		}
 		return 0;
@@ -328,15 +371,18 @@ class Arkanoid {
 		game.ball.uniforms.u_matrix = utils.transposeMatrix(utils.multiplyMatrices(
 			VP,utils.multiplyMatrices(
 			utils.MakeTranslateMatrix(game.ball.center[0],game.ball.center[1],0),
-			utils.MakeScaleNuMatrix(0.1,0.1,0.1)
+			utils.MakeScaleMatrix(game.ball.radius)
 		)))
 		
 		game.bar.uniforms.u_matrix = utils.transposeMatrix(utils.multiplyMatrices(
 			VP,utils.multiplyMatrices(
 			utils.MakeTranslateMatrix(game.bar.center[0],game.bar.center[1],0),
-			utils.MakeScaleNuMatrix(0.2,0.1,0.1)
+			utils.MakeScaleNuMatrix(game.bar.dimensions[0],game.bar.dimensions[1],game.bar.dimensions[2])
 		)))
 		game.block.forEach(e => {
+			e.uniforms.u_matrix = utils.transposeMatrix(utils.multiplyMatrices(VP,e.localMatrix))
+		});
+		game.sponde.forEach(e => {
 			e.uniforms.u_matrix = utils.transposeMatrix(utils.multiplyMatrices(VP,e.localMatrix))
 		});
 		twgl.resizeCanvasToDisplaySize(gl.canvas);
@@ -345,6 +391,7 @@ class Arkanoid {
 		game.drawSingleObject(game.bar);
 		game.drawSingleObject(game.ball);
 		twgl.drawObjectList(gl, game.block);
+		twgl.drawObjectList(gl, game.sponde);
 		requestAnimationFrame(game.render);
 	}
 
