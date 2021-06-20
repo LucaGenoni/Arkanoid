@@ -22,17 +22,18 @@ void main() {
 `;
 class Arkanoid {
 	constructor(params) {
+		var ballPosition = [0.0,-0.8];
+		var barPosition = [0,-1];
 		console.log("Preparing the game...");
 		this.params = params;
 		this.state = "Starting";
 		this.ballAngle = 90;
-		this.ballPosition = [0.0,-0.8];
-		this.barPosition = [0,-1];
 		this.score = 0;
 		this.lives = 3;
 		this.velocity = 0.02;
 		this.velocityBar = 0.02;
 		this.isGameStopped = true;
+		// window.addEventListener("keydown", this.keyDown, false);
 		// document.onkeydown = (keyDownEvent) => this.keyDown(keyDownEvent);
 		// window.addEventListener("keydown", this.keyDown, false);
 		// 
@@ -46,17 +47,18 @@ class Arkanoid {
 		this.programInfo = twgl.createProgramInfo(gl, [vs, fs]);
 		twgl.setAttributePrefix("a_");
 		var colors = [[1, 0.250980392, 0, 1],[1, 0.501960784, 0, 1],[1, 0.749019608, 0, 1],[1, 1, 0, 1],[0.749019608, 1, 0, 1],[0.501960784, 1, 0, 1],[0.250980392, 1, 0, 1],[0, 1, 0, 1],[0, 1, 0.250980392, 1],[0, 1, 0.501960784, 1],[0, 1, 0.749019608, 1],[0, 1, 1, 1],[0, 0.749019608, 1, 1],[0, 0.501960784, 1, 1],[0, 0.250980392, 1, 1],[0, 0, 1, 1],[0.250980392, 0, 1, 1],[0.501960784, 0, 1, 1],[0.749019608, 0, 1, 1],[1, 0, 1, 1],[1, 0, 0.749019608, 1],[1, 0, 0.501960784, 1],[1, 0, 0.250980392, 1],[1, 0, 0, 1],];
-		
+		var dimensionsBAR = [0.2,0.1,0.1]
 		this.bar = {
 			//uniforms like color, textures and other things
-			
-			center:[this.barPosition[0],this.barPosition[1],0],
-			dimensions: [0.2,0.1,0.1],
+			 
+			center:[barPosition[0],barPosition[1],0],
+			dimensions: dimensionsBAR,
+			spigoli:[],
 			uniforms: { 
 				u_color: [185/255, 122/255, 87/255, 1],
 				// u_matrix: utils.MakeTranslateMatrix((2*x-map.length)/map.length,(2*y-map[x].length)/map[x].length,0)
 				u_matrix: utils.transposeMatrix(utils.multiplyMatrices(
-					utils.MakeTranslateMatrix(this.barPosition[0],this.barPosition[1],0),
+					utils.MakeTranslateMatrix(barPosition[0],barPosition[1],0),
 					utils.MakeScaleNuMatrix(0.2,0.1,0.1)
 				))
 			},	
@@ -65,49 +67,50 @@ class Arkanoid {
 			//geometry
 			bufferInfo: twgl.createBufferInfoFromArrays(gl, this.geometryBlock),
 		}
-
+		this.updateSpigoliObject(this.bar);
 		this.ball = {
 			//uniforms like color, textures and other things
+			center: ballPosition,
 			direction:[Math.cos(utils.degToRad(this.ballAngle)),Math.sin(utils.degToRad(this.ballAngle)),0],
 			radius:0.1,
 			uniforms: { 
 				u_color: [1, 1, 1, 1],
 				// u_matrix: utils.MakeTranslateMatrix((2*x-map.length)/map.length,(2*y-map[x].length)/map[x].length,0)
 				u_matrix: utils.transposeMatrix(utils.multiplyMatrices(
-					utils.MakeTranslateMatrix(this.ballPosition[0],this.ballPosition[1],0),
+					utils.MakeTranslateMatrix(ballPosition[0],ballPosition[1],0),
 					utils.MakeScaleNuMatrix(0.1,0.1,0.1)
 				))
 			},	
 			//shaders
 			programInfo: this.programInfo,
 			//geometry
-			bufferInfo: twgl.createBufferInfoFromArrays(gl, buildGeometry(30,30)),
+			bufferInfo: twgl.createBufferInfoFromArrays(gl, buildGeometry(20,20)),
 		}
 
 		this.block = [];
 		// loading meshes blocks
-		for (x = 0; x < map.length; x++){
-			for (y = 0; y < map[x].length; y++){
+		for (x=0;x<map.length;x++){
+			for (y=0;y<map[x].length;y++){
 				var typeBlock = map[x][y];
-				if (typeBlock !== 0){					
-					var singleColor = Math.floor(Math.random() * colors.length);
-					console.log((2*x-map.length+1)/map.length,(2*y-map[x].length+1)/map[x].length);
+				if (typeBlock != 0){ //to add different typeblock make more cases with 1,2,3 block
+					var signleColor = Math.floor(Math.random() * colors.length);
 					var coordinate = [(2*x-map.length+1)/map.length,(2*y-map[x].length+1)/map[x].length,0];
 					var scaling = 0.1;
 					this.block.push({
-						//uniforms like color, textures and other things
+						//uniforms like color, textures and other things						
 						center:coordinate,
 						dimensions: [scaling,scaling,scaling],
+						spigoli:[],
 						localMatrix : utils.multiplyMatrices(
 							utils.MakeTranslateMatrix(coordinate[0],coordinate[1],0),
 							utils.MakeScaleMatrix(scaling)
 						),
 						uniforms: {
-							u_color: colors[singleColor],
+							u_color: colors[signleColor],
 							// u_matrix: utils.MakeTranslateMatrix((2*x-map.length)/map.length,(2*y-map[x].length)/map[x].length,0)
 							u_matrix: utils.transposeMatrix(utils.multiplyMatrices(
 								utils.MakeTranslateMatrix(coordinate[0],coordinate[1],0),
-								utils.MakeScaleMatrix(0.1)
+								utils.MakeScaleMatrix(scaling)
 							))
 						},
 						//shaders
@@ -115,24 +118,8 @@ class Arkanoid {
 						//geometry
 						bufferInfo: twgl.createBufferInfoFromArrays(gl, this.geometryBlock),
 					});
+					this.updateSpigoliObject(this.block[x]);
 				}
-				// else{
-				// 	this.block.push({
-				// 		//uniforms like color, textures and other things
-				// 		uniforms: { 
-				// 			u_color: [0,0,0,1],
-				// 			// u_matrix: utils.MakeTranslateMatrix((2*x-map.length)/map.length,(2*y-map[x].length)/map[x].length,0)
-				// 			u_matrix: utils.transposeMatrix(utils.multiplyMatrices(
-				// 				utils.MakeTranslateMatrix((2*x-map.length+1)/map.length,(2*y-map[x].length+1)/map[x].length,0),
-				// 				utils.MakeScaleMatrix(0.1)
-				// 			))
-				// 		},	
-				// 		//shaders
-				// 		programInfo: this.programInfo,
-				// 		//geometry
-				// 		bufferInfo: twgl.createBufferInfoFromArrays(gl, this.geometryBlock),
-				// 	})
-				// }
 			}
 		}
 
@@ -141,8 +128,7 @@ class Arkanoid {
 	
 	
 	keyDown(e){
-		console.log(this.params,e);
-		if (e.code === "Escape") this.state = "Pause";
+		if (e.code=="Escape") this.state = "Pause"
 		switch (this.state) {
 			case "Pause":
 			case "Won":
@@ -153,18 +139,20 @@ class Arkanoid {
 					// starting position bar to right
 					case "ArrowLeft":
 					case "KeyA":
-						var tempChange = this.barPosition[0] - this.velocityBar;
-						if(tempChange>-1+this.bar.dimensions[0]) this.barPosition[0] = tempChange;
-						else this.barPosition[0] = -1 + this.bar.dimensions[0];
-						this.ballPosition[0] = this.barPosition[0];
+						var tempChange = this.bar.center[0] - this.velocityBar;
+						if(tempChange>-1+this.bar.dimensions[0]) this.bar.center[0] = tempChange;
+						else this.bar.center[0] = -1 + this.bar.dimensions[0];
+						this.updateSpigoliObject(this.bar);
+						this.ball.center[0] = this.bar.center[0];
 						break;
 					// starting position bar to left
 					case "KeyD":
 					case "ArrowRight":
-						var tempChange = this.barPosition[0] + this.velocityBar;
-						if(tempChange<1-this.bar.dimensions[0]) this.barPosition[0] = tempChange;
-						else this.barPosition[0] = 1 - this.bar.dimensions[0];
-						this.ballPosition[0] = this.barPosition[0];
+						var tempChange = this.bar.center[0] + this.velocityBar;
+						if(tempChange<1-this.bar.dimensions[0]) this.bar.center[0] = tempChange;
+						else this.bar.center[0] = 1 - this.bar.dimensions[0];
+						this.updateSpigoliObject(this.bar);
+						this.ball.center[0] = this.bar.center[0];
 						break;
 					// starting direction ball counter-clockwise
 					case "ArrowUp":
@@ -179,7 +167,7 @@ class Arkanoid {
 					// start game
 					case "Space":
 						this.ball.direction = [Math.cos(utils.degToRad(this.ballAngle)),Math.sin(utils.degToRad(this.ballAngle)),0];
-						this.state = "Playing";
+						this.state = "Playing"
 						break;
 				}
 				break;
@@ -188,16 +176,18 @@ class Arkanoid {
 					// position bar
 					case "ArrowLeft":
 					case "KeyA":
-						var tempChange = this.barPosition[0] - this.velocityBar;
-						if (tempChange > -1 + this.bar.dimensions[0]) this.barPosition[0] = tempChange;
-						else this.barPosition[0] = -1 + this.bar.dimensions[0];
+						var tempChange = this.bar.center[0] - this.velocityBar;
+						if(tempChange>-1+this.bar.dimensions[0]) this.bar.center[0] = tempChange;
+						else this.bar.center[0] = -1 + this.bar.dimensions[0];
+						this.updateSpigoliObject(this.bar);
 						break;
 					// position bar
 					case "KeyD":
 					case "ArrowRight":
-						var tempChange = this.barPosition[0] + this.velocityBar;
-						if (tempChange < 1 - this.bar.dimensions[0]) this.barPosition[0] = tempChange;
-						else this.barPosition[0] = 1 - this.bar.dimensions[0];
+						var tempChange = this.bar.center[0] + this.velocityBar;
+						if(tempChange<1-this.bar.dimensions[0]) this.bar.center[0] = tempChange;
+						else this.bar.center[0] = 1 - this.bar.dimensions[0];
+						this.updateSpigoliObject(this.bar);
 						break;
 				}
 				break;	
@@ -206,7 +196,7 @@ class Arkanoid {
 		}
 	}
 
-	play() {                    
+	play() {
 		switch (this.state) {
 			case "Pause":
 			case "Won":
@@ -217,7 +207,7 @@ class Arkanoid {
 			case "Starting":
 			case "Playing":
 				if (this.isGameStopped) {
-					console.log(this.state);
+					console.log(this.state)
 					this.isGameStopped = ! this.isGameStopped
 				}
 				requestAnimationFrame(this.render);
@@ -232,111 +222,35 @@ class Arkanoid {
 		switch (game.state) {
 			case "Starting":
 				
-				game.ballPosition[0] = game.ballPosition[0]; 
-				game.ballPosition[1] = game.ballPosition[1];
-				
 				game.drawGame();
 				break;     
 			case "Playing":
-				console.log(game.state,game.ballPosition,game.ballAngle,game.barPosition);
+				var angle = Math.acos(game.ball.direction[0]);
+				var correction = 0.03;
+				if (Math.abs(angle - 1.570796326794896)<correction){
+					console.log(angle);
+					game.ballAngle = angle + correction - 2*correction*(angle<1.57079);
+					game.ball.direction = [Math.cos(game.ballAngle),Math.sin(game.ballAngle),0];
+				}
 				// update position of the ball
-				game.ballPosition[0] = game.ballPosition[0] + game.ball.direction[0]*game.velocity;
-				game.ballPosition[1] = game.ballPosition[1] + game.ball.direction[1]*game.velocity;
+				game.ball.center[0] = game.ball.center[0] + game.ball.direction[0]*game.velocity;
+				game.ball.center[1] = game.ball.center[1] + game.ball.direction[1]*game.velocity;
 
 				// check collisioni con sponde
-					if (Math.abs(game.ballPosition[0]) > 1-game.ball.radius) game.ball.direction[0] = -game.ball.direction[0];
-					if (game.ballPosition[1] > 1-game.ball.radius) game.ball.direction[1] = -game.ball.direction[1];
-					if (game.ballPosition[1] < -1-game.ball.radius*3) {
-						console.log("lost a life or the game");
-						game.handleLifeLoss();
-					}
-				// check collisioni con barra
-				var xaxis = Math.abs(game.ballPosition[0] - game.barPosition[0]) - game.bar.dimensions[0];
-				var yaxis = Math.abs(game.ballPosition[1] - game.barPosition[1]) - game.bar.dimensions[1];
-				
-				if(xaxis <= 0 && yaxis < game.ball.radius && game.state !== "Starting"){
-					// collision on xaxis
-					console.log("collision detected on yaxis bar");
-					game.ball.direction[1] = -game.ball.direction[1];
-					game.ballPosition[1] = game.ballPosition[1] + game.ball.direction[1]*game.velocity;
-
-				}else if(yaxis < 0 && xaxis < game.ball.radius){
-					// collision on yaxis
-					console.log("collision detected on xaxis bar");
-					game.ball.direction[0] = -game.ball.direction[0];
-					game.ballPosition[0] = game.ballPosition[0] + game.ball.direction[0]*game.velocity;
-					
-				}else if(xaxis < game.ball.radius && yaxis < game.ball.radius){
-					// possible collision on the edge 
-					var spigoli =[
-						[(game.barPosition[0] + game.bar.dimensions[0]),(game.barPosition[1] + game.bar.dimensions[1]),0],
-						[(game.barPosition[0] + game.bar.dimensions[0]),(game.barPosition[1] - game.bar.dimensions[1]),0],
-						[(game.barPosition[0] - game.bar.dimensions[0]),(game.barPosition[1] + game.bar.dimensions[1]),0],
-						[(game.barPosition[0] - game.bar.dimensions[0]),(game.barPosition[1] - game.bar.dimensions[1]),0]
-					];
-					for(var j = 0; j < spigoli.length; j++){
-						xaxis = game.ballPosition[0] - spigoli[j][0];
-						yaxis = game.ballPosition[1] - spigoli[j][1];
-						// pitagora
-						if ((xaxis**2 + yaxis**2 - game.ball.radius**2)<0){
-							console.log("collision detected on spigolo bar");
-							dotProductVector(game.ballPosition,spigoli[j]);
-							game.ball.direction[0] = -game.ball.direction[0];
-							game.ball.direction[1] = -game.ball.direction[1];
-							
-							game.ballPosition[0] = game.ballPosition[0] + game.ball.direction[0]*game.velocity;
-							game.ballPosition[1] = game.ballPosition[1] + game.ball.direction[1]*game.velocity;
-						}
-					}
+				if(Math.abs(game.ball.center[0])>1-game.ball.radius) game.ball.direction[0] = -game.ball.direction[0];
+				if(game.ball.center[1]>1-game.ball.radius) game.ball.direction[1] = -game.ball.direction[1];
+				if(game.ball.center[1]<-1+game.ball.radius) {
+					console.log("lost a life or the game")
+					game.state = "Pause";
+					game.handleLifeLoss();
+					break;
 				}
-				// collision with blocks
+				// collisioni con prismi 
+				game.collision(game.bar);
 				for (let i = 0; i < game.block.length; i++) {
-					const e = game.block[i];					
-					var xaxis = Math.abs(game.ballPosition[0] - e.center[0]) - e.dimensions[0];
-					var yaxis = Math.abs(game.ballPosition[1] - e.center[1]) - e.dimensions[1];
-					if(xaxis <= 0 && yaxis < game.ball.radius){
-						// collision on xaxis
-						console.log("collision detected on yaxis",i);
-						game.ball.direction[1] = -game.ball.direction[1];
-						game.ballPosition[1] = game.ballPosition[1] + game.ball.direction[1]*game.velocity;
-						//delete the block that was hit and update the player's score
+					if(game.collision(game.block[i])>0){
 						game.block.splice(i, 1);
 						game.updateScore();
-
-					}else if(yaxis < 0 && xaxis < game.ball.radius){
-						// collision on yaxis
-						console.log("collision detected on xaxis",i);
-						game.ball.direction[0] = -game.ball.direction[0];
-						game.ballPosition[0] = game.ballPosition[0] + game.ball.direction[0]*game.velocity;
-						//delete the block that was hit and update the player's score
-						game.block.splice(i, 1);
-						game.updateScore();
-						
-					}else if(xaxis < game.ball.radius && yaxis < game.ball.radius){
-						// possible collision on the edge 
-						var spigoli =[
-							[(e.center[0] + e.dimensions[0]),(e.center[1] + e.dimensions[1]),0],
-							[(e.center[0] + e.dimensions[0]),(e.center[1] - e.dimensions[1]),0],
-							[(e.center[0] - e.dimensions[0]),(e.center[1] + e.dimensions[1]),0],
-							[(e.center[0] - e.dimensions[0]),(e.center[1] - e.dimensions[1]),0]
-						];
-						for(var j = 0; j < spigoli.length; j++){
-							xaxis = game.ballPosition[0] - spigoli[j][0];
-							yaxis = game.ballPosition[1] - spigoli[j][1];
-							// pitagora
-							if((xaxis**2 + yaxis**2 - game.ball.radius**2)<0){
-								console.log("collision detected with block ",j);
-								game.ball.direction[0] = -game.ball.direction[0];
-								game.ball.direction[1] = -game.ball.direction[1];
-								
-								game.ballPosition[0] = game.ballPosition[0] + game.ball.direction[0]*game.velocity;
-								game.ballPosition[1] = game.ballPosition[1] + game.ball.direction[1]*game.velocity;
-								//delete the block that was hit and update the player's score
-								game.block.splice(i, 1);
-								game.updateScore();
-								break;
-							}
-						}
 					}
 				}
 				game.drawGame();
@@ -347,22 +261,79 @@ class Arkanoid {
 		}
 	}
 	
+	drawSingleObject(item){		
+		gl.useProgram(item.programInfo.program);
+		twgl.setBuffersAndAttributes(gl, item.programInfo, item.bufferInfo);
+		twgl.setUniforms(item.programInfo, item.uniforms);
+		twgl.drawBufferInfo(gl, item.bufferInfo);
+	}
+
+	updateSpigoliObject(obj){
+		if(obj){
+			obj.spigoli = [
+				[(obj.center[0] + obj.dimensions[0]),(obj.center[1] + obj.dimensions[1]),0],
+				[(obj.center[0] + obj.dimensions[0]),(obj.center[1] - obj.dimensions[1]),0],
+				[(obj.center[0] - obj.dimensions[0]),(obj.center[1] + obj.dimensions[1]),0],
+				[(obj.center[0] - obj.dimensions[0]),(obj.center[1] - obj.dimensions[1]),0]
+			];
+		}
+	}
+
+	collision(obj){
+		var xaxis = Math.abs(game.ball.center[0] - obj.center[0]) - obj.dimensions[0];
+		var yaxis = Math.abs(game.ball.center[1] - obj.center[1]) - obj.dimensions[1];
+		
+		if(xaxis<=0 && yaxis<game.ball.radius){
+			// collision on xaxis
+			console.log("collision detected on yaxis bar");
+			game.ball.direction[1] = -game.ball.direction[1];
+			game.ball.center[1] = game.ball.center[1] + game.ball.direction[1]*game.velocity;
+			return 1
+
+		}else if(yaxis<0 && xaxis<game.ball.radius){
+			// collision on yaxis
+			console.log("collision detected on xaxis bar");
+			game.ball.direction[0] = -game.ball.direction[0];
+			game.ball.center[0] = game.ball.center[0] + game.ball.direction[0]*game.velocity;
+			return 2
+
+		}else if(xaxis<game.ball.radius &&yaxis<game.ball.radius){
+			// possible collision on the edge
+			for(var j=0;j< obj.spigoli.length;j++){
+				xaxis = game.ball.center[0] - obj.spigoli[j][0];
+				yaxis = game.ball.center[1] - obj.spigoli[j][1];
+				// pitagora
+				if((xaxis**2 + yaxis**2 - game.ball.radius**2)<0){
+					console.log("collision detected on spigolo bar");
+					var angle = Math.acos(game.ball.direction[0]);
+					
+					game.ball.direction[0] = -game.ball.direction[0];
+					game.ball.direction[1] = -game.ball.direction[1];
+					
+					game.ball.center[0] = game.ball.center[0] + game.ball.direction[0]*game.velocity;
+					game.ball.center[1] = game.ball.center[1] + game.ball.direction[1]*game.velocity;
+					// TODO correggere il rimbalzo in decente con i vettori
+					// TODO check con l'orizzontale cos(1)
+					return 3;
+				};
+			}
+		}
+		return 0;
+	}
+
+
 	drawGame(){
 		
-		// var viewWorldMatrix = utils.multiplyMatrices(viewMatrix, cubeWorldMatrix[i]);
-		// var projectionMatrix = utils.multiplyMatrices(perspectiveMatrix, viewWorldMatrix);
-		// gl.uniformMatrix4fv(matrixLocation, gl.FALSE, utils.transposeMatrix(projectionMatrix));
-		// if(space.getView())
 		var VP = utils.multiplyMatrices(space.getPerspective(),space.getView())
 		game.ball.uniforms.u_matrix = utils.transposeMatrix(utils.multiplyMatrices(
 			VP,utils.multiplyMatrices(
-			utils.MakeTranslateMatrix(game.ballPosition[0],game.ballPosition[1],0),
+			utils.MakeTranslateMatrix(game.ball.center[0],game.ball.center[1],0),
 			utils.MakeScaleNuMatrix(0.1,0.1,0.1)
 		)))
 		
 		game.bar.uniforms.u_matrix = utils.transposeMatrix(utils.multiplyMatrices(
 			VP,utils.multiplyMatrices(
-			utils.MakeTranslateMatrix(game.barPosition[0],game.barPosition[1],0),
+			utils.MakeTranslateMatrix(game.bar.center[0],game.bar.center[1],0),
 			utils.MakeScaleNuMatrix(0.2,0.1,0.1)
 		)))
 		game.block.forEach(e => {
@@ -375,12 +346,6 @@ class Arkanoid {
 		game.drawSingleObject(game.ball);
 		twgl.drawObjectList(gl, game.block);
 		requestAnimationFrame(game.render);
-	}
-	drawSingleObject(item){		
-		gl.useProgram(item.programInfo.program);
-		twgl.setBuffersAndAttributes(gl, item.programInfo, item.bufferInfo);
-		twgl.setUniforms(item.programInfo, item.uniforms);
-		twgl.drawBufferInfo(gl, item.bufferInfo);
 	}
 
 	/* <----------------- Functions for UI -----------------> */
@@ -407,8 +372,8 @@ class Arkanoid {
 		if (this.lives + 1 === 3){
 			document.getElementById('life-3').style.display = "none";
 			this.ballAngle = 90;
-			this.ballPosition = [0.0,-0.8];
-			this.barPosition = [0,-1];
+			this.ball.center = [0.0,-0.8];
+			this.bar.center = [0,-1];
 			this.state = "Starting";
 			this.play();
 		}
@@ -416,8 +381,8 @@ class Arkanoid {
 		else if (this.lives + 1 === 2){
 			document.getElementById('life-2').style.display = "none";
 			this.ballAngle = 90;
-			this.ballPosition = [0.0,-0.8];
-			this.barPosition = [0,-1];
+			this.ball.center = [0.0,-0.8];
+			this.bar.center = [0,-1];
 			this.state = "Starting";
 			this.play();
 		}
@@ -430,29 +395,4 @@ class Arkanoid {
 		}
 	}
 
-	// drawScene() {
-	// 	//this function must work with globals   
-	// 	switch (game.state) {
-	// 		case "Starting":
-	// 		case "Playing":
-	// 			console.log(game.state,game.ballPosition,game.ballAngle,game.barPosition)
-	// 			// rendering
-	// 			// scene.updateWorldMatrices();	
-	// 			// var viewProj = m4.multiply(proj,view)
-	// 			// this.nodeObjects.forEach(e => {
-	// 			// 	e.drawInfo.uniforms.u_matrix = m4.multiply(viewProj, e.worldMatrix)
-	// 			// 	//extention for detection
-	// 			// 		if(e.drawDetectionID) {
-	// 			// 			e.drawDetectionID.uniforms.u_matrix = e.drawInfo.uniforms.u_matrix
-	// 			// 			e.drawDetectionColor.uniforms.u_matrix = e.drawInfo.uniforms.u_matrix					
-	// 			// 		}
-	// 			// });
-	// 			twgl.drawObjectList(gl, game.block);
-	// 			requestAnimationFrame(game.drawScene);
-	// 			break;                    
-	// 		default:
-	// 			console.log("Block refresh");
-	// 			break;
-	// 	}
-	// }
 }
