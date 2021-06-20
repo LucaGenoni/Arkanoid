@@ -25,13 +25,20 @@ class Arkanoid {
 		console.log("Preparing the game...");
 		this.params = params;
 		this.state = "Starting";
+		this.isGameStopped = true;
+		
 		this.ballAngle = 90;
+
+		var ballPosition = [0.0,-0.8];
+		var barPosition = [0,-1];
+		
 		this.score = 0;
 		this.lives = 3;
-		this.velocity = .03;
-		this.velocityBar = 0.1;
-		this.isGameStopped = true;
-		// window.addEventListener("keydown", this.keyDown, false);
+		this.pity = 0;
+		
+		this.velocity = 0.02;
+		this.velocityBar = 0.02;
+		
 		// document.onkeydown = (keyDownEvent) => this.keyDown(keyDownEvent);
 		// window.addEventListener("keydown", this.keyDown, false);
 		// 
@@ -91,15 +98,26 @@ class Arkanoid {
 
 		this.block = [];
 		var coordinate;
+		this.powerUps = [];
 		// loading meshes blocks
-		for (x=0;x<map.length;x++){
-			for (y=0;y<map[x].length;y++){
+		for (var x = 0; x < map.length; x++){
+			for (var y = 0; y < map[x].length; y++){
 				var typeBlock = map[x][y];
 				if (typeBlock != 0){ //to add different typeblock make more cases with 1,2,3 block
 					var signleColor = Math.floor(Math.random() * colors.length);
 					coordinate = [(2*x-map.length+1)/map.length,(2*y-map[x].length+1)/map[x].length,0];
 					dimensions = [1/map.length,1/map[x].length,0.1];
+					// add to the list a block hiding a powerup, and also add the powerup to its list
+					// (powerup hidden behind the block only if randomly extracted by willHavePowerUp, and if the number
+					// of upgrades already hidden doesn't overcome the limit)
+					var power = false;
+					if (this.willHavePowerUp() && this.powerUps.length <= Math.floor(this.block.length / 5)){
+						power = true;
+						this.powerUps.push(new powerUp(this, this.powerUps.length + 1));
+					}
 					this.block.push({
+						hasPowerUp: power,
+						id: this.powerUps.length,
 						//uniforms like color, textures and other things
 						typeObj:"Block "+this.block.length,
 						center:coordinate,
@@ -393,6 +411,29 @@ class Arkanoid {
 		twgl.drawObjectList(gl, game.block);
 		twgl.drawObjectList(gl, game.sponde);
 		requestAnimationFrame(game.render);
+	}
+	
+	drawSingleObject(item){		
+		gl.useProgram(item.programInfo.program);
+		twgl.setBuffersAndAttributes(gl, item.programInfo, item.bufferInfo);
+		twgl.setUniforms(item.programInfo, item.uniforms);
+		twgl.drawBufferInfo(gl, item.bufferInfo);
+	}
+	
+	willHavePowerUp(){
+		var prob = Math.random();
+
+		// randomically decides to add a powerup or not to the block: subsequent negative cases result in an increase 
+		// of the pity, which increases the probability that the next block will have a powerup
+		if (Math.random() + this.pity > 0.6){
+			this.pity = 0;
+			return true;
+		}
+		
+		else {
+			this.pity += 0.1;
+			return false;
+		}
 	}
 
 	/* <----------------- Functions for UI -----------------> */
