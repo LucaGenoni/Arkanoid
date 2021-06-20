@@ -13,6 +13,7 @@ $(document).ready(function(){
     //Click on "Resume": close the "Menu" screen
     $("#resume").click(function(){
         document.getElementById('menu').style.display = "none";
+        game.resume()
     });
 
     //Click on Settings while in "Menu" screen: show the "Settings" screen and hide the "Menu" one

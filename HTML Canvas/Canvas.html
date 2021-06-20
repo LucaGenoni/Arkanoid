@@ -25,11 +25,11 @@
             <canvas id="arkanoid-canvas"></canvas>
             <script>
                 map = [];
-                row = 20;
-                column = 15;
+                row = 10;
+                column = 9;
                 for (x = 0; x < row; x++) map[x] = [];
                 for (x = 0; x < row; x++) for (y = 0; y < column; y++) map[x][y] = 0;
-                for (x = 7; x < row-1; x++) for (y = 0; y < column; y++) map[x][y] = 1;
+                for (x = Math.floor(row/2); x < row-Math.floor(row/4); x++) for (y = 0; y < column; y++) map[x][y] = 1;
                 stringa ="[";
                 for (x=0; x < column; x++){
                     stringa += "[";
@@ -40,18 +40,16 @@
                 }
                 stringa += "]";
                 console.log(stringa);
-                map = [
-                    [0,0,0,1,1,1,1,1,1,0,],
-                    [0,0,0,1,1,1,1,1,1,0,],
-                    [0,0,0,1,1,1,1,1,1,0,],
-                    [0,0,0,1,1,1,1,1,1,0,],
-                    [0,0,0,1,1,1,1,1,1,0,],
-                    [0,0,0,1,1,1,1,1,1,0,],
-                    [0,0,0,1,1,1,1,1,1,0,],
-                    [0,0,0,1,1,1,1,1,1,0,],
-                    [0,0,0,1,1,1,1,1,1,0,],
-                    [0,0,0,1,1,1,1,1,1,0,],
-                ];
+                map = [[0,0,0,0,0,1,1,1,0,0,],
+                    [0,0,0,0,0,1,1,1,0,0,],
+                    [0,0,0,0,0,1,1,1,0,0,],
+                    [0,0,0,0,0,1,1,1,0,0,],
+                    [0,0,0,0,0,1,1,1,0,0,],
+                    [0,0,0,0,0,1,1,1,0,0,],
+                    [0,0,0,0,0,1,1,1,0,0,],
+                    [0,0,0,0,0,1,1,1,0,0,],
+                    [0,0,0,0,0,1,1,1,0,0,],
+                    ]
                 var canvas = document.getElementById("arkanoid-canvas");
                 gl = canvas.getContext("webgl2");
                 if (!gl) {
