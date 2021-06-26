@@ -34,6 +34,7 @@ class Arkanoid {
 
 		this.velocity = 0.02;
 		this.velocityBar = 0.05;
+		this.powerUpVelocity = 0.005;
 
 		// CREATE SHADERS
 
@@ -137,11 +138,13 @@ class Arkanoid {
 			bufferInfo: twgl.createBufferInfoFromArrays(gl, buildGeometry(20, 20)),
 		}
 
-		// CREATE BLOCKS
+		// CREATE BLOCKS (AND INITIALIZE POWERUPS LIST)
 
 		this.block = [];
+		this.powerup = [];
 		var coordinate;
-		this.powerUps = [];
+		var power;
+		var powerUpsCount = 0;
 		for (var x = 0; x < map.length; x++) {
 			for (var y = 0; y < map[x].length; y++) {
 				var typeBlock = map[x][y];
@@ -149,17 +152,15 @@ class Arkanoid {
 					var signleColor = Math.floor(Math.random() * colors.length);
 					coordinate = [(2 * x - map.length + 1) / map.length, (2 * y - map[x].length + 1) / map[x].length, 0];
 					dimensions = [1 / map.length, 1 / map[x].length, 0.1];
-					// add to the list a block hiding a powerup, and also add the powerup to its list
-					// (powerup hidden behind the block only if randomly extracted by willHavePowerUp, and if the number
-					// of upgrades already hidden doesn't overcome the limit)
-					var power = false;
-					if (this.willHavePowerUp() && this.powerUps.length <= Math.floor(this.block.length / 5)) {
+					
+					power = false;
+					if (this.willHavePowerUp()) {
 						power = true;
-						this.powerUps.push(new powerUp(this, this.powerUps.length + 1));
+						powerUpsCount += 1;
 					}
 					this.block.push({
 						hasPowerUp: power,
-						id: this.powerUps.length,
+						powerUpType: Math.floor(4* Math.random()) + 1, //identifies the upgrade (possible values: 1, 2, 3, 4),
 						typeObj: "Block " + this.block.length,
 						center: coordinate,
 						dimensions: dimensions,
@@ -183,7 +184,7 @@ class Arkanoid {
 				}
 			}
 		}
-
+		
 		// create attributes for collision detection
 		this.updateSpigoliObject(this.bar);
 		for (x = 0; x < this.block.length; x++) this.updateSpigoliObject(this.block[x]);
@@ -262,11 +263,22 @@ class Arkanoid {
 				// update position of the ball
 				game.ball.center[0] = game.ball.center[0] + game.ball.direction[0] * game.velocity;
 				game.ball.center[1] = game.ball.center[1] + game.ball.direction[1] * game.velocity;
+				
+				//update position of each rendered power-up
+				for (let i = 0; i < game.powerup.length; i++){
+					game.powerup[i].center[1] = game.powerup[i].center[1] - game.powerUpVelocity;
+
+					//despawn the power-up if it goes past the bar
+					if (game.powerup[i].center[1] < -1 - game.bar.dimensions[1]){
+						game.powerup.splice(i, 1);
+					}
+				}
 
 				// check lost condition
 				if (game.ball.center[1] < -1 - game.ball.radius) {
-					console.log("lost a life or the game")
-					game.changeState("Pause")
+					console.log("lost a life or the game");
+					game.changeState("Pause");
+					game.powerup = []; //delete every rendered upgrade if the player loses a life
 					game.handleLifeLoss();
 					break;
 				}
@@ -286,10 +298,17 @@ class Arkanoid {
 				}
 				for (let i = 0; i < game.block.length; i++) {
 					if (game.collision(game.block[i]) > 0) {
+						if (game.block[i].hasPowerUp){
+							game.preparePowerUp(game.block[i].powerUpType, game.block[i].center, game.block[i].dimensions);
+						}
 						game.block.splice(i, 1);
 						game.updateScore();
 					}
 				}
+				
+				/*for ()
+				if (this.powerUpCollision()*/
+					
 				game.drawGame();
 				break;
 			default:
@@ -311,6 +330,7 @@ class Arkanoid {
 			obj.max = [obj.center[0] + obj.dimensions[0], obj.center[1] + obj.dimensions[1], 0]
 		}
 	}
+	
 	collision(obj) {
 		var xaxis = Math.abs(game.ball.center[0] - obj.center[0]) - obj.dimensions[0];
 		var yaxis = Math.abs(game.ball.center[1] - obj.center[1]) - obj.dimensions[1];
@@ -341,8 +361,42 @@ class Arkanoid {
 		}
 		return 0;
 	}
-
-
+	
+	powerUpCollision(){
+		
+	}
+	
+	//function to add a power-up to the list of power-up to be renderized
+	preparePowerUp(powerUpType, blockCenter, dimensions){
+		const shrk = 0.4; //shrinking factor to be applied to the scaling factors of the block
+		// in order to represent the powerup as a shrunken block
+		var dimX = shrk * dimensions[0];
+		var dimY = shrk * dimensions[1];
+		var dimZ = shrk * dimensions[2];
+		
+		this.powerup.push({
+			powerUpType: powerUpType,
+			center: blockCenter,
+			dimensions: [dimX, dimY, dimZ],
+			/*localMatrix: utils.multiplyMatrices(
+				utils.MakeTranslateMatrix(blockCenter[0], blockCenter[1], 0),
+				utils.MakeScaleNuMatrix(shrk * dimensions[0],  shrk * dimensions[1], shrk * dimensions[2])
+			),*/
+			//uniforms like color, textures and other things
+			uniforms: {
+				u_color: this.POWERUPS[powerUpType].color,
+				u_matrix: utils.transposeMatrix(utils.multiplyMatrices(
+					utils.MakeTranslateMatrix(blockCenter[0], blockCenter[1], 0),
+					utils.MakeScaleNuMatrix(dimX, dimY, dimZ)
+				))
+			},
+			//shaders
+			programInfo: this.programInfo,
+			//geometry
+			bufferInfo: twgl.createBufferInfoFromArrays(gl, cube()),
+		})
+	}
+	
 	drawGame() {
 
 		var VP = utils.multiplyMatrices(space.getPerspective(), space.getView())
@@ -350,25 +404,37 @@ class Arkanoid {
 			VP, utils.multiplyMatrices(
 				utils.MakeTranslateMatrix(game.ball.center[0], game.ball.center[1], 0),
 				utils.MakeScaleMatrix(game.ball.radius)
-			)))
+			)));
 
 		game.bar.uniforms.u_matrix = utils.transposeMatrix(utils.multiplyMatrices(
 			VP, utils.multiplyMatrices(
 				utils.MakeTranslateMatrix(game.bar.center[0], game.bar.center[1], 0),
 				utils.MakeScaleNuMatrix(game.bar.dimensions[0], game.bar.dimensions[1], game.bar.dimensions[2])
-			)))
+			)));
+		
 		game.block.forEach(e => {
 			e.uniforms.u_matrix = utils.transposeMatrix(utils.multiplyMatrices(VP, e.localMatrix))
 		});
+		
+		game.powerup.forEach(p => {
+			p.uniforms.u_matrix = utils.transposeMatrix(utils.multiplyMatrices(
+				VP, utils.multiplyMatrices(
+					utils.MakeTranslateMatrix(p.center[0], p.center[1], 0),
+					utils.MakeScaleNuMatrix(p.dimensions[0],  p.dimensions[1], p.dimensions[2])
+			)))
+		});
+		
 		game.sponde.forEach(e => {
 			e.uniforms.u_matrix = utils.transposeMatrix(utils.multiplyMatrices(VP, e.localMatrix))
 		});
+		
 		twgl.resizeCanvasToDisplaySize(gl.canvas);
 		gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 
 		game.drawSingleObject(game.bar);
 		game.drawSingleObject(game.ball);
 		twgl.drawObjectList(gl, game.block);
+		twgl.drawObjectList(gl, game.powerup);
 		twgl.drawObjectList(gl, game.sponde);
 		requestAnimationFrame(game.play);
 	}
@@ -381,11 +447,9 @@ class Arkanoid {
 	}
 
 	willHavePowerUp() {
-		var prob = Math.random();
-
 		// randomically decides to add a powerup or not to the block: subsequent negative cases result in an increase 
 		// of the pity, which increases the probability that the next block will have a powerup
-		if (Math.random() + this.pity > 0.6) {
+		if (Math.random() + this.pity > 0.9) {
 			this.pity = 0;
 			return true;
 		}
@@ -395,6 +459,15 @@ class Arkanoid {
 			return false;
 		}
 	}
+
+	/* <----------------- Power-Up List -----------------> */
+	
+	POWERUPS = {
+		"1": {"color": [1, 0.749019608, 0, 1]},
+		"2": {"color": [0.501960784, 0, 1, 1]},
+		"3": {"color": [1, 0, 0.501960784, 1]},
+		"4": {"color": [0, 1, 0.749019608, 1]}
+	};
 
 	/* <----------------- Functions for UI -----------------> */
 
@@ -417,17 +490,9 @@ class Arkanoid {
 		this.lives -= 1;
 
 		//handling cases where player still has 1-2 lives left
-		if (this.lives + 1 === 3) {
-			document.getElementById('life-3').style.display = "none";
-			this.ballAngle = 90;
-			this.ball.center = [0.0, -0.8];
-			this.bar.center = [0, -1];
-			game.changeState("Starting");
-			this.play();
-		}
-
-		else if (this.lives + 1 === 2) {
-			document.getElementById('life-2').style.display = "none";
+		if (this.lives + 1 === 3 || this.lives + 1 === 2) {
+			const lifeId = this.lives + 1;
+			document.getElementById('life-' + lifeId).style.display = "none";
 			this.ballAngle = 90;
 			this.ball.center = [0.0, -0.8];
 			this.bar.center = [0, -1];
