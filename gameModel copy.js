@@ -75,7 +75,18 @@ class Arkanoid {
 			// if you want a specific value for crossOrigin
 			// crossOrigin: "", // either this or use twgl.setDefaults
 		});
-
+		
+		const textures = twgl.createTextures(gl, {
+			// a non-power of 2 image
+			blocks: { src: base+"mesh/kitchen/floordiffuse.png" },
+		});
+		
+		const sampler = twgl.createSamplers(gl, {
+			nearest: {
+				minMag: gl.NEAREST,
+				maxMag: gl.NEAREST,
+			},
+		});
 		// CREATE SHADERS
 
 		this.programInfo = twgl.createProgramInfo(gl, [vs, fs]);
@@ -94,7 +105,10 @@ class Arkanoid {
 			dimensions: dimensions,
 			uniforms: {
 				u_color: [185 / 255, 122 / 255, 87 / 255, 1],
-				u_colorText: tex,
+				u_colorText:{
+					texture: textures.blocks,
+					sampler: sampler.nearest,
+				},
 				// u_matrix: utils.MakeTranslateMatrix((2*x-map.length)/map.length,(2*y-map[x].length)/map[x].length,0)
 				u_matrix: utils.transposeMatrix(utils.multiplyMatrices(
 					utils.MakeTranslateMatrix(barPosition[0], barPosition[1], 0),
@@ -102,7 +116,7 @@ class Arkanoid {
 				))
 			},
 			//shaders
-			programInfo: this.programInfo,
+			programInfo: this.programInfoBLOCK,
 			//geometry
 			bufferInfo: twgl.createBufferInfoFromArrays(gl, cube()),
 		}
@@ -254,7 +268,7 @@ class Arkanoid {
 							))
 						},
 						//shaders
-						programInfo: this.programInfoBLOCK,
+						programInfo: this.programInfo,
 						//geometry
 						bufferInfo: twgl.createBufferInfoFromArrays(gl, cube()),
 					});
