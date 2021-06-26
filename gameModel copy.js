@@ -247,6 +247,7 @@ class Arkanoid {
 						//uniforms like color, textures and other things
 						uniforms: {
 							u_color: colors[signleColor],
+							u_colorText: tex,
 							u_matrix: utils.transposeMatrix(utils.multiplyMatrices(
 								utils.MakeTranslateMatrix(coordinate[0], coordinate[1], 0),
 								utils.MakeScaleNuMatrix(dimensions[0], dimensions[1], dimensions[2])
