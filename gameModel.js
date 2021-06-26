@@ -264,12 +264,12 @@ class Arkanoid {
 				game.ball.center[0] = game.ball.center[0] + game.ball.direction[0] * game.velocity;
 				game.ball.center[1] = game.ball.center[1] + game.ball.direction[1] * game.velocity;
 				
-				//update position of each rendered power-up
+				//update position of each rendered power-up and check collisions
 				for (let i = 0; i < game.powerup.length; i++){
 					game.powerup[i].center[1] = game.powerup[i].center[1] - game.powerUpVelocity;
 
-					//despawn the power-up if it goes past the bar
-					if (game.powerup[i].center[1] < -1 - game.bar.dimensions[1]){
+					//despawn the power-up if it goes past the bar or if the bar takes it
+					if (game.powerup[i].center[1] < -1 - game.bar.dimensions[1] || game.powerUpCollision()){
 						game.powerup.splice(i, 1);
 					}
 				}
@@ -305,9 +305,6 @@ class Arkanoid {
 						game.updateScore();
 					}
 				}
-				
-				/*for ()
-				if (this.powerUpCollision()*/
 					
 				game.drawGame();
 				break;
@@ -363,7 +360,7 @@ class Arkanoid {
 	}
 	
 	powerUpCollision(){
-		
+		//
 	}
 	
 	//function to add a power-up to the list of power-up to be renderized
