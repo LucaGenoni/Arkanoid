@@ -20,6 +20,33 @@ void main() {
    outColor = u_color;
 }
 `;
+vsBLOCK = `#version 300 es
+
+in vec4 a_position;
+in vec2 a_texcoord;
+
+uniform mat4 u_matrix;
+
+out vec2 v_texcoord;
+
+void main() {
+  // Multiply the position by the matrix M_{WVP}.
+  gl_Position = u_matrix * a_position;
+}
+`
+fsBLOCK = `#version 300 es
+precision highp float;
+
+in vec2 v_texcoord;
+uniform sampler2D u_colorText;
+
+out vec4 outColor;
+
+void main() {
+	// vec4 color = 
+   	outColor = texture(u_colorText, v_texcoord);
+}
+`;
 class Arkanoid {
 	constructor(params) {
 		console.log("Preparing the game...");
@@ -35,10 +62,25 @@ class Arkanoid {
 		this.velocity = 0.02;
 		this.velocityBar = 0.05;
 		this.powerUpVelocity = 0.005;
-
+		var path = window.location.pathname;
+		var page = path.split("/").pop();
+		var base = window.location.href.replace(page, '');
+		
+		const textures = twgl.createTextures(gl, {
+			// a non-power of 2 image
+			blocks: { src: base+"textures/prova.png" },
+		});
+		
+		const sampler = twgl.createSamplers(gl, {
+			nearest: {
+				minMag: gl.NEAREST,
+				maxMag: gl.NEAREST,
+			},
+		});
 		// CREATE SHADERS
 
 		this.programInfo = twgl.createProgramInfo(gl, [vs, fs]);
+		this.programInfoBLOCK = twgl.createProgramInfo(gl, [vsBLOCK, fsBLOCK]);
 		twgl.setAttributePrefix("a_");
 		var colors = [[1, 0.250980392, 0, 1], [1, 0.501960784, 0, 1], [1, 0.749019608, 0, 1], [1, 1, 0, 1], [0.749019608, 1, 0, 1], [0.501960784, 1, 0, 1], [0.250980392, 1, 0, 1], [0, 1, 0, 1], [0, 1, 0.250980392, 1], [0, 1, 0.501960784, 1], [0, 1, 0.749019608, 1], [0, 1, 1, 1], [0, 0.749019608, 1, 1], [0, 0.501960784, 1, 1], [0, 0.250980392, 1, 1], [0, 0, 1, 1], [0.250980392, 0, 1, 1], [0.501960784, 0, 1, 1], [0.749019608, 0, 1, 1], [1, 0, 1, 1], [1, 0, 0.749019608, 1], [1, 0, 0.501960784, 1], [1, 0, 0.250980392, 1], [1, 0, 0, 1],];
 
@@ -54,13 +96,17 @@ class Arkanoid {
 			uniforms: {
 				u_color: [185 / 255, 122 / 255, 87 / 255, 1],
 				// u_matrix: utils.MakeTranslateMatrix((2*x-map.length)/map.length,(2*y-map[x].length)/map[x].length,0)
+				u_colorText:{
+					texture: textures.blocks,
+					sampler: sampler.nearest,
+				},
 				u_matrix: utils.transposeMatrix(utils.multiplyMatrices(
 					utils.MakeTranslateMatrix(barPosition[0], barPosition[1], 0),
 					utils.MakeScaleNuMatrix(dimensions[0], dimensions[1], dimensions[2])
 				))
 			},
 			//shaders
-			programInfo: this.programInfo,
+			programInfo: this.programInfoBLOCK,
 			//geometry
 			bufferInfo: twgl.createBufferInfoFromArrays(gl, cube()),
 		}
