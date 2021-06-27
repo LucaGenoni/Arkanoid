@@ -86,7 +86,7 @@ class Arkanoid {
 
 		// CREATE BAR
 
-		var dimensions = [0.4, 0.1, 0.1]
+		var dimensions = [0.4, 0.1, 0.1];
 		var barPosition = [0, -1];
 		this.bar = {
 			//uniforms like color, textures and other things
@@ -109,7 +109,7 @@ class Arkanoid {
 			programInfo: this.programInfoBLOCK,
 			//geometry
 			bufferInfo: twgl.createBufferInfoFromArrays(gl, cube()),
-		}
+		};
 
 		// CREATE EDGES
 
@@ -182,7 +182,7 @@ class Arkanoid {
 			programInfo: this.programInfo,
 			//geometry
 			bufferInfo: twgl.createBufferInfoFromArrays(gl, buildGeometry(20, 20)),
-		}
+		};
 
 		// CREATE BLOCKS (AND INITIALIZE POWERUPS LIST)
 
@@ -315,7 +315,7 @@ class Arkanoid {
 					game.powerup[i].center[1] = game.powerup[i].center[1] - game.powerUpVelocity;
 
 					//despawn the power-up if it goes past the bar or if the bar takes it
-					if (game.powerup[i].center[1] < -1 - game.bar.dimensions[1] || game.powerUpCollision()){
+					if (game.powerup[i].center[1] < -1 - (2 * game.bar.dimensions[1]) || game.powerUpCollision(game.powerup[i])){
 						game.powerup.splice(i, 1);
 					}
 				}
@@ -332,7 +332,7 @@ class Arkanoid {
 				if (game.collision(game.bar) > 0) {
 					if (game.bugRecovery) {
 						console.log("FUCKING BUG");
-						game.changeState("Pause")
+						game.changeState("Pause");
 						game.handleLifeLoss();
 					}
 					game.bugRecovery = true;
@@ -369,7 +369,7 @@ class Arkanoid {
 
 	updateSpigoliObject(obj) {
 		if (obj) {// check why i need to place it to avoid a BIG FUCKING CRASH!!!!!!!!!!!!!!ASJKFGHASKLGHASIGHAFGB 
-			obj.min = [obj.center[0] - obj.dimensions[0], obj.center[1] - obj.dimensions[1], 0]
+			obj.min = [obj.center[0] - obj.dimensions[0], obj.center[1] - obj.dimensions[1], 0];
 			obj.max = [obj.center[0] + obj.dimensions[0], obj.center[1] + obj.dimensions[1], 0]
 		}
 	}
@@ -389,13 +389,13 @@ class Arkanoid {
 			var distance = Math.sqrt((x - game.ball.center[0]) ** 2 + (y - game.ball.center[1]) ** 2);
 			if (distance <= game.ball.radius) {
 				console.log("collision with", obj.typeObj);
-				var bounce = normalizeVector([x - game.ball.center[0], y - game.ball.center[1], 0])
+				var bounce = normalizeVector([x - game.ball.center[0], y - game.ball.center[1], 0]);
 				game.ball.center[0] = game.ball.center[0] - game.ball.direction[0] * game.velocity;
 				game.ball.center[1] = game.ball.center[1] - game.ball.direction[1] * game.velocity;
 				game.ball.direction =
 					subVector(game.ball.direction,
 						scalarVector(2 * dotProductVector(bounce, game.ball.direction) / dotProductVector(bounce, bounce),
-							bounce))
+							bounce));
 
 				game.ball.center[0] = game.ball.center[0] + 2 * game.ball.direction[0] * game.velocity;
 				game.ball.center[1] = game.ball.center[1] + 2 * game.ball.direction[1] * game.velocity;
@@ -405,8 +405,24 @@ class Arkanoid {
 		return 0;
 	}
 	
-	powerUpCollision(){
-		//
+	powerUpCollision(powerUp){
+		var xDistance = Math.abs(powerUp.center[0] - game.bar.center[0]);
+		var yDistance = Math.abs(powerUp.center[1] - game.bar.center[1]);
+		
+		if (xDistance <= (powerUp.dimensions[0] + (0.2 * game.bar.dimensions[0])) &&
+			(powerUp.center[1] > game.bar.center[1] - game.bar.dimensions[1] && powerUp.center[1] < game.bar.center[1] + game.bar.dimensions[1]) ||
+			yDistance <= (powerUp.dimensions[1] + game.bar.dimensions[1]) && powerUp.center[1] >= game.bar.center[1] + game.bar.dimensions[1])
+		{
+			//TODO: APPLY THE EFFECTS OF THE POWER-UP TO THE GAME
+			// MAKING THEM LAST A PRECISE AMOUNT OF TIME ACCORDING TO A SET TIMER
+			
+			console.log("You grabbed an upgrade " + powerUp.powerUpType);
+			return true;
+		}
+		
+		else {
+			return false;
+		}
 	}
 	
 	//function to add a power-up to the list of power-up to be renderized
@@ -442,7 +458,7 @@ class Arkanoid {
 	
 	drawGame() {
 
-		var VP = utils.multiplyMatrices(space.getPerspective(), space.getView())
+		var VP = utils.multiplyMatrices(space.getPerspective(), space.getView());
 		game.ball.uniforms.u_matrix = utils.transposeMatrix(utils.multiplyMatrices(
 			VP, utils.multiplyMatrices(
 				utils.MakeTranslateMatrix(game.ball.center[0], game.ball.center[1], 0),
@@ -546,7 +562,7 @@ class Arkanoid {
 		//handling case where the player has no lives left: LOSS
 		else if (this.lives + 1 === 1) {
 			document.getElementById('life-1').style.display = "none";
-			this.changeState("Pause")
+			this.changeState("Pause");
 			document.getElementById('lost-screen').style.display = "block";
 		}
 	}

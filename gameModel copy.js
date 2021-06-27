@@ -246,7 +246,7 @@ class Arkanoid {
 					var power = false;
 					if (this.willHavePowerUp() && this.powerUps.length <= Math.floor(this.block.length / 5)) {
 						power = true;
-						this.powerUps.push(new powerUp(this, this.powerUps.length + 1));
+						//this.powerUps.push(new powerUp(this, this.powerUps.length + 1));
 					}
 					this.block.push({
 						hasPowerUp: power,
