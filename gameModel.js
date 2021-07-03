@@ -344,6 +344,8 @@ class Arkanoid {
 		//this function must work with globals   
 		switch (game.state) {
 			case "Starting":
+				space._w = gl.canvas.clientWidth;
+				space._h = gl.canvas.clientHeight;
 				var VP = utils.multiplyMatrices(space.getPerspective(), space.getView())
 				game.arrow.uniforms.u_matrix = utils.transposeMatrix(utils.multiplyMatrices(
 					VP, game.arrow.localMatrix))
@@ -404,6 +406,8 @@ class Arkanoid {
 					}
 				}
 					
+				space._w = gl.canvas.clientWidth;
+				space._h = gl.canvas.clientHeight;
 				var VP = utils.multiplyMatrices(space.getPerspective(), space.getView())
 				game.drawGame(VP);
 				break;
@@ -539,7 +543,6 @@ class Arkanoid {
 		game.sponde.forEach(e => {
 			e.uniforms.u_matrix = utils.transposeMatrix(utils.multiplyMatrices(VP, e.localMatrix))
 		});
-		
 		twgl.resizeCanvasToDisplaySize(gl.canvas);
 		gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 
