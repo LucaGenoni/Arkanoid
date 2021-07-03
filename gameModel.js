@@ -31,6 +31,7 @@ out vec2 v_texcoord;
 
 void main() {
   // Multiply the position by the matrix M_{WVP}.
+  v_texcoord = a_texcoord;
   gl_Position = u_matrix * a_position;
 }
 `
@@ -68,7 +69,7 @@ class Arkanoid {
 		
 		const textures = twgl.createTextures(gl, {
 			// a non-power of 2 image
-			blocks: { crossOrigin: 'anonymous', src: "textures/prova.png" },
+			blocks: { crossOrigin: 'anonymous', src: "textures/test.png" },
 		});
 		
 		const sampler = twgl.createSamplers(gl, {
