@@ -68,7 +68,7 @@ class Arkanoid {
 		
 		const textures = twgl.createTextures(gl, {
 			// a non-power of 2 image
-			blocks: { src: base+"textures/prova.png" },
+			blocks: { src: "textures/prova.png" },
 		});
 		
 		const sampler = twgl.createSamplers(gl, {
