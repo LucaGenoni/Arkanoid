@@ -87,7 +87,7 @@ class Arkanoid {
 
 		// CREATE BAR
 
-		var dimensions = [0.3, 0.1, 0.1];
+		var dimensions = [0.3, 0.01, 0.1];
 		var barPosition = [0, -1];
 		this.bar = {
 			//uniforms like color, textures and other things
@@ -191,8 +191,10 @@ class Arkanoid {
 		this.arrow = {
 			//uniforms like color, textures and other things
 			typeObj: "Arrow",
-			center: ballPosition,
-			dimensions: dimensions,			
+			center: function () {
+				return game.ball.center;
+			},
+			dimensions: dimensions,
 			localMatrix : utils.multiplyMatrices(utils.multiplyMatrices(utils.multiplyMatrices(
 				utils.MakeTranslateMatrix(this.ball.center[0], this.ball.center[1], 0),
 				utils.MakeRotateZMatrix(this.ballAngle)),
@@ -374,18 +376,15 @@ class Arkanoid {
 
 				// check lost condition
 				if (game.ball.center[1] < -1 - game.ball.radius) {
-					console.log("lost a life or the game");
-					game.changeState("Pause");
-					game.powerup = []; //delete every rendered upgrade if the player loses a life
 					game.handleLifeLoss();
-					break;
+					return;
 				}
 				// collisions with objects
 				if (game.collision(game.bar) > 0) {
 					if (game.bugRecovery) {
 						console.log("FUCKING BUG");
-						game.changeState("Pause");
 						game.handleLifeLoss();
+						return;
 					}
 					game.bugRecovery = true;
 				} else game.bugRecovery = false;
@@ -625,6 +624,9 @@ class Arkanoid {
 	}
 
 	handleLifeLoss() {
+		console.log("lost a life or the game");
+		game.changeState("Pause");
+		game.powerup = []; //delete every rendered upgrade if the player loses a life
 		this.lives -= 1;
 
 		//handling cases where player still has 1-2 lives left
@@ -632,16 +634,17 @@ class Arkanoid {
 			const lifeId = this.lives + 1;
 			document.getElementById('life-' + lifeId).style.display = "none";
 			this.ballAngle = 90;
-			this.ball.center = [0.0, -0.8];
 			this.bar.center = [0, -1];
-			game.changeState("Starting");
+			this.ball.center = [0.0, this.bar.center[1] + this.ball.radius + this.bar.dimensions[1]];
+			this.arrow.updateLocal();
+			console.log(this.ball.center,this.arrow.center);
+			this.changeState("Starting");
 			this.play();
 		}
 
 		//handling case where the player has no lives left: LOSS
 		else if (this.lives + 1 === 1) {
 			document.getElementById('life-1').style.display = "none";
-			this.changeState("Pause");
 			document.getElementById('lost-screen').style.display = "block";
 		}
 	}
