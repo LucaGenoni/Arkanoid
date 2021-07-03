@@ -408,8 +408,9 @@ class Arkanoid {
 	powerUpCollision(powerUp){
 		var xDistance = Math.abs(powerUp.center[0] - game.bar.center[0]);
 		var yDistance = Math.abs(powerUp.center[1] - game.bar.center[1]);
+		var powerUpBar = powerUp.dimensions[0] + game.bar.dimensions[0];
 		
-		if (xDistance <= (powerUp.dimensions[0] + (0.2 * game.bar.dimensions[0])) &&
+		if (xDistance < powerUp.dimensions[0] + game.bar.dimensions[0] &&
 			(powerUp.center[1] > game.bar.center[1] - game.bar.dimensions[1] && powerUp.center[1] < game.bar.center[1] + game.bar.dimensions[1]) ||
 			yDistance <= (powerUp.dimensions[1] + game.bar.dimensions[1]) && powerUp.center[1] >= game.bar.center[1] + game.bar.dimensions[1])
 		{
