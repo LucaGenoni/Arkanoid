@@ -59,13 +59,13 @@ class Arkanoid {
 		this.score = 0;
 		this.lives = 3;
 		this.pity = 0;
+		
+		this.gameStart = Date.now() / 1000;
+		this.gameEnd = 0;
 
 		this.velocity = 0.026;
 		this.velocityBar = 0.05;
 		this.powerUpVelocity = 0.005;
-		var path = window.location.pathname;
-		var page = path.split("/").pop();
-		var base = window.location.href.replace(page, '');
 		
 		const textures = twgl.createTextures(gl, {
 			// a non-power of 2 image
@@ -609,16 +609,16 @@ class Arkanoid {
 	/* <----------------- Functions for UI -----------------> */
 
 	updateScore() {
-		//TODO: score modification to be changed considering the time spent playing, 
-		// the active upgrade's score multiplier and whatever else we feel is needed
-
 		this.score += 10;
 		$(".ui-score").text("Score: " + this.score);
 
 		//check win condition
 		if (this.block.length === 0) {
+			this.gameEnd = Date.now() / 1000;
+			var gameDuration = this.gameEnd - this.gameStart;
+			var finalScore = this.score + Math.round(2000 / gameDuration);
 			game.changeState("Won");
-			$("#victory-score").text("Your score: " + this.score);
+			$("#victory-score").text("Your score: " + finalScore);
 			document.getElementById('victory-screen').style.display = "block";
 		}
 	}
