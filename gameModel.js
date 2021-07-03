@@ -60,7 +60,7 @@ class Arkanoid {
 		this.lives = 3;
 		this.pity = 0;
 
-		this.velocity = 0.02;
+		this.velocity = 0.026;
 		this.velocityBar = 0.05;
 		this.powerUpVelocity = 0.005;
 		var path = window.location.pathname;
@@ -69,7 +69,7 @@ class Arkanoid {
 		
 		const textures = twgl.createTextures(gl, {
 			// a non-power of 2 image
-			blocks: { crossOrigin: 'anonymous', src: "textures/test.png" },
+			blocks: { crossOrigin: 'anonymous', src: "textures/prova.png" },
 		});
 		
 		const sampler = twgl.createSamplers(gl, {
@@ -87,7 +87,7 @@ class Arkanoid {
 
 		// CREATE BAR
 
-		var dimensions = [0.4, 0.1, 0.1];
+		var dimensions = [0.3, 0.1, 0.1];
 		var barPosition = [0, -1];
 		this.bar = {
 			//uniforms like color, textures and other things
@@ -163,7 +163,7 @@ class Arkanoid {
 
 		// CREATE BALL
 
-		var radius = 0.1;
+		var radius = 0.05;
 		var ballPosition = [0.0, barPosition[1] + radius + this.bar.dimensions[1]];
 		this.ball = {
 			//uniforms like color, textures and other things
@@ -344,7 +344,6 @@ class Arkanoid {
 		//this function must work with globals   
 		switch (game.state) {
 			case "Starting":
-				
 				var VP = utils.multiplyMatrices(space.getPerspective(), space.getView())
 				game.arrow.uniforms.u_matrix = utils.transposeMatrix(utils.multiplyMatrices(
 					VP, game.arrow.localMatrix))
@@ -446,11 +445,10 @@ class Arkanoid {
 				var bounce = normalizeVector([x - game.ball.center[0], y - game.ball.center[1], 0]);
 				game.ball.center[0] = game.ball.center[0] - game.ball.direction[0] * game.velocity;
 				game.ball.center[1] = game.ball.center[1] - game.ball.direction[1] * game.velocity;
-				game.ball.direction =
+				game.ball.direction = normalizeVector(
 					subVector(game.ball.direction,
 						scalarVector(2 * dotProductVector(bounce, game.ball.direction) / dotProductVector(bounce, bounce),
-							bounce));
-
+							bounce)));
 				game.ball.center[0] = game.ball.center[0] + 2 * game.ball.direction[0] * game.velocity;
 				game.ball.center[1] = game.ball.center[1] + 2 * game.ball.direction[1] * game.velocity;
 				return 1;
@@ -468,6 +466,7 @@ class Arkanoid {
 			(powerUp.center[1] > game.bar.center[1] - game.bar.dimensions[1] && powerUp.center[1] < game.bar.center[1] + game.bar.dimensions[1]) ||
 			yDistance <= (powerUp.dimensions[1] + game.bar.dimensions[1]) && powerUp.center[1] >= game.bar.center[1] + game.bar.dimensions[1])
 		{
+			game.POWERUPS[powerUp.powerUpType].apply();
 			//TODO: APPLY THE EFFECTS OF THE POWER-UP TO THE GAME
 			// MAKING THEM LAST A PRECISE AMOUNT OF TIME ACCORDING TO A SET TIMER
 			
@@ -576,12 +575,35 @@ class Arkanoid {
 	/* <----------------- Power-Up List -----------------> */
 	
 	POWERUPS = {
-		"1": {"color": [1, 0.749019608, 0, 1]},
-		"2": {"color": [0.501960784, 0, 1, 1]},
-		"3": {"color": [1, 0, 0.501960784, 1]},
-		"4": {"color": [0, 1, 0.749019608, 1]}
+		"1": {
+			"color": [1, 0.749019608, 0, 1],
+			"effect":"Bigger bar",
+			apply: function(){
+				game.bar.dimensions[0] = 0.4
+			}
+		},
+		"2": {
+			"color": [0.501960784, 0, 1, 1],
+			"effect":"Short bar",
+			apply: function(){
+				game.bar.dimensions[0] = 0.2
+			}
+		},
+		"3": {
+			"color": [1, 0, 0.501960784, 1],
+			"effect":"Speed up",
+			apply: function(){
+				game.velocity = 0.03
+			}
+		},
+		"4": {
+			"color": [0, 1, 0.749019608, 1],
+			"effect":"slow down",
+			apply: function(){
+				game.velocity = 0.02
+			}
+		}
 	};
-
 	/* <----------------- Functions for UI -----------------> */
 
 	updateScore() {
