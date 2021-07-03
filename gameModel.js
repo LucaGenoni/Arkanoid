@@ -184,6 +184,41 @@ class Arkanoid {
 			bufferInfo: twgl.createBufferInfoFromArrays(gl, buildGeometry(20, 20)),
 		};
 
+
+		// CREATE ARROW
+		dimensions = [0.2,0.01,0.01]
+		this.arrow = {
+			//uniforms like color, textures and other things
+			typeObj: "Arrow",
+			center: ballPosition,
+			dimensions: dimensions,			
+			localMatrix : utils.multiplyMatrices(utils.multiplyMatrices(utils.multiplyMatrices(
+				utils.MakeTranslateMatrix(this.ball.center[0], this.ball.center[1], 0),
+				utils.MakeRotateZMatrix(this.ballAngle)),
+				utils.MakeTranslateMatrix(dimensions[0], dimensions[1], 0)),
+				utils.MakeScaleNuMatrix(dimensions[0], dimensions[1], dimensions[2])
+			),
+			updateLocal: function () {
+				this.localMatrix = utils.multiplyMatrices(utils.multiplyMatrices(utils.multiplyMatrices(
+					utils.MakeTranslateMatrix(game.ball.center[0], game.ball.center[1], 0),
+					utils.MakeRotateZMatrix(game.ballAngle)),
+					utils.MakeTranslateMatrix(this.dimensions[0], this.dimensions[1], 0)),
+					utils.MakeScaleNuMatrix(this.dimensions[0], this.dimensions[1], this.dimensions[2])
+				)
+			},
+			uniforms: {
+				u_color: [124/255,252/255,0,0],
+				u_matrix: utils.transposeMatrix(utils.multiplyMatrices(
+					utils.MakeTranslateMatrix(coordinate[0], coordinate[1], 0),
+					utils.MakeScaleNuMatrix(dimensions[0], dimensions[1], dimensions[2])
+				))
+			},
+			//shaders
+			programInfo: this.programInfo,
+			//geometry
+			bufferInfo: twgl.createBufferInfoFromArrays(gl, cube()),
+		}
+
 		// CREATE BLOCKS (AND INITIALIZE POWERUPS LIST)
 
 		this.block = [];
@@ -250,7 +285,10 @@ class Arkanoid {
 				var tempChange = this.bar.center[0] - this.velocityBar;
 				if (tempChange > -1 + this.bar.dimensions[0]) this.bar.center[0] = tempChange;
 				else this.bar.center[0] = -1 + this.bar.dimensions[0];
-				if (this.state == "Starting") this.ball.center[0] = this.bar.center[0];
+				if (this.state == "Starting") {
+					this.ball.center[0] = this.bar.center[0];
+					this.arrow.updateLocal();
+				}
 				this.updateSpigoliObject(this.bar);
 				return;
 			case "KeyD":
@@ -258,17 +296,26 @@ class Arkanoid {
 				var tempChange = this.bar.center[0] + this.velocityBar;
 				if (tempChange < 1 - this.bar.dimensions[0]) this.bar.center[0] = tempChange;
 				else this.bar.center[0] = 1 - this.bar.dimensions[0];
-				if (this.state == "Starting") this.ball.center[0] = this.bar.center[0];
+				if (this.state == "Starting") {
+					this.ball.center[0] = this.bar.center[0];
+					this.arrow.updateLocal();
+				}
 				this.updateSpigoliObject(this.bar);
 				return;
 			// starting direction ball + counter-clockwise, - clockwise
 			case "ArrowUp":
 			case "KeyW":
-				if (this.state == "Starting") this.ballAngle++;
+				if (this.state == "Starting") {
+					this.ballAngle++;
+					this.arrow.updateLocal();
+				}
 				return;
 			case "KeyS":
 			case "ArrowDown":
-				if (this.state == "Starting") this.ballAngle--;
+				if (this.state == "Starting") {
+					this.ballAngle--;
+					this.arrow.updateLocal();
+				}
 				return;
 			// start game
 			case "Space":
@@ -296,7 +343,12 @@ class Arkanoid {
 		//this function must work with globals   
 		switch (game.state) {
 			case "Starting":
-				game.drawGame();
+				
+				var VP = utils.multiplyMatrices(space.getPerspective(), space.getView())
+				game.arrow.uniforms.u_matrix = utils.transposeMatrix(utils.multiplyMatrices(
+					VP, game.arrow.localMatrix))
+				game.drawSingleObject(game.arrow);
+				game.drawGame(VP);
 				break;
 			case "Playing":
 				var angle = Math.acos(game.ball.direction[0]);
@@ -352,7 +404,8 @@ class Arkanoid {
 					}
 				}
 					
-				game.drawGame();
+				var VP = utils.multiplyMatrices(space.getPerspective(), space.getView())
+				game.drawGame(VP);
 				break;
 			default:
 				console.log("Block refresh");
@@ -457,9 +510,8 @@ class Arkanoid {
 		})
 	}
 	
-	drawGame() {
+	drawGame(VP) {
 
-		var VP = utils.multiplyMatrices(space.getPerspective(), space.getView());
 		game.ball.uniforms.u_matrix = utils.transposeMatrix(utils.multiplyMatrices(
 			VP, utils.multiplyMatrices(
 				utils.MakeTranslateMatrix(game.ball.center[0], game.ball.center[1], 0),
