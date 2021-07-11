@@ -39,12 +39,12 @@ fsBLOCK = `#version 300 es
 precision highp float;
 
 in vec2 v_texcoord;
-uniform sampler2D u_colorText;
+uniform sampler2D u_colorTex;
 
 out vec4 outColor;
 
 void main() {
-   	outColor = texture(u_colorText, v_texcoord);
+   	outColor = texture(u_colorTex, v_texcoord);
 }
 `;
 class Arkanoid {
@@ -80,13 +80,16 @@ class Arkanoid {
 		coordinate = [0, -1, 0];
 		uniform = {
 			u_color: [185 / 255, 122 / 255, 87 / 255, 1],
-			u_matrix: utils.transposeMatrix(utils.multiplyMatrices(
-				utils.MakeTranslateMatrix(coordinate[0], coordinate[1], 0),
-				utils.MakeScaleNuMatrix(dimensions[0], dimensions[1], dimensions[2])
-			))
+			u_world: function(){
+				return utils.multiplyMatrices(
+					utils.MakeTranslateMatrix(game.bar.center[0], game.bar.center[1], 0),
+					utils.MakeScaleNuMatrix(game.bar.dimensions[0], game.bar.dimensions[1], game.bar.dimensions[2])
+				)
+			}
 		}
 		newObj = setup.newObject("Bar",coordinate,dimensions,uniform, setup.shaders.justColor, setup.geometries.cube );
 		this.bar = newObj;
+		// console.log(newObj.uniforms.u_world());
 
 		// CREATE EDGES
 		this.sponde = [];
@@ -112,10 +115,10 @@ class Arkanoid {
 			}
 			uniform = {
 				u_color: colors[Math.floor(Math.random() * colors.length)],
-				u_matrix: utils.transposeMatrix(utils.multiplyMatrices(
+				u_world: utils.multiplyMatrices(
 					utils.MakeTranslateMatrix(coordinate[0], coordinate[1], 0),
 					utils.MakeScaleNuMatrix(dimensions[0], dimensions[1], dimensions[2])
-				))
+				)
 			}
 			// create sponda
 			newObj = setup.newObject(name,coordinate,dimensions,uniform, setup.shaders.justColor, setup.geometries.cube );
@@ -131,10 +134,12 @@ class Arkanoid {
 		coordinate = [0.0, this.bar.center[1] + dimensions + this.bar.dimensions[1]];
 		uniform = {
 			u_color: [1, 1, 1, 1],
-			u_matrix: utils.transposeMatrix(utils.multiplyMatrices(
-				utils.MakeTranslateMatrix(coordinate[0], coordinate[1], 0),
-				utils.MakeScaleMatrix(dimensions)
-			))
+			u_world: function(){
+				return utils.multiplyMatrices(
+					utils.MakeTranslateMatrix(game.ball.center[0], game.ball.center[1], 0),
+					utils.MakeScaleMatrix(game.ball.dimensions)
+				)
+			},
 		}
 		newObj = setup.newObject("Ball",coordinate,dimensions,uniform, setup.shaders.justColor, setup.geometries.sphere );
 		newObj.radius = dimensions;
@@ -147,10 +152,14 @@ class Arkanoid {
 		dimensions = [0.2,0.01,0.01];
 		uniform = {
 			u_color: [124/255,252/255,0,0],
-			u_matrix: utils.transposeMatrix(utils.multiplyMatrices(
-				utils.MakeTranslateMatrix(coordinate[0], coordinate[1], 0),
-				utils.MakeScaleNuMatrix(dimensions[0], dimensions[1], dimensions[2])
-			))
+			u_world: function () {
+				return utils.multiplyMatrices(utils.multiplyMatrices(utils.multiplyMatrices(
+					utils.MakeTranslateMatrix(game.ball.center[0], game.ball.center[1], 0),
+					utils.MakeRotateZMatrix(game.ballAngle)),
+					utils.MakeTranslateMatrix(this.dimensions[0], this.dimensions[1], 0)),
+					utils.MakeScaleNuMatrix(this.dimensions[0], this.dimensions[1], this.dimensions[2])
+				)
+			},
 		}
 		newObj = setup.newObject("Arrow",function () { return game.ball.center;},dimensions,uniform, setup.shaders.justColor, setup.geometries.sphere );
 		newObj.updateLocal = function () {
@@ -191,10 +200,10 @@ class Arkanoid {
 					// create block
 					uniform = {
 						u_color: colors[signleColor],
-						u_matrix: utils.transposeMatrix(utils.multiplyMatrices(
+						u_world: utils.multiplyMatrices(
 							utils.MakeTranslateMatrix(coordinate[0], coordinate[1], 0),
-							utils.MakeScaleNuMatrix(dimensions[0], dimensions[1], dimensions[2])
-						))
+							utils.MakeScaleNuMatrix( dimensions[0], dimensions[1], dimensions[2])
+						)
 					}
 					newObj = setup.newObject("Block " + this.block.length, coordinate, dimensions, uniform, setup.shaders.justColor, setup.geometries.cube );
 					newObj.localMatrix = utils.multiplyMatrices(
@@ -381,7 +390,7 @@ class Arkanoid {
 			// var distance = Math.sqrt((x - sphere.x) **2 + (y - sphere.y) **2 + (z - sphere.z) **2);
 			var distance = Math.sqrt((x - game.ball.center[0]) ** 2 + (y - game.ball.center[1]) ** 2);
 			if (distance <= game.ball.radius) {
-				console.log("collision with", obj.typeObj);
+				console.log("collision with", obj.name);
 				var bounce = normalizeVector([x - game.ball.center[0], y - game.ball.center[1], 0]);
 				game.ball.center[0] = game.ball.center[0] - game.ball.direction[0] * game.velocityBall;
 				game.ball.center[1] = game.ball.center[1] - game.ball.direction[1] * game.velocityBall;
@@ -429,9 +438,10 @@ class Arkanoid {
 			u_matrix: utils.transposeMatrix(utils.multiplyMatrices(
 				utils.MakeTranslateMatrix(blockCenter[0], blockCenter[1], 0),
 				utils.MakeScaleNuMatrix(dimensions[0], dimensions[1], dimensions[2])
-			))
+			)),
+			u_colorTex : game.POWERUPS[powerUpType].texture,
 		}
-		var newObj = setup.newObject("PowerUP "+powerUpType, blockCenter, dimensions, uniform, setup.shaders.justColor, setup.geometries.cube );
+		var newObj = setup.newObject("PowerUP "+powerUpType, blockCenter, dimensions, uniform, setup.shaders.justTexture, setup.geometries.cube );
 		newObj.powerUpType = powerUpType,
 		this.powerup.push(newObj);
 	}
@@ -444,14 +454,10 @@ class Arkanoid {
 				utils.MakeScaleMatrix(game.ball.radius)
 			)));
 
-		game.bar.uniforms.u_matrix = utils.transposeMatrix(utils.multiplyMatrices(
-			VP, utils.multiplyMatrices(
-				utils.MakeTranslateMatrix(game.bar.center[0], game.bar.center[1], 0),
-				utils.MakeScaleNuMatrix(game.bar.dimensions[0], game.bar.dimensions[1], game.bar.dimensions[2])
-			)));
+		game.bar.uniforms.u_matrix = utils.transposeMatrix(utils.multiplyMatrices( VP, game.bar.uniforms.u_world()));
 		
 		game.block.forEach(e => {
-			e.uniforms.u_matrix = utils.transposeMatrix(utils.multiplyMatrices(VP, e.localMatrix))
+			e.uniforms.u_matrix = utils.transposeMatrix(utils.multiplyMatrices(VP, e.uniforms.u_world))
 		});
 		
 		game.powerup.forEach(p => {
@@ -463,7 +469,7 @@ class Arkanoid {
 		});
 		
 		game.sponde.forEach(e => {
-			e.uniforms.u_matrix = utils.transposeMatrix(utils.multiplyMatrices(VP, e.localMatrix))
+			e.uniforms.u_matrix = utils.transposeMatrix(utils.multiplyMatrices(VP, e.uniforms.u_world))
 		});
 		
 		space._resizeCanvas(gl);
@@ -486,7 +492,7 @@ class Arkanoid {
 	}
 
 	willHavePowerUp() {
-		return true;
+		return true
 		// randomically decides to add a powerup or not to the block: subsequent negative cases result in an increase 
 		// of the pity, which increases the probability that the next block will have a powerup
 		if (Math.random() + this.pity > 0.9) {
@@ -530,6 +536,10 @@ class Arkanoid {
 			"effect":"Speed up",
 			apply: function(){
 				game.velocityBall = 0.03
+			},
+			texture: {
+				texture:setup.textures.restrict,
+				sampler:setup.samplers.nearest,
 			}
 		},
 		"4": {
@@ -537,6 +547,10 @@ class Arkanoid {
 			"effect":"slow down",
 			apply: function(){
 				game.velocityBall = 0.02
+			},
+			texture: {
+				texture:setup.textures.restrict,
+				sampler:setup.samplers.nearest,
 			}
 		}
 	};
@@ -582,5 +596,4 @@ class Arkanoid {
 			document.getElementById('lost-screen').style.display = "block";
 		}
 	}
-
 }

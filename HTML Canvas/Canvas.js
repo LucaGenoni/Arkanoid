@@ -54,7 +54,7 @@ $(document).ready(function(){
         document.getElementById('life-3').style.display = "inline-block";
         
         //then, the game
-        game = new Arkanoid(map,1);
+        game = new Arkanoid(map);
         game.play();
     });
 });
