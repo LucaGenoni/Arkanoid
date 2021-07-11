@@ -44,14 +44,14 @@ uniform sampler2D u_colorText;
 out vec4 outColor;
 
 void main() {
-	// vec4 color = 
    	outColor = texture(u_colorText, v_texcoord);
 }
 `;
 class Arkanoid {
-	constructor(params) {
+	constructor(mapBlocks,velocityBall,velocityBar) {
 		console.log("Preparing the game...");
-		this.params = params;
+		this.velocityBall = velocityBall ? velocityBall:0.025;
+		this.velocityBar = velocityBar ? velocityBar:0.05;
 		this.previousState = "Pause";
 		this.state = "Starting";
 		this.ballAngle = 90;
@@ -63,61 +63,34 @@ class Arkanoid {
 		this.gameStart = Date.now() / 1000;
 		this.gameEnd = 0;
 
-		this.velocity = 0.026;
-		this.velocityBar = 0.05;
 		this.powerUpVelocity = 0.005;
-		
-		const textures = twgl.createTextures(gl, {
-			// a non-power of 2 image
-			blocks: { crossOrigin: 'anonymous', src: "textures/prova.png" },
-		});
-		
-		const sampler = twgl.createSamplers(gl, {
-			nearest: {
-				minMag: gl.NEAREST,
-				maxMag: gl.NEAREST,
-			},
-		});
-		// CREATE SHADERS
 
+	
+		// CREATE SHADERS
+		
 		this.programInfo = twgl.createProgramInfo(gl, [vs, fs]);
 		this.programInfoBLOCK = twgl.createProgramInfo(gl, [vsBLOCK, fsBLOCK]);
 		twgl.setAttributePrefix("a_");
 		var colors = [[1, 0.250980392, 0, 1], [1, 0.501960784, 0, 1], [1, 0.749019608, 0, 1], [1, 1, 0, 1], [0.749019608, 1, 0, 1], [0.501960784, 1, 0, 1], [0.250980392, 1, 0, 1], [0, 1, 0, 1], [0, 1, 0.250980392, 1], [0, 1, 0.501960784, 1], [0, 1, 0.749019608, 1], [0, 1, 1, 1], [0, 0.749019608, 1, 1], [0, 0.501960784, 1, 1], [0, 0.250980392, 1, 1], [0, 0, 1, 1], [0.250980392, 0, 1, 1], [0.501960784, 0, 1, 1], [0.749019608, 0, 1, 1], [1, 0, 1, 1], [1, 0, 0.749019608, 1], [1, 0, 0.501960784, 1], [1, 0, 0.250980392, 1], [1, 0, 0, 1],];
 
-		// CREATE BAR
+		var dimensions, coordinate, uniform, newObj, name;
 
-		var dimensions = [0.3, 0.01, 0.1];
-		var barPosition = [0, -1];
-		this.bar = {
-			//uniforms like color, textures and other things
-			typeObj: "Bar",
-			center: [barPosition[0], barPosition[1], 0],
-			dimensions: dimensions,
-			uniforms: {
-				u_color: [185 / 255, 122 / 255, 87 / 255, 1],
-				// u_matrix: utils.MakeTranslateMatrix((2*x-map.length)/map.length,(2*y-map[x].length)/map[x].length,0)
-				u_colorText:{
-					texture: textures.blocks,
-					sampler: sampler.nearest,
-				},
-				u_matrix: utils.transposeMatrix(utils.multiplyMatrices(
-					utils.MakeTranslateMatrix(barPosition[0], barPosition[1], 0),
-					utils.MakeScaleNuMatrix(dimensions[0], dimensions[1], dimensions[2])
-				))
-			},
-			//shaders
-			programInfo: this.programInfoBLOCK,
-			//geometry
-			bufferInfo: twgl.createBufferInfoFromArrays(gl, cube()),
-		};
+		// CREATE BAR
+		dimensions = [0.3, 0.01, 0.1];
+		coordinate = [0, -1, 0];
+		uniform = {
+			u_color: [185 / 255, 122 / 255, 87 / 255, 1],
+			u_matrix: utils.transposeMatrix(utils.multiplyMatrices(
+				utils.MakeTranslateMatrix(coordinate[0], coordinate[1], 0),
+				utils.MakeScaleNuMatrix(dimensions[0], dimensions[1], dimensions[2])
+			))
+		}
+		newObj = setup.newObject("Bar",coordinate,dimensions,uniform, setup.shaders.justColor, setup.geometries.cube );
+		this.bar = newObj;
 
 		// CREATE EDGES
-
 		this.sponde = [];
 		for (x = 0; x < 3; x++) {
-			var name;
-			var signleColor = Math.floor(Math.random() * colors.length);
 			switch (x) {
 				case 0:
 					name = "sponda SX";
@@ -137,134 +110,100 @@ class Arkanoid {
 				default:
 					break;
 			}
-			this.sponde.push({
-				//uniforms like color, textures and other things
-				typeObj: name,
-				center: coordinate,
-				dimensions: dimensions,
-				localMatrix: utils.multiplyMatrices(
+			uniform = {
+				u_color: colors[Math.floor(Math.random() * colors.length)],
+				u_matrix: utils.transposeMatrix(utils.multiplyMatrices(
 					utils.MakeTranslateMatrix(coordinate[0], coordinate[1], 0),
 					utils.MakeScaleNuMatrix(dimensions[0], dimensions[1], dimensions[2])
-				),
-				uniforms: {
-					u_color: colors[signleColor],
-					// u_matrix: utils.MakeTranslateMatrix((2*x-map.length)/map.length,(2*y-map[x].length)/map[x].length,0)
-					u_matrix: utils.transposeMatrix(utils.multiplyMatrices(
-						utils.MakeTranslateMatrix(coordinate[0], coordinate[1], 0),
-						utils.MakeScaleNuMatrix(dimensions[0], dimensions[1], dimensions[2])
-					))
-				},
-				//shaders
-				programInfo: this.programInfo,
-				//geometry
-				bufferInfo: twgl.createBufferInfoFromArrays(gl, cube()),
-			});
+				))
+			}
+			// create sponda
+			newObj = setup.newObject(name,coordinate,dimensions,uniform, setup.shaders.justColor, setup.geometries.cube );
+			newObj.localMatrix = utils.multiplyMatrices(
+				utils.MakeTranslateMatrix(coordinate[0], coordinate[1], 0),
+				utils.MakeScaleNuMatrix(dimensions[0], dimensions[1], dimensions[2])
+			)
+			this.sponde.push(newObj);
 		}
 
 		// CREATE BALL
-
-		var radius = 0.05;
-		var ballPosition = [0.0, barPosition[1] + radius + this.bar.dimensions[1]];
-		this.ball = {
-			//uniforms like color, textures and other things
-			typeObj: "Ball",
-			center: ballPosition,
-			direction: [Math.cos(utils.degToRad(this.ballAngle)), Math.sin(utils.degToRad(this.ballAngle)), 0],
-			radius: radius,
-			uniforms: {
-				u_color: [1, 1, 1, 1],
-				// u_matrix: utils.MakeTranslateMatrix((2*x-map.length)/map.length,(2*y-map[x].length)/map[x].length,0)
-				u_matrix: utils.transposeMatrix(utils.multiplyMatrices(
-					utils.MakeTranslateMatrix(ballPosition[0], ballPosition[1], 0),
-					utils.MakeScaleMatrix(radius)
-				))
-			},
-			//shaders
-			programInfo: this.programInfo,
-			//geometry
-			bufferInfo: twgl.createBufferInfoFromArrays(gl, buildGeometry(20, 20)),
-		};
+		dimensions = 0.05;
+		coordinate = [0.0, this.bar.center[1] + dimensions + this.bar.dimensions[1]];
+		uniform = {
+			u_color: [1, 1, 1, 1],
+			u_matrix: utils.transposeMatrix(utils.multiplyMatrices(
+				utils.MakeTranslateMatrix(coordinate[0], coordinate[1], 0),
+				utils.MakeScaleMatrix(dimensions)
+			))
+		}
+		newObj = setup.newObject("Ball",coordinate,dimensions,uniform, setup.shaders.justColor, setup.geometries.sphere );
+		newObj.radius = dimensions;
+		newObj.direction = [Math.cos(utils.degToRad(this.ballAngle)), Math.sin(utils.degToRad(this.ballAngle)), 0],
+		this.ball = newObj
 
 
 		// CREATE ARROW
-		dimensions = [0.2,0.01,0.01]
-		this.arrow = {
-			//uniforms like color, textures and other things
-			typeObj: "Arrow",
-			center: function () {
-				return game.ball.center;
-			},
-			dimensions: dimensions,
-			localMatrix : utils.multiplyMatrices(utils.multiplyMatrices(utils.multiplyMatrices(
-				utils.MakeTranslateMatrix(this.ball.center[0], this.ball.center[1], 0),
-				utils.MakeRotateZMatrix(this.ballAngle)),
-				utils.MakeTranslateMatrix(dimensions[0], dimensions[1], 0)),
+		coordinate = this.ball.center;
+		dimensions = [0.2,0.01,0.01];
+		uniform = {
+			u_color: [124/255,252/255,0,0],
+			u_matrix: utils.transposeMatrix(utils.multiplyMatrices(
+				utils.MakeTranslateMatrix(coordinate[0], coordinate[1], 0),
 				utils.MakeScaleNuMatrix(dimensions[0], dimensions[1], dimensions[2])
-			),
-			updateLocal: function () {
-				this.localMatrix = utils.multiplyMatrices(utils.multiplyMatrices(utils.multiplyMatrices(
-					utils.MakeTranslateMatrix(game.ball.center[0], game.ball.center[1], 0),
-					utils.MakeRotateZMatrix(game.ballAngle)),
-					utils.MakeTranslateMatrix(this.dimensions[0], this.dimensions[1], 0)),
-					utils.MakeScaleNuMatrix(this.dimensions[0], this.dimensions[1], this.dimensions[2])
-				)
-			},
-			uniforms: {
-				u_color: [124/255,252/255,0,0],
-				u_matrix: utils.transposeMatrix(utils.multiplyMatrices(
-					utils.MakeTranslateMatrix(coordinate[0], coordinate[1], 0),
-					utils.MakeScaleNuMatrix(dimensions[0], dimensions[1], dimensions[2])
-				))
-			},
-			//shaders
-			programInfo: this.programInfo,
-			//geometry
-			bufferInfo: twgl.createBufferInfoFromArrays(gl, cube()),
+			))
 		}
+		newObj = setup.newObject("Arrow",function () { return game.ball.center;},dimensions,uniform, setup.shaders.justColor, setup.geometries.sphere );
+		newObj.updateLocal = function () {
+			this.localMatrix = utils.multiplyMatrices(utils.multiplyMatrices(utils.multiplyMatrices(
+				utils.MakeTranslateMatrix(game.ball.center[0], game.ball.center[1], 0),
+				utils.MakeRotateZMatrix(game.ballAngle)),
+				utils.MakeTranslateMatrix(this.dimensions[0], this.dimensions[1], 0)),
+				utils.MakeScaleNuMatrix(this.dimensions[0], this.dimensions[1], this.dimensions[2])
+			)
+		}
+		newObj.localMatrix = utils.multiplyMatrices(utils.multiplyMatrices(utils.multiplyMatrices(
+			utils.MakeTranslateMatrix(this.ball.center[0], this.ball.center[1], 0),
+			utils.MakeRotateZMatrix(this.ballAngle)),
+			utils.MakeTranslateMatrix(dimensions[0], dimensions[1], 0)),
+			utils.MakeScaleNuMatrix(dimensions[0], dimensions[1], dimensions[2])
+		)
+		this.arrow = newObj
+
 
 		// CREATE BLOCKS (AND INITIALIZE POWERUPS LIST)
 
 		this.block = [];
 		this.powerup = [];
-		var coordinate;
 		var power;
 		var powerUpsCount = 0;
-		for (var x = 0; x < map.length; x++) {
-			for (var y = 0; y < map[x].length; y++) {
-				var typeBlock = map[x][y];
+		for (var x = 0; x < mapBlocks.length; x++) {
+			for (var y = 0; y < mapBlocks[x].length; y++) {
+				var typeBlock = mapBlocks[x][y];
 				if (typeBlock != 0) { //to add different typeblock make more cases with 1,2,3 block
 					var signleColor = Math.floor(Math.random() * colors.length);
-					coordinate = [(2 * x - map.length + 1) / map.length, (2 * y - map[x].length + 1) / map[x].length, 0];
-					dimensions = [1 / map.length, 1 / map[x].length, 0.1];
-					
+					coordinate = [(2 * x - mapBlocks.length + 1) / mapBlocks.length, (2 * y - mapBlocks[x].length + 1) / mapBlocks[x].length, 0];
+					dimensions = [1 / mapBlocks.length, 1 / mapBlocks[x].length, 0.1];
 					power = false;
 					if (this.willHavePowerUp()) {
 						power = true;
 						powerUpsCount += 1;
 					}
-					this.block.push({
-						hasPowerUp: power,
-						powerUpType: Math.floor(4* Math.random()) + 1, //identifies the upgrade (possible values: 1, 2, 3, 4),
-						typeObj: "Block " + this.block.length,
-						center: coordinate,
-						dimensions: dimensions,
-						localMatrix: utils.multiplyMatrices(
+					// create block
+					uniform = {
+						u_color: colors[signleColor],
+						u_matrix: utils.transposeMatrix(utils.multiplyMatrices(
 							utils.MakeTranslateMatrix(coordinate[0], coordinate[1], 0),
 							utils.MakeScaleNuMatrix(dimensions[0], dimensions[1], dimensions[2])
-						),
-						//uniforms like color, textures and other things
-						uniforms: {
-							u_color: colors[signleColor],
-							u_matrix: utils.transposeMatrix(utils.multiplyMatrices(
-								utils.MakeTranslateMatrix(coordinate[0], coordinate[1], 0),
-								utils.MakeScaleNuMatrix(dimensions[0], dimensions[1], dimensions[2])
-							))
-						},
-						//shaders
-						programInfo: this.programInfo,
-						//geometry
-						bufferInfo: twgl.createBufferInfoFromArrays(gl, cube()),
-					});
+						))
+					}
+					newObj = setup.newObject("Block " + this.block.length, coordinate, dimensions, uniform, setup.shaders.justColor, setup.geometries.cube );
+					newObj.localMatrix = utils.multiplyMatrices(
+						utils.MakeTranslateMatrix(coordinate[0], coordinate[1], 0),
+						utils.MakeScaleNuMatrix(dimensions[0], dimensions[1], dimensions[2])
+					),
+					newObj.hasPowerUp = power,
+					newObj.powerUpType = Math.floor(4* Math.random()) + 1, //identifies the upgrade (possible values: 1, 2, 3, 4),
+					this.block.push(newObj);
 				}
 			}
 		}
@@ -361,8 +300,8 @@ class Arkanoid {
 					game.ball.direction = [Math.cos(game.ballAngle), Math.sin(game.ballAngle), 0];
 				}
 				// update position of the ball
-				game.ball.center[0] = game.ball.center[0] + game.ball.direction[0] * game.velocity;
-				game.ball.center[1] = game.ball.center[1] + game.ball.direction[1] * game.velocity;
+				game.ball.center[0] = game.ball.center[0] + game.ball.direction[0] * game.velocityBall;
+				game.ball.center[1] = game.ball.center[1] + game.ball.direction[1] * game.velocityBall;
 				
 				//update position of each rendered power-up and check collisions
 				for (let i = 0; i < game.powerup.length; i++){
@@ -444,14 +383,14 @@ class Arkanoid {
 			if (distance <= game.ball.radius) {
 				console.log("collision with", obj.typeObj);
 				var bounce = normalizeVector([x - game.ball.center[0], y - game.ball.center[1], 0]);
-				game.ball.center[0] = game.ball.center[0] - game.ball.direction[0] * game.velocity;
-				game.ball.center[1] = game.ball.center[1] - game.ball.direction[1] * game.velocity;
+				game.ball.center[0] = game.ball.center[0] - game.ball.direction[0] * game.velocityBall;
+				game.ball.center[1] = game.ball.center[1] - game.ball.direction[1] * game.velocityBall;
 				game.ball.direction = normalizeVector(
 					subVector(game.ball.direction,
 						scalarVector(2 * dotProductVector(bounce, game.ball.direction) / dotProductVector(bounce, bounce),
 							bounce)));
-				game.ball.center[0] = game.ball.center[0] + 2 * game.ball.direction[0] * game.velocity;
-				game.ball.center[1] = game.ball.center[1] + 2 * game.ball.direction[1] * game.velocity;
+				game.ball.center[0] = game.ball.center[0] + 2 * game.ball.direction[0] * game.velocityBall;
+				game.ball.center[1] = game.ball.center[1] + 2 * game.ball.direction[1] * game.velocityBall;
 				return 1;
 			}
 		}
@@ -484,31 +423,17 @@ class Arkanoid {
 	preparePowerUp(powerUpType, blockCenter, dimensions){
 		const shrk = 0.4; //shrinking factor to be applied to the scaling factors of the block
 		// in order to represent the powerup as a shrunken block
-		var dimX = shrk * dimensions[0];
-		var dimY = shrk * dimensions[1];
-		var dimZ = shrk * dimensions[2];
-		
-		this.powerup.push({
-			powerUpType: powerUpType,
-			center: blockCenter,
-			dimensions: [dimX, dimY, dimZ],
-			/*localMatrix: utils.multiplyMatrices(
+		dimensions = scalarVector(shrk,dimensions);
+		var uniform = {
+			u_color: this.POWERUPS[powerUpType].color,
+			u_matrix: utils.transposeMatrix(utils.multiplyMatrices(
 				utils.MakeTranslateMatrix(blockCenter[0], blockCenter[1], 0),
-				utils.MakeScaleNuMatrix(shrk * dimensions[0],  shrk * dimensions[1], shrk * dimensions[2])
-			),*/
-			//uniforms like color, textures and other things
-			uniforms: {
-				u_color: this.POWERUPS[powerUpType].color,
-				u_matrix: utils.transposeMatrix(utils.multiplyMatrices(
-					utils.MakeTranslateMatrix(blockCenter[0], blockCenter[1], 0),
-					utils.MakeScaleNuMatrix(dimX, dimY, dimZ)
-				))
-			},
-			//shaders
-			programInfo: this.programInfo,
-			//geometry
-			bufferInfo: twgl.createBufferInfoFromArrays(gl, cube()),
-		})
+				utils.MakeScaleNuMatrix(dimensions[0], dimensions[1], dimensions[2])
+			))
+		}
+		var newObj = setup.newObject("PowerUP "+powerUpType, blockCenter, dimensions, uniform, setup.shaders.justColor, setup.geometries.cube );
+		newObj.powerUpType = powerUpType,
+		this.powerup.push(newObj);
 	}
 	
 	drawGame(VP) {
@@ -561,6 +486,7 @@ class Arkanoid {
 	}
 
 	willHavePowerUp() {
+		return true;
 		// randomically decides to add a powerup or not to the block: subsequent negative cases result in an increase 
 		// of the pity, which increases the probability that the next block will have a powerup
 		if (Math.random() + this.pity > 0.9) {
@@ -582,6 +508,10 @@ class Arkanoid {
 			"effect":"Bigger bar",
 			apply: function(){
 				game.bar.dimensions[0] = 0.4
+			},
+			texture: {
+				texture:setup.textures.enlarge,
+				sampler:setup.samplers.nearest,
 			}
 		},
 		"2": {
@@ -589,20 +519,24 @@ class Arkanoid {
 			"effect":"Short bar",
 			apply: function(){
 				game.bar.dimensions[0] = 0.2
+			},
+			texture: {
+				texture:setup.textures.restrict,
+				sampler:setup.samplers.nearest,
 			}
 		},
 		"3": {
 			"color": [1, 0, 0.501960784, 1],
 			"effect":"Speed up",
 			apply: function(){
-				game.velocity = 0.03
+				game.velocityBall = 0.03
 			}
 		},
 		"4": {
 			"color": [0, 1, 0.749019608, 1],
 			"effect":"slow down",
 			apply: function(){
-				game.velocity = 0.02
+				game.velocityBall = 0.02
 			}
 		}
 	};
