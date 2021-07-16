@@ -87,10 +87,9 @@ class Arkanoid {
 				)
 			}
 		}
-		newObj = setup.newObject("Bar",coordinate,dimensions,uniform, setup.shaders.justColor, setup.geometries.cube );
+		newObj = setup.newObject("Bar",coordinate,dimensions,uniform, setup.shaders.testLight, setup.geometries.cube );
+		
 		this.bar = newObj;
-		// console.log(newObj.uniforms.u_world());
-
 		// CREATE EDGES
 		this.sponde = [];
 		for (x = 0; x < 3; x++) {
@@ -443,7 +442,7 @@ class Arkanoid {
 				utils.MakeTranslateMatrix(game.ball.center[0], game.ball.center[1], 0),
 				utils.MakeScaleMatrix(game.ball.radius)
 			)));
-
+		game.bar.uniforms.u_colorLight = [Math.random(),0,0,1]
 		game.bar.uniforms.u_matrix = utils.transposeMatrix(utils.multiplyMatrices( VP, game.bar.uniforms.u_world()));
 		
 		game.block.forEach(e => {
