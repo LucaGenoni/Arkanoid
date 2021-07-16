@@ -1,52 +1,3 @@
-vs = `#version 300 es
-
-in vec4 a_position;
-
-uniform mat4 u_matrix;
-
-void main() {
-  // Multiply the position by the matrix M_{WVP}.
-  gl_Position = u_matrix * a_position;
-}
-`
-fs = `#version 300 es
-precision highp float;
-
-uniform vec4 u_color;
-
-out vec4 outColor;
-
-void main() {
-   outColor = u_color;
-}
-`;
-vsBLOCK = `#version 300 es
-
-in vec4 a_position;
-in vec2 a_texcoord;
-
-uniform mat4 u_matrix;
-
-out vec2 v_texcoord;
-
-void main() {
-  // Multiply the position by the matrix M_{WVP}.
-  v_texcoord = a_texcoord;
-  gl_Position = u_matrix * a_position;
-}
-`
-fsBLOCK = `#version 300 es
-precision highp float;
-
-in vec2 v_texcoord;
-uniform sampler2D u_colorTex;
-
-out vec4 outColor;
-
-void main() {
-   	outColor = texture(u_colorTex, v_texcoord);
-}
-`;
 class Arkanoid {
 	constructor(mapBlocks,velocityBall,velocityBar) {
 		console.log("Preparing the game...");
@@ -73,7 +24,7 @@ class Arkanoid {
 		twgl.setAttributePrefix("a_");
 		var colors = [[1, 0.250980392, 0, 1], [1, 0.501960784, 0, 1], [1, 0.749019608, 0, 1], [1, 1, 0, 1], [0.749019608, 1, 0, 1], [0.501960784, 1, 0, 1], [0.250980392, 1, 0, 1], [0, 1, 0, 1], [0, 1, 0.250980392, 1], [0, 1, 0.501960784, 1], [0, 1, 0.749019608, 1], [0, 1, 1, 1], [0, 0.749019608, 1, 1], [0, 0.501960784, 1, 1], [0, 0.250980392, 1, 1], [0, 0, 1, 1], [0.250980392, 0, 1, 1], [0.501960784, 0, 1, 1], [0.749019608, 0, 1, 1], [1, 0, 1, 1], [1, 0, 0.749019608, 1], [1, 0, 0.501960784, 1], [1, 0, 0.250980392, 1], [1, 0, 0, 1],];
 
-		var dimensions, coordinate, uniform, newObj, name;
+		var dimensions, coordinate, uniform, newObj, name, uv, geometry;
 
 		// CREATE BAR
 		dimensions = [0.3, 0.01, 0.1];
@@ -93,11 +44,33 @@ class Arkanoid {
 		// CREATE EDGES
 		this.sponde = [];
 		for (x = 0; x < 3; x++) {
+			geometry = setup.geometries.cube
+			uv = []
 			switch (x) {
 				case 0:
 					name = "sponda SX";
 					coordinate = [-1, 0, 0];
 					dimensions = [0, 1, .1];
+					uv = [
+						//back face
+							[0,0],	[0,1],	[1,1],
+							[1,1],[1,0],[0,0],
+						//front face	
+							[0,1],	[1,0],	[0,0],
+							[1,0],	[0,1],	[1,1],	
+						//dx face
+							[1,1],	[0,1],	[1,0],
+							[0,1],	[0,0],	[1,0],
+						//sx face
+							[0,1],	[0,0],	[0,1],
+							[0,1], 	[0,0],	[0,0],
+						//top face
+							[0,1],	[1,0],	[1,1],
+							[0,0],	[1,0],	[0,1],
+						//bottom face
+							[0,0],	[1,0],	[1,1],
+							[0,1],	[0,0],	[1,1]	
+					]
 					break;
 				case 1:
 					name = "sponda TOP";
@@ -112,15 +85,28 @@ class Arkanoid {
 				default:
 					break;
 			}
+			if (uv.length>0){
+				geometry.texcoord = []
+				uv.forEach(element => {				
+					for (let i = 0; i < element.length; i++) {
+						const el = element[i];
+						geometry.texcoord.push(el)
+					}
+				});
+			}
 			uniform = {
 				u_color: colors[Math.floor(Math.random() * colors.length)],
 				u_world: utils.multiplyMatrices(
 					utils.MakeTranslateMatrix(coordinate[0], coordinate[1], 0),
 					utils.MakeScaleNuMatrix(dimensions[0], dimensions[1], dimensions[2])
-				)
+				),
+				u_colorTex: { 
+					texture: setup.textures.sponde,
+					sampler: setup.samplers.nearest,
+				}
 			}
 			// create sponda
-			newObj = setup.newObject(name,coordinate,dimensions,uniform, setup.shaders.justColor, setup.geometries.cube );
+			newObj = setup.newObject(name,coordinate,dimensions,uniform, setup.shaders.justTexture, geometry );
 			newObj.localMatrix = utils.multiplyMatrices(
 				utils.MakeTranslateMatrix(coordinate[0], coordinate[1], 0),
 				utils.MakeScaleNuMatrix(dimensions[0], dimensions[1], dimensions[2])
@@ -431,7 +417,7 @@ class Arkanoid {
 			u_colorTex : game.POWERUPS[powerUpType].texture,
 		}
 		var newObj = setup.newObject("PowerUP "+powerUpType, blockCenter, dimensions, uniform, setup.shaders.justTexture, setup.geometries.cube );
-		newObj.powerUpType = powerUpType,
+		newObj.powerUpType = powerUpType;  
 		this.powerup.push(newObj);
 	}
 	
@@ -442,7 +428,7 @@ class Arkanoid {
 				utils.MakeTranslateMatrix(game.ball.center[0], game.ball.center[1], 0),
 				utils.MakeScaleMatrix(game.ball.radius)
 			)));
-		game.bar.uniforms.u_colorLight = [Math.random(),0,0,1]
+		game.bar.uniforms.u_colorLight = [1,0,0,1]
 		game.bar.uniforms.u_matrix = utils.transposeMatrix(utils.multiplyMatrices( VP, game.bar.uniforms.u_world()));
 		
 		game.block.forEach(e => {
@@ -464,12 +450,14 @@ class Arkanoid {
 		space._resizeCanvas(gl);
 		twgl.resizeCanvasToDisplaySize(gl.canvas);
 		gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
-
+		for (let i = 0; i < game.sponde.length; i++) {
+			const e = game.sponde[i];
+			this.drawSingleObject(e)
+		}
 		game.drawSingleObject(game.bar);
 		game.drawSingleObject(game.ball);
 		twgl.drawObjectList(gl, game.block);
 		twgl.drawObjectList(gl, game.powerup);
-		twgl.drawObjectList(gl, game.sponde);
 		requestAnimationFrame(game.play);
 	}
 
