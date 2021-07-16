@@ -315,11 +315,8 @@ class Arkanoid {
 				//update position of each rendered power-up and check collisions
 				for (let i = 0; i < game.powerup.length; i++){
 					game.powerup[i].center[1] = game.powerup[i].center[1] - game.powerUpVelocity;
-
-					//despawn the power-up if it goes past the bar or if the bar takes it
-					if (game.powerup[i].center[1] < -1 - (2 * game.bar.dimensions[1]) || game.powerUpCollision(game.powerup[i])){
-						game.powerup.splice(i, 1);
-					}
+					if (game.powerUpCollision(game.powerup[i]) > 0) game.powerup.splice(i, 1);
+					else if (game.powerup[i].center[1] < -1 - game.powerup[i].dimensions[1]) game.powerup.splice(i, 1);
 				}
 
 				// check lost condition
@@ -407,25 +404,18 @@ class Arkanoid {
 	}
 	
 	powerUpCollision(powerUp){
-		var xDistance = Math.abs(powerUp.center[0] - game.bar.center[0]);
-		var yDistance = Math.abs(powerUp.center[1] - game.bar.center[1]);
-		var powerUpBar = powerUp.dimensions[0] + game.bar.dimensions[0];
+		var xDistance = Math.abs(powerUp.center[0] - game.bar.center[0]) - powerUp.dimensions[0];;
+		var yDistance = Math.abs(powerUp.center[1] - game.bar.center[1]) - powerUp.dimensions[1];;
 		
-		if (xDistance < powerUp.dimensions[0] + game.bar.dimensions[0] &&
-			(powerUp.center[1] > game.bar.center[1] - game.bar.dimensions[1] && powerUp.center[1] < game.bar.center[1] + game.bar.dimensions[1]) ||
-			yDistance <= (powerUp.dimensions[1] + game.bar.dimensions[1]) && powerUp.center[1] >= game.bar.center[1] + game.bar.dimensions[1])
-		{
-			game.POWERUPS[powerUp.powerUpType].apply();
-			//TODO: APPLY THE EFFECTS OF THE POWER-UP TO THE GAME
-			// MAKING THEM LAST A PRECISE AMOUNT OF TIME ACCORDING TO A SET TIMER
-			
-			console.log("You grabbed an upgrade " + powerUp.powerUpType);
-			return true;
+		if (yDistance <= game.bar.dimensions[1]){
+			// it may be a collision
+			if(xDistance <= game.bar.dimensions[0]){
+				game.POWERUPS[powerUp.powerUpType].apply();
+				console.log("You grabbed an upgrade " + powerUp.powerUpType);
+				return true;
+			}
 		}
-		
-		else {
-			return false;
-		}
+		return false;
 	}
 	
 	//function to add a power-up to the list of power-up to be renderized
@@ -513,7 +503,10 @@ class Arkanoid {
 			"color": [1, 0.749019608, 0, 1],
 			"effect":"Bigger bar",
 			apply: function(){
+				var newDimension = 0.4
+				if (!(game.bar.center[0] > -1 + newDimension)) game.bar.center[0] = -1 + newDimension;
 				game.bar.dimensions[0] = 0.4
+				game.updateSpigoliObject(game.bar);
 			},
 			texture: {
 				texture:setup.textures.enlarge,
@@ -538,8 +531,8 @@ class Arkanoid {
 				game.velocityBall = 0.03
 			},
 			texture: {
-				texture:setup.textures.restrict,
-				sampler:setup.samplers.nearest,
+				texture: setup.textures.fast,
+				sampler: setup.samplers.nearest,
 			}
 		},
 		"4": {
@@ -549,8 +542,8 @@ class Arkanoid {
 				game.velocityBall = 0.02
 			},
 			texture: {
-				texture:setup.textures.restrict,
-				sampler:setup.samplers.nearest,
+				texture: setup.textures.slow,
+				sampler: setup.samplers.nearest,
 			}
 		}
 	};
