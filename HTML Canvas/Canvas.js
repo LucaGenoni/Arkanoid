@@ -53,8 +53,32 @@ $(document).ready(function(){
         document.getElementById('life-2').style.display = "inline-block";
         document.getElementById('life-3').style.display = "inline-block";
         
+        map2 = [
+            [0,0,0,0,0,0,0,0,0,0,0,0,0,],
+            [0,0,0,0,0,2,2,2,0,0,0,0,0,],
+            [0,0,0,0,0,0,0,2,2,0,0,0,0,],
+            [0,0,0,0,0,2,2,2,2,2,0,3,0,],
+            [0,0,0,0,2,0,2,2,4,2,3,0,0,],
+            [0,0,0,0,2,0,2,2,2,2,0,0,0,],
+            [0,0,0,0,0,0,2,2,2,2,0,0,0,],
+            [0,0,0,0,2,0,2,2,2,2,0,0,0,],
+            [0,0,0,0,2,0,2,2,4,2,3,0,0,],
+            [0,0,0,0,0,2,2,2,2,2,0,3,0,],
+            [0,0,0,0,0,0,0,2,2,0,0,0,0,],
+            [0,0,0,0,0,2,2,2,0,0,0,0,0,],
+            [0,0,0,0,0,0,0,0,0,0,0,0,0,],
+        ];
+        map3 = []
+        map2.forEach(e => {
+            var column = []
+            for (let i = 0; i < e.length; i++) {
+                const num = e[i];
+                column.push(num,num);
+            }
+            map3.push(column)
+        });
         //then, the game
-        game = new Arkanoid(map);
+        game = new Arkanoid(map3);
         game.play();
     });
 });
