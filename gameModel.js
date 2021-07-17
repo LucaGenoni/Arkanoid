@@ -50,7 +50,8 @@ class Arkanoid {
 				case 0:
 					name = "sponda SX";
 					coordinate = [-1, 0, 0];
-					dimensions = [0, 1, .1];
+					dimensions = [0, 1, .6];
+				
 					uv = [
 						//back face
 							[0,0],	[0,1],	[1,1],
@@ -75,12 +76,12 @@ class Arkanoid {
 				case 1:
 					name = "sponda TOP";
 					coordinate = [0, 1, 0];
-					dimensions = [1, 0, .1];
+					dimensions = [1, 0, .6];
 					break;
 				case 2:
 					name = "sponda DX";
 					coordinate = [1, 0, 0];
-					dimensions = [0, 1, .1];
+					dimensions = [0, 1, .6];
 					break;
 				default:
 					break;
@@ -190,7 +191,7 @@ class Arkanoid {
 							utils.MakeScaleNuMatrix( dimensions[0], dimensions[1], dimensions[2])
 						)
 					}
-					newObj = setup.newObject("Block " + this.block.length, coordinate, dimensions, uniform, setup.shaders.justColor, setup.geometries.cube );
+					newObj = setup.newObject("Block " + this.block.length, coordinate, dimensions, uniform, setup.shaders.testLight, setup.geometries.cube );
 					newObj.localMatrix = utils.multiplyMatrices(
 						utils.MakeTranslateMatrix(coordinate[0], coordinate[1], 0),
 						utils.MakeScaleNuMatrix(dimensions[0], dimensions[1], dimensions[2])
@@ -428,10 +429,11 @@ class Arkanoid {
 				utils.MakeTranslateMatrix(game.ball.center[0], game.ball.center[1], 0),
 				utils.MakeScaleMatrix(game.ball.radius)
 			)));
-		game.bar.uniforms.u_colorLight = [1,0,0,1]
+		game.bar.uniforms = {...game.bar.uniforms,...setup.globalsLight}
 		game.bar.uniforms.u_matrix = utils.transposeMatrix(utils.multiplyMatrices( VP, game.bar.uniforms.u_world()));
 		
 		game.block.forEach(e => {
+			e.uniforms = {...e.uniforms,...setup.globalsLight}
 			e.uniforms.u_matrix = utils.transposeMatrix(utils.multiplyMatrices(VP, e.uniforms.u_world))
 		});
 		
