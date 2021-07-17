@@ -123,7 +123,7 @@ class Arkanoid {
 		}
 
 		// CREATE BALL
-		dimensions = 0.05;
+		dimensions = 0.025;
 		coordinate = [0.0, this.bar.center[1] + dimensions + this.bar.dimensions[1]];
 		uniform = {
 			u_color: [1, 1, 1, 1],
@@ -327,8 +327,8 @@ class Arkanoid {
 					game.ball.direction = [Math.cos(game.ballAngle), Math.sin(game.ballAngle), 0];
 				}
 				// update position of the ball
-				game.ball.center[0] = game.ball.center[0] + game.ball.direction[0] * game.velocityBall;
-				game.ball.center[1] = game.ball.center[1] + game.ball.direction[1] * game.velocityBall;
+				game.ball.next0 = game.ball.center[0] + game.ball.direction[0] * game.velocityBall;
+				game.ball.next1 = game.ball.center[1] + game.ball.direction[1] * game.velocityBall;
 				
 				//update position of each rendered power-up and check collisions
 				for (let i = 0; i < game.powerup.length; i++){
@@ -338,7 +338,7 @@ class Arkanoid {
 				}
 
 				// check lost condition
-				if (game.ball.center[1] < -1 - game.ball.radius) {
+				if (game.ball.next1 < -1 - game.ball.radius) {
 					game.handleLifeLoss();
 					return;
 				}
@@ -365,9 +365,8 @@ class Arkanoid {
 						game.updateScore();
 					}
 				}
-					
-				space._w = gl.canvas.clientWidth;
-				space._h = gl.canvas.clientHeight;
+				game.ball.center[0] = game.ball.next0;
+				game.ball.center[1] = game.ball.next1;
 				var VP = utils.multiplyMatrices(space.getPerspective(), space.getView());
 				game.drawGame(VP);
 				break;
@@ -392,28 +391,31 @@ class Arkanoid {
 	}
 	
 	collision(obj) {
-		var xaxis = Math.abs(game.ball.center[0] - obj.center[0]) - obj.dimensions[0];
-		var yaxis = Math.abs(game.ball.center[1] - obj.center[1]) - obj.dimensions[1];
+		var xaxis = Math.abs(game.ball.next0 - obj.center[0]) - obj.dimensions[0];
+		var yaxis = Math.abs(game.ball.next1 - obj.center[1]) - obj.dimensions[1];
 
 		if (xaxis <= game.ball.radius && yaxis <= game.ball.radius) {
 			// collision detected
-			var x = Math.max(obj.min[0], Math.min(game.ball.center[0], obj.max[0]));
-			var y = Math.max(obj.min[1], Math.min(game.ball.center[1], obj.max[1]));
+			var x = Math.max(obj.min[0], Math.min(game.ball.next0, obj.max[0]));
+			var y = Math.max(obj.min[1], Math.min(game.ball.next1, obj.max[1]));
 			// var z = Math.max(box.minZ, Math.min(sphere.z, box.maxZ));
 			// distance between the closes point to the center of the sphere
 			// var distance = Math.sqrt((x - sphere.x) **2 + (y - sphere.y) **2 + (z - sphere.z) **2);
-			var distance = Math.sqrt((x - game.ball.center[0]) ** 2 + (y - game.ball.center[1]) ** 2);
+			var distance = Math.sqrt((x - game.ball.next0) ** 2 + (y - game.ball.next1) ** 2);
 			if (distance <= game.ball.radius) {
 				console.log("collision with", obj.name);
-				var bounce = normalizeVector([x - game.ball.center[0], y - game.ball.center[1], 0]);
-				game.ball.center[0] = game.ball.center[0] - game.ball.direction[0] * game.velocityBall;
-				game.ball.center[1] = game.ball.center[1] - game.ball.direction[1] * game.velocityBall;
+				// errore su bounce
+				var bounce = normalizeVector([x - game.ball.next0, y - game.ball.next1, 0]);
+				var scal = dotProductVector(bounce, bounce);
+				scal = isNaN(scal) ? 1:scal;
+				console.log("before",game.ball.direction,"-",bounce);
 				game.ball.direction = normalizeVector(
 					subVector(game.ball.direction,
-						scalarVector(2 * dotProductVector(bounce, game.ball.direction) / dotProductVector(bounce, bounce),
-							bounce)));
-				game.ball.center[0] = game.ball.center[0] + 2 * game.ball.direction[0] * game.velocityBall;
-				game.ball.center[1] = game.ball.center[1] + 2 * game.ball.direction[1] * game.velocityBall;
+						scalarVector(2 * dotProductVector(bounce, game.ball.direction) / scal, bounce)));
+				
+				console.log("after",game.ball.direction,"-",bounce);
+				game.ball.next0 = game.ball.center[0] + game.ball.direction[0] * game.velocityBall;
+				game.ball.next1 = game.ball.center[1] + game.ball.direction[1] * game.velocityBall;
 				return 1;
 			}
 		}
