@@ -37,81 +37,88 @@ class Arkanoid {
 					utils.MakeScaleNuMatrix(game.bar.dimensions[0], game.bar.dimensions[1], game.bar.dimensions[2])
 				)
 			}
-		}
+		};
 		newObj = setup.newObject("Bar",coordinate,dimensions,uniform, setup.shaders.testLight, setup.geometries.cube );
 		
 		this.bar = newObj;
 		// CREATE EDGES
 		this.sponde = [];
 		for (x = 0; x < 3; x++) {
-			geometry = setup.geometries.cube
-			uv = []
+			geometry = setup.geometries.barrier;
 			switch (x) {
 				case 0:
-					name = "sponda SX";
+					name = "LEFT Barrier";
 					coordinate = [-1, 0, 0];
-					dimensions = [0, 1, .6];
-				
-					uv = [
-						//back face
-							[0,0],	[0,1],	[1,1],
-							[1,1],[1,0],[0,0],
-						//front face	
-							[0,1],	[1,0],	[0,0],
-							[1,0],	[0,1],	[1,1],	
-						//dx face
-							[1,1],	[0,1],	[1,0],
-							[0,1],	[0,0],	[1,0],
-						//sx face
-							[0,1],	[0,0],	[0,1],
-							[0,1], 	[0,0],	[0,0],
-						//top face
-							[0,1],	[1,0],	[1,1],
-							[0,0],	[1,0],	[0,1],
-						//bottom face
-							[0,0],	[1,0],	[1,1],
-							[0,1],	[0,0],	[1,1]	
-					]
+					dimensions = [1, 0.01, 0.5];
+
+					//uniforms for LEFT Barrier
+					uniform = {
+						u_color: colors[Math.floor(Math.random() * colors.length)],
+						u_world: utils.multiplyMatrices(
+							utils.MakeTranslateMatrix(coordinate[0], coordinate[1], 0),
+							utils.multiplyMatrices(utils.MakeRotateZMatrix(90),
+								utils.MakeScaleNuMatrix(dimensions[0], dimensions[1], dimensions[2]))
+						),
+						u_colorTex: {
+							texture: setup.textures.sponde,
+							sampler: setup.samplers.nearest,
+						}
+					};
+					// create barriers
+					dimensions = [0.01, 1, 0.5]; //updated dimensions after the transformations
+					newObj = setup.newObject(name,coordinate,dimensions,uniform, setup.shaders.justTexture, geometry );
+					newObj.localMatrix = uniform.u_world;
 					break;
 				case 1:
-					name = "sponda TOP";
+					name = "TOP Barrier";
 					coordinate = [0, 1, 0];
-					dimensions = [1, 0, .6];
+					dimensions = [1, 0.01, 0.5];
+					
+					//uniforms for TOP Barrier 
+					uniform = {
+						u_color: colors[Math.floor(Math.random() * colors.length)],
+						u_world: utils.multiplyMatrices(
+							utils.MakeTranslateMatrix(coordinate[0], coordinate[1], 0),
+							utils.MakeScaleNuMatrix(dimensions[0], dimensions[1], dimensions[2])
+						),
+						u_colorTex: {
+							texture: setup.textures.sponde,
+							sampler: setup.samplers.nearest,
+						}
+					};
+					// create barriers
+					newObj = setup.newObject(name,coordinate,dimensions,uniform, setup.shaders.justTexture, geometry );
+					newObj.localMatrix = utils.multiplyMatrices(
+						utils.MakeTranslateMatrix(coordinate[0], coordinate[1], 0),
+						utils.MakeScaleNuMatrix(dimensions[0], dimensions[1], dimensions[2])
+					);
 					break;
 				case 2:
-					name = "sponda DX";
+					name = "RIGHT Barrier";
 					coordinate = [1, 0, 0];
-					dimensions = [0, 1, .6];
+					dimensions = [1, 0.01, 0.5];
+					
+					//uniforms for RIGHT Barrier
+					uniform = {
+						u_color: colors[Math.floor(Math.random() * colors.length)],
+						u_world: utils.multiplyMatrices(
+							utils.MakeTranslateMatrix(coordinate[0], coordinate[1], 0),
+							utils.multiplyMatrices(utils.MakeRotateZMatrix(-90),
+								utils.MakeScaleNuMatrix(dimensions[0], dimensions[1], dimensions[2]))
+						),
+						u_colorTex: {
+							texture: setup.textures.sponde,
+							sampler: setup.samplers.nearest,
+						}
+					};
+					// create barriers
+					dimensions = [0.01, 1, 0.5]; //updated dimensions after the transformations
+					newObj = setup.newObject(name,coordinate,dimensions,uniform, setup.shaders.justTexture, geometry );
+					newObj.localMatrix = uniform.u_world;
 					break;
 				default:
 					break;
 			}
-			if (uv.length>0){
-				geometry.texcoord = []
-				uv.forEach(element => {				
-					for (let i = 0; i < element.length; i++) {
-						const el = element[i];
-						geometry.texcoord.push(el)
-					}
-				});
-			}
-			uniform = {
-				u_color: colors[Math.floor(Math.random() * colors.length)],
-				u_world: utils.multiplyMatrices(
-					utils.MakeTranslateMatrix(coordinate[0], coordinate[1], 0),
-					utils.MakeScaleNuMatrix(dimensions[0], dimensions[1], dimensions[2])
-				),
-				u_colorTex: { 
-					texture: setup.textures.sponde,
-					sampler: setup.samplers.nearest,
-				}
-			}
-			// create sponda
-			newObj = setup.newObject(name,coordinate,dimensions,uniform, setup.shaders.justTexture, geometry );
-			newObj.localMatrix = utils.multiplyMatrices(
-				utils.MakeTranslateMatrix(coordinate[0], coordinate[1], 0),
-				utils.MakeScaleNuMatrix(dimensions[0], dimensions[1], dimensions[2])
-			)
 			this.sponde.push(newObj);
 		}
 
@@ -126,11 +133,11 @@ class Arkanoid {
 					utils.MakeScaleMatrix(game.ball.dimensions)
 				)
 			},
-		}
+		};
 		newObj = setup.newObject("Ball",coordinate,dimensions,uniform, setup.shaders.justColor, setup.geometries.sphere );
 		newObj.radius = dimensions;
-		newObj.direction = [Math.cos(utils.degToRad(this.ballAngle)), Math.sin(utils.degToRad(this.ballAngle)), 0],
-		this.ball = newObj
+		newObj.direction = [Math.cos(utils.degToRad(this.ballAngle)), Math.sin(utils.degToRad(this.ballAngle)), 0];
+		this.ball = newObj;
 
 
 		// CREATE ARROW
@@ -146,7 +153,7 @@ class Arkanoid {
 					utils.MakeScaleNuMatrix(this.dimensions[0], this.dimensions[1], this.dimensions[2])
 				)
 			},
-		}
+		};
 		newObj = setup.newObject("Arrow",function () { return game.ball.center;},dimensions,uniform, setup.shaders.justColor, setup.geometries.sphere );
 		newObj.updateLocal = function () {
 			this.localMatrix = utils.multiplyMatrices(utils.multiplyMatrices(utils.multiplyMatrices(
@@ -155,14 +162,14 @@ class Arkanoid {
 				utils.MakeTranslateMatrix(this.dimensions[0], this.dimensions[1], 0)),
 				utils.MakeScaleNuMatrix(this.dimensions[0], this.dimensions[1], this.dimensions[2])
 			)
-		}
+		};
 		newObj.localMatrix = utils.multiplyMatrices(utils.multiplyMatrices(utils.multiplyMatrices(
 			utils.MakeTranslateMatrix(this.ball.center[0], this.ball.center[1], 0),
 			utils.MakeRotateZMatrix(this.ballAngle)),
 			utils.MakeTranslateMatrix(dimensions[0], dimensions[1], 0)),
 			utils.MakeScaleNuMatrix(dimensions[0], dimensions[1], dimensions[2])
-		)
-		this.arrow = newObj
+		);
+		this.arrow = newObj;
 
 
 		// CREATE BLOCKS (AND INITIALIZE POWERUPS LIST)
@@ -174,7 +181,7 @@ class Arkanoid {
 		for (var x = 0; x < mapBlocks.length; x++) {
 			for (var y = 0; y < mapBlocks[x].length; y++) {
 				var typeBlock = mapBlocks[x][y];
-				if (typeBlock != 0) { //to add different typeblock make more cases with 1,2,3 block
+				if (typeBlock !== 0) { //to add different typeblock make more cases with 1,2,3 block
 					var signleColor = Math.floor(Math.random() * colors.length);
 					coordinate = [(2 * x - mapBlocks.length + 1) / mapBlocks.length, (2 * y - mapBlocks[x].length + 1) / mapBlocks[x].length, 0];
 					dimensions = [1 / mapBlocks.length, 1 / mapBlocks[x].length, 0.1];
@@ -190,7 +197,7 @@ class Arkanoid {
 							utils.MakeTranslateMatrix(coordinate[0], coordinate[1], 0),
 							utils.MakeScaleNuMatrix( dimensions[0], dimensions[1], dimensions[2])
 						)
-					}
+					};
 					newObj = setup.newObject("Block " + this.block.length, coordinate, dimensions, uniform, setup.shaders.testLight, setup.geometries.cube );
 					newObj.localMatrix = utils.multiplyMatrices(
 						utils.MakeTranslateMatrix(coordinate[0], coordinate[1], 0),
@@ -222,7 +229,7 @@ class Arkanoid {
 				var tempChange = this.bar.center[0] - this.velocityBar;
 				if (tempChange > -1 + this.bar.dimensions[0]) this.bar.center[0] = tempChange;
 				else this.bar.center[0] = -1 + this.bar.dimensions[0];
-				if (this.state == "Starting") {
+				if (this.state === "Starting") {
 					this.ball.center[0] = this.bar.center[0];
 					this.arrow.updateLocal();
 				}
@@ -233,7 +240,7 @@ class Arkanoid {
 				var tempChange = this.bar.center[0] + this.velocityBar;
 				if (tempChange < 1 - this.bar.dimensions[0]) this.bar.center[0] = tempChange;
 				else this.bar.center[0] = 1 - this.bar.dimensions[0];
-				if (this.state == "Starting") {
+				if (this.state === "Starting") {
 					this.ball.center[0] = this.bar.center[0];
 					this.arrow.updateLocal();
 				}
@@ -242,31 +249,40 @@ class Arkanoid {
 			// starting direction ball + counter-clockwise, - clockwise
 			case "ArrowUp":
 			case "KeyW":
-				if (this.state == "Starting") {
-					this.ballAngle++;
+				if (this.state === "Starting") {
+					if (this.ballAngle < 160){
+						this.ballAngle++;
+					}
+					else {
+						this.ballAngle = 160;
+					}
 					this.arrow.updateLocal();
 				}
 				return;
 			case "KeyS":
 			case "ArrowDown":
-				if (this.state == "Starting") {
-					this.ballAngle--;
+				if (this.state === "Starting") {
+					if (this.ballAngle > 20){
+						this.ballAngle--;
+					}
+					else {
+						this.ballAngle = 20;
+					}
 					this.arrow.updateLocal();
 				}
 				return;
 			// start game
 			case "Space":
-				if (this.state == "Starting") {
+				if (this.state === "Starting") {
 					this.ball.direction = [Math.cos(utils.degToRad(this.ballAngle)), Math.sin(utils.degToRad(this.ballAngle)), 0];
 					this.changeState("Playing")
 				}
 				return;
 		}
-		return;
 	}
 
 	changeState(newState) {
-		if (newState == "Pause" && this.state == "Pause") return;
+		if (newState === "Pause" && this.state === "Pause") return;
 		this.previousState = this.state;
 		this.state = newState;
 	}
@@ -282,7 +298,7 @@ class Arkanoid {
 			case "Starting":
 				var VP = utils.multiplyMatrices(space.getPerspective(), space.getView())
 				game.arrow.uniforms.u_matrix = utils.transposeMatrix(utils.multiplyMatrices(
-					VP, game.arrow.localMatrix))
+					VP, game.arrow.localMatrix));
 				game.drawSingleObject(game.arrow);
 				game.drawGame(VP);
 				break;
@@ -336,7 +352,7 @@ class Arkanoid {
 					
 				space._w = gl.canvas.clientWidth;
 				space._h = gl.canvas.clientHeight;
-				var VP = utils.multiplyMatrices(space.getPerspective(), space.getView())
+				var VP = utils.multiplyMatrices(space.getPerspective(), space.getView());
 				game.drawGame(VP);
 				break;
 			default:
@@ -365,7 +381,6 @@ class Arkanoid {
 
 		if (xaxis <= game.ball.radius && yaxis <= game.ball.radius) {
 			// collision detected
-
 			var x = Math.max(obj.min[0], Math.min(game.ball.center[0], obj.max[0]));
 			var y = Math.max(obj.min[1], Math.min(game.ball.center[1], obj.max[1]));
 			// var z = Math.max(box.minZ, Math.min(sphere.z, box.maxZ));
@@ -429,11 +444,11 @@ class Arkanoid {
 				utils.MakeTranslateMatrix(game.ball.center[0], game.ball.center[1], 0),
 				utils.MakeScaleMatrix(game.ball.radius)
 			)));
-		game.bar.uniforms = {...game.bar.uniforms,...setup.globalsLight}
+		game.bar.uniforms = {...game.bar.uniforms,...setup.globalsLight};
 		game.bar.uniforms.u_matrix = utils.transposeMatrix(utils.multiplyMatrices( VP, game.bar.uniforms.u_world()));
 		
 		game.block.forEach(e => {
-			e.uniforms = {...e.uniforms,...setup.globalsLight}
+			e.uniforms = {...e.uniforms,...setup.globalsLight};
 			e.uniforms.u_matrix = utils.transposeMatrix(utils.multiplyMatrices(VP, e.uniforms.u_world))
 		});
 		
