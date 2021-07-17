@@ -65,7 +65,7 @@ class Arkanoid {
 						}
 					};
 					// create barriers
-					dimensions = [0.01, 1, 0.5]; //updated dimensions after the transformations
+					dimensions = [dimensions[1], dimensions[0], dimensions[2]]; //updated dimensions after the transformations
 					newObj = setup.newObject(name,coordinate,dimensions,uniform, setup.shaders.justTexture, geometry );
 					newObj.localMatrix = uniform.u_world;
 					break;
@@ -112,7 +112,7 @@ class Arkanoid {
 						}
 					};
 					// create barriers
-					dimensions = [0.01, 1, 0.5]; //updated dimensions after the transformations
+					dimensions = [dimensions[1], dimensions[0], dimensions[2]]; //updated dimensions after the transformations
 					newObj = setup.newObject(name,coordinate,dimensions,uniform, setup.shaders.justTexture, geometry );
 					newObj.localMatrix = uniform.u_world;
 					break;
@@ -312,7 +312,7 @@ class Arkanoid {
 		//this function must work with globals   
 		switch (game.state) {
 			case "Starting":
-				var VP = utils.multiplyMatrices(space.getPerspective(), space.getView())
+				var VP = utils.multiplyMatrices(space.getPerspective(), space.getView());
 				game.arrow.uniforms.u_matrix = utils.transposeMatrix(utils.multiplyMatrices(
 					VP, game.arrow.localMatrix));
 				game.drawSingleObject(game.arrow);
