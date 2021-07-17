@@ -182,7 +182,23 @@ class Arkanoid {
 			for (var y = 0; y < mapBlocks[x].length; y++) {
 				var typeBlock = mapBlocks[x][y];
 				if (typeBlock !== 0) { //to add different typeblock make more cases with 1,2,3 block
-					var signleColor = Math.floor(Math.random() * colors.length);
+					var color;
+					switch (typeBlock) {
+						case 1:
+							color = colors[Math.floor(Math.random() * colors.length)];
+							break;
+						case 2:
+							color = RgbTo01([176, 176, 176, 255]);
+							break;
+						case 3:
+							color = RgbTo01([229, 232, 37, 255]);
+							break;
+						case 4:
+							color = RgbTo01([240, 19, 19, 255]);
+							break;
+						default:
+							break;
+					}
 					coordinate = [(2 * x - mapBlocks.length + 1) / mapBlocks.length, (2 * y - mapBlocks[x].length + 1) / mapBlocks[x].length, 0];
 					dimensions = [1 / mapBlocks.length, 1 / mapBlocks[x].length, 0.1];
 					power = false;
@@ -192,7 +208,7 @@ class Arkanoid {
 					}
 					// create block
 					uniform = {
-						u_color: colors[signleColor],
+						u_color: color,
 						u_world: utils.multiplyMatrices(
 							utils.MakeTranslateMatrix(coordinate[0], coordinate[1], 0),
 							utils.MakeScaleNuMatrix( dimensions[0], dimensions[1], dimensions[2])
