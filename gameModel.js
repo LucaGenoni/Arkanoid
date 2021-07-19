@@ -33,11 +33,15 @@ class Arkanoid {
 			u_color: [185 / 255, 122 / 255, 87 / 255, 1],
 			u_world: [],
 			u_diffuseTexture: {
-				texture: setup.textures.bar_and_blocks,
+				texture: setup.textures.diffuseBar,
+				sampler: setup.samplers.nearest,
+			},
+			u_normalTexture: {
+				texture: setup.textures.normalBar,
 				sampler: setup.samplers.nearest,
 			}
 		};
-		newObj = setup.newObject("Bar",coordinate,dimensions,uniform, setup.shaders.lightTexture, setup.geometries.bar);
+		newObj = setup.newObject("Bar",coordinate,dimensions,uniform, setup.shaders.lightTextureNormal, setup.geometries.cube);
 		newObj.move = 0;
 		newObj.updateLocal = function () {
 			this.uniforms.u_world = utils.multiplyMatrices(
@@ -474,6 +478,7 @@ class Arkanoid {
 			const e = game.sponde[i];
 			this.drawSingleObject(VP,e)
 		}
+		game.bar.uniforms.c_eyePos = space._pos_cam;
 		game.drawSingleObject(VP,game.bar);
 		game.drawSingleObject(VP,game.ball);
 		twgl.drawObjectList(gl, game.block);
