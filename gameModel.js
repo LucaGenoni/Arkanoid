@@ -10,7 +10,7 @@ class Arkanoid {
 		this.score = 0;
 		this.lives = 3;
 		this.pity = 0;
-		
+		this.collisionsCounter = 0;
 		this.gameStart = Date.now() / 1000;
 		this.gameEnd = 0;
 
@@ -39,7 +39,7 @@ class Arkanoid {
 			}
 		};
 		newObj = setup.newObject("Bar",coordinate,dimensions,uniform, setup.shaders.testLight, setup.geometries.cube );
-		
+		newObj.move = 0;
 		this.bar = newObj;
 		// CREATE EDGES
 		this.sponde = [];
@@ -213,7 +213,6 @@ class Arkanoid {
 						),
 						u_diffuseTexture: setup.textures.diffuseBlocks,
 					};
-					console.log(uniform)
 					newObj = setup.newObject("Block " + this.block.length, coordinate, dimensions, uniform, setup.shaders.lightTexture, setup.geometries.cube );
 					newObj.localMatrix = utils.multiplyMatrices(
 						utils.MakeTranslateMatrix(coordinate[0], coordinate[1], 0),
@@ -234,68 +233,55 @@ class Arkanoid {
 
 
 	keyDown(e) {
-		switch (e.code) {
-			// starting position bar to right
+        switch (e.code) {
 			case "Escape":
-				this.changeState("Pause");
-				return;
+				game.changeState("Pause");
+				break;
 			// position bar 
 			case "ArrowLeft":
 			case "KeyA":
-				var tempChange = this.bar.center[0] - this.velocityBar;
-				if (tempChange > -1 + this.bar.dimensions[0]) this.bar.center[0] = tempChange;
-				else this.bar.center[0] = -1 + this.bar.dimensions[0];
-				if (this.state === "Starting") {
-					this.ball.center[0] = this.bar.center[0];
-					this.arrow.updateLocal();
-				}
-				this.updateSpigoliObject(this.bar);
-				return;
+				game.bar.move = -1;
+				break;
 			case "KeyD":
 			case "ArrowRight":
-				var tempChange = this.bar.center[0] + this.velocityBar;
-				if (tempChange < 1 - this.bar.dimensions[0]) this.bar.center[0] = tempChange;
-				else this.bar.center[0] = 1 - this.bar.dimensions[0];
-				if (this.state === "Starting") {
-					this.ball.center[0] = this.bar.center[0];
-					this.arrow.updateLocal();
-				}
-				this.updateSpigoliObject(this.bar);
-				return;
+				game.bar.move = +1;
+				break;
 			// starting direction ball + counter-clockwise, - clockwise
 			case "ArrowUp":
 			case "KeyW":
-				if (this.state === "Starting") {
-					if (this.ballAngle < 160){
-						this.ballAngle++;
-					}
-					else {
-						this.ballAngle = 160;
-					}
-					this.arrow.updateLocal();
-				}
-				return;
+				game.arrow.move = +1;
+				break;
 			case "KeyS":
 			case "ArrowDown":
-				if (this.state === "Starting") {
-					if (this.ballAngle > 20){
-						this.ballAngle--;
-					}
-					else {
-						this.ballAngle = 20;
-					}
-					this.arrow.updateLocal();
-				}
-				return;
+				game.arrow.move = -1;
+				break;
 			// start game
 			case "Space":
-				if (this.state === "Starting") {
-					this.ball.direction = [Math.cos(utils.degToRad(this.ballAngle)), Math.sin(utils.degToRad(this.ballAngle)), 0];
-					this.changeState("Playing")
+				if (game.state === "Starting") {
+					game.ball.direction = normalizeVector([Math.cos(utils.degToRad(game.ballAngle)), Math.sin(utils.degToRad(game.ballAngle)), 0]);
+					game.changeState("Playing")
 				}
-				return;
-		}
+				break;
+        }
 	}
+    keyUp(e) {
+		switch (e.code) {
+			// position bar 
+			case "ArrowLeft":
+			case "KeyA":
+			case "KeyD":
+			case "ArrowRight":
+				this.bar.move = 0;
+				break;
+			case "ArrowUp":
+            case "KeyW":
+            case "KeyS":
+            case "ArrowDown":
+                this.arrow.move = 0;
+			default:
+				break;
+        }
+    }
 
 	changeState(newState) {
 		if (newState === "Pause" && this.state === "Pause") return;
@@ -312,7 +298,21 @@ class Arkanoid {
 		//this function must work with globals   
 		switch (game.state) {
 			case "Starting":
-				
+				// update position of the bar
+				if (game.bar.move!=0){
+					var tempChange = game.bar.center[0] + game.bar.move * game.velocityBar;
+					if (tempChange <= -1 + game.bar.dimensions[0]) tempChange = -1 + game.bar.dimensions[0];
+					if (tempChange >= 1 - game.bar.dimensions[0]) tempChange = 1 - game.bar.dimensions[0];
+					game.bar.center[0] = tempChange;
+					game.updateSpigoliObject(game.bar);
+					game.ball.center[0] = game.bar.center[0];
+					game.arrow.updateLocal();
+				}
+				if (game.arrow.move!=0){
+					var tempChange = game.ballAngle + game.arrow.move;
+					if (20<tempChange && tempChange<160) game.ballAngle = tempChange;
+					game.arrow.updateLocal();
+				}
 				var VP = space.getVP();
 				game.arrow.uniforms.u_matrix = utils.transposeMatrix(utils.multiplyMatrices(
 					VP, game.arrow.localMatrix));
@@ -320,13 +320,26 @@ class Arkanoid {
 				game.drawGame(VP);
 				break;
 			case "Playing":
-				var angle = Math.acos(game.ball.direction[0]);
-				var correction = 0.03;
-				if (Math.abs(angle - 1.570796326794896) < correction) {
-					console.log(angle);
-					game.ballAngle = angle + correction - 2 * correction * (angle < 1.57079);
-					game.ball.direction = [Math.cos(game.ballAngle), Math.sin(game.ballAngle), 0];
+				// update position of the bar
+				if (game.bar.move!=0){
+					var tempChange = game.bar.center[0] + game.bar.move * game.velocityBar;
+					if (tempChange <= -1 + game.bar.dimensions[0]) tempChange = -1 + game.bar.dimensions[0];
+					if (tempChange >= 1 - game.bar.dimensions[0]) tempChange = 1 - game.bar.dimensions[0];
+					game.bar.center[0] = tempChange;
+					game.updateSpigoliObject(game.bar);
 				}
+
+				if(game.collisionsCounter>1){
+					var angle = Math.acos(game.ball.direction[0]);
+					var correction = 0.04;
+					if (Math.abs(angle - Math.PI/2) < correction || angle<correction || angle>Math.PI-correction) {
+						console.log("correction",angle);
+						game.ballAngle = angle + correction - (Math.random()>0.5? correction*2:0);
+						game.ball.direction = normalizeVector([Math.cos(game.ballAngle), Math.sin(game.ballAngle), 0]);
+						game.collisionsCounter=0
+					}
+				} 
+
 				// update position of the ball
 				var ball0 = game.ball.center[0] + game.ball.direction[0] * game.velocityBall;
 				var ball1 = game.ball.center[1] + game.ball.direction[1] * game.velocityBall;
@@ -345,29 +358,31 @@ class Arkanoid {
 				}
 				// collisions with objects
 				if (game.collision(ball0,ball1,game.bar) > 0) {
-					if (game.bugRecovery) {
-						console.log("FUCKING BUG");
-						game.handleLifeLoss();
-						return;
+					game.collisionsCounter += 1;
+					if (game.checkMultipleCollisions) {
+						console.log("multiple collsion with bar detected");
+						game.collisionsCounter -= 1;
+						if (game.ball.direction[1]<0) game.ball.direction[1] = -game.ball.direction[1];
 					}
-					game.bugRecovery = true;
-				} else game.bugRecovery = false;
-				for (let i = 0; i < game.sponde.length; i++) {
-					if (game.collision(ball0,ball1,game.sponde[i]) > 1) {
-						// TODO correction of direction depending on the type of sponda 
-					}
-				}
-				for (let i = 0; i < game.block.length; i++) {
-					if (game.collision(ball0,ball1,game.block[i]) > 0) {
-						if (game.block[i].hasPowerUp){
-							game.preparePowerUp(game.block[i].powerUpType, game.block[i].center, game.block[i].dimensions);
+					game.checkMultipleCollisions = true;
+				}else{
+					game.checkMultipleCollisions = false;
+					for (let i = 0; i < game.sponde.length; i++) game.collisionsCounter += game.collision(ball0,ball1,game.sponde[i]);
+					for (let i = 0; i < game.block.length; i++) {
+						if (game.collision(ball0,ball1,game.block[i]) > 0) {
+							game.collisionsCounter = 0;
+							if (game.block[i].hasPowerUp){
+								game.preparePowerUp(game.block[i].powerUpType, game.block[i].center, game.block[i].dimensions);
+							}
+							game.block.splice(i, 1);
+							game.updateScore();
 						}
-						game.block.splice(i, 1);
-						game.updateScore();
 					}
 				}
-				game.ball.center[0] = game.ball.center[0] + game.ball.direction[0] * game.velocityBall;;
-				game.ball.center[1] = game.ball.center[1] + game.ball.direction[1] * game.velocityBall;;
+				var increment = scalarVector(game.velocityBall,game.ball.direction);
+				
+				game.ball.center[0] = game.ball.center[0] + increment[0] ;
+				game.ball.center[1] = game.ball.center[1] + increment[1] ;
 				var VP = space.getVP();
 				game.drawGame(VP);
 				break;
