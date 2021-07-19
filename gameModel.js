@@ -312,7 +312,8 @@ class Arkanoid {
 		//this function must work with globals   
 		switch (game.state) {
 			case "Starting":
-				var VP = utils.multiplyMatrices(space.getPerspective(), space.getView());
+				
+				var VP = space.getVP();
 				game.arrow.uniforms.u_matrix = utils.transposeMatrix(utils.multiplyMatrices(
 					VP, game.arrow.localMatrix));
 				game.drawSingleObject(game.arrow);
@@ -367,7 +368,7 @@ class Arkanoid {
 				}
 				game.ball.center[0] = ball0;
 				game.ball.center[1] = ball1;
-				var VP = utils.multiplyMatrices(space.getPerspective(), space.getView());
+				var VP = space.getVP();
 				game.drawGame(VP);
 				break;
 			default:
@@ -402,12 +403,14 @@ class Arkanoid {
 			// distance between the closes point to the center of the sphere
 			// var distance = Math.sqrt((x - sphere.x) **2 + (y - sphere.y) **2 + (z - sphere.z) **2);
 			var distance = Math.sqrt((x - ball0) ** 2 + (y - ball1) ** 2);
-			if (distance < game.ball.radius && distance>0) {
-				var bounce = normalizeVector([x - ball0, y - ball1, 0]);
-				var scal = dotProductVector(bounce, bounce);
+			
+			if (distance < game.ball.radius) {
+				var bounce 
+				if (distance==0) bounce = normalizeVector([x - game.ball.center[0], y - game.ball.center[1], 0]);
+				else bounce = normalizeVector([x - ball0, y - ball1, 0]);
 				game.ball.direction = normalizeVector(
 					subVector(game.ball.direction,
-						scalarVector(2 * dotProductVector(bounce, game.ball.direction) / scal, bounce)));
+						scalarVector(2 * dotProductVector(bounce, game.ball.direction) / dotProductVector(bounce, bounce), bounce)));
 				return 1;
 			}
 		}
@@ -496,7 +499,6 @@ class Arkanoid {
 	}
 
 	willHavePowerUp() {
-		return true
 		// randomically decides to add a powerup or not to the block: subsequent negative cases result in an increase 
 		// of the pity, which increases the probability that the next block will have a powerup
 		if (Math.random() + this.pity > 0.9) {
