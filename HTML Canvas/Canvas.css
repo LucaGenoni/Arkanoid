@@ -15,6 +15,38 @@
     height: inherit;
 }
 
+#toolbox {
+    position: absolute;
+    text-align : left;
+    top: 1%;
+    left: 0.5%;
+    margin-bottom: 0;
+    z-index: 1;
+}
+
+#menu-gear {
+    position: sticky;
+    right: 0;
+    color: white;
+    font-size: 2rem;
+}
+
+#camera {
+    display: none;
+    color: white;
+    font-size: 2rem;
+}
+
+#lights {
+    display: none;
+    color: white;
+    font-size: 2rem;
+}
+
+#menu-gear:hover {
+    color: gainsboro;
+}
+
 #ui-container {
     position: absolute;
     text-align : left;
@@ -44,13 +76,12 @@
     color: ghostwhite;
 }
 
-.ui-lives > i {
-    font-size: 1.2rem;
+.ui-lives > span {
+    font-size: 1.5rem;
     color: crimson;
 }
 
 #arkanoid-canvas {
-    background-image: url(textures/scifi_texture.jpg);
     background-size: 100% 100%;
     background-color: black;
     min-width: 100%;

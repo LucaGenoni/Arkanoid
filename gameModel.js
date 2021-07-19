@@ -284,6 +284,10 @@ class Arkanoid {
 		this.previousState = this.state;
 		this.state = newState;
 	}
+	
+	pause(){
+		this.changeState("Pause");
+	}
 
 	resume() {
 		this.changeState(this.previousState);
@@ -307,7 +311,7 @@ class Arkanoid {
 				}
 				if (game.arrow.move !== 0){
 					var tempChange = game.ballAngle + game.arrow.move;
-					if (20<tempChange && tempChange<160) game.ballAngle = tempChange;
+					if (20 < tempChange && tempChange < 160) game.ballAngle = tempChange;
 					game.arrow.updateLocal();
 				}
 				var VP = space.getVP();
@@ -416,7 +420,7 @@ class Arkanoid {
 				game.ball.direction = normalizeVector(
 					subVector(game.ball.direction,
 						scalarVector(2 * dotProductVector(bounce, game.ball.direction) / dotProductVector(bounce, bounce), bounce)));
-				//if the obj it collides with is the Bar, special treatment is needed
+				//if the Ball collides with the Bar, special treatment is needed
 				if (obj.name === "Bar"){
 					//if the ball hits the right side of the bar, it will always bounce right
 					if (ball0 >= obj.center[0] ){
@@ -460,8 +464,8 @@ class Arkanoid {
 				utils.MakeScaleNuMatrix(dimensions[0], dimensions[1], dimensions[2])
 			)),
 			u_colorTex : game.POWERUPS[powerUpType].texture,
-		}
-		var newObj = setup.newObject("PowerUP "+powerUpType, blockCenter, dimensions, uniform, setup.shaders.justTexture, setup.geometries.cube );
+		};
+		var newObj = setup.newObject("PowerUP " +powerUpType, blockCenter, dimensions, uniform, setup.shaders.justTexture, setup.geometries.cube );
 		newObj.powerUpType = powerUpType;  
 		this.powerup.push(newObj);
 	}
@@ -469,8 +473,8 @@ class Arkanoid {
 	drawGame(VP) {
 
 		game.block.forEach(e => {
-			e.uniforms.u_matrix = utils.transposeMatrix(utils.multiplyMatrices(VP, e.uniforms.u_world))
-			e.uniforms.n_matrix = utils.invertMatrix(utils.transposeMatrix(e.uniforms.u_world)),
+			e.uniforms.u_matrix = utils.transposeMatrix(utils.multiplyMatrices(VP, e.uniforms.u_world));
+			e.uniforms.n_matrix = utils.invertMatrix(utils.transposeMatrix(e.uniforms.u_world));
 			e.uniforms = {...e.uniforms,...setup.globalsLight};
 		});
 		
@@ -501,7 +505,7 @@ class Arkanoid {
 	drawSingleObject(VP,item) {
 		item.updateLocal()
 		item.uniforms.u_matrix = utils.transposeMatrix(utils.multiplyMatrices( VP, item.uniforms.u_world));
-		item.uniforms.n_matrix = utils.invertMatrix(utils.transposeMatrix( item.uniforms.u_world)),
+		item.uniforms.n_matrix = utils.invertMatrix(utils.transposeMatrix( item.uniforms.u_world));
 		item.uniforms = {...item.uniforms,...setup.globalsLight};
 		gl.useProgram(item.programInfo.program);
 		twgl.setBuffersAndAttributes(gl, item.programInfo, item.bufferInfo);
@@ -544,7 +548,7 @@ class Arkanoid {
 			"color": [0.501960784, 0, 1, 1],
 			"effect":"Short bar",
 			apply: function(){
-				game.bar.dimensions[0] = 0.2
+				game.bar.dimensions[0] = 0.15;
 			},
 			texture: {
 				texture:setup.textures.restrict,
@@ -555,7 +559,7 @@ class Arkanoid {
 			"color": [1, 0, 0.501960784, 1],
 			"effect":"Speed up",
 			apply: function(){
-				game.velocityBall = 0.03
+				game.velocityBall = 0.03;
 			},
 			texture: {
 				texture: setup.textures.fast,
@@ -566,7 +570,7 @@ class Arkanoid {
 			"color": [0, 1, 0.749019608, 1],
 			"effect":"slow down",
 			apply: function(){
-				game.velocityBall = 0.02
+				game.velocityBall = 0.02;
 			},
 			texture: {
 				texture: setup.textures.slow,

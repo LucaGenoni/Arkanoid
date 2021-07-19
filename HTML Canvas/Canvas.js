@@ -8,6 +8,25 @@ $(document).ready(function(){
                 document.getElementById('menu').style.display = "block";
             }
         }
+        //"1" pressed during the gameplay: the camera parameters can be modified
+        else if (evt.key === "1"){
+            document.getElementById('camera').style.display = "inline-block";
+        }
+        //"2" pressed during the gameplay: the lights parameters can be modified
+        else if (evt.key === "2"){
+            document.getElementById('lights').style.display = "inline-block";
+        }
+        //"0" pressed during the gameplay: if camera and/or lights changes were enabled, they are disabled
+        else if (evt.key === "0" && ($("#lights").css("display") !== "none" || $("#camera").css("display") !== "none")){
+            document.getElementById('camera').style.display = "none";
+            document.getElementById('lights').style.display = "none";
+        }
+    });
+    
+    //The "gear" icon has been pressed during the gameplay: the "Menu" screen is opened
+    $("#menu-gear").click(function(){
+        document.getElementById('menu').style.display = "block";
+        game.pause();
     });
     
     //Click on "Resume": close the "Menu" screen
@@ -68,9 +87,9 @@ $(document).ready(function(){
             [0,0,0,0,0,0,0,0,0,2,2,2,0,0,0,0,0,],
             [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,],
         ];
-        map3 = []
+        map3 = [];
         map2.forEach(e => {
-            var column = []
+            var column = [];
             for (let i = 0; i < e.length; i++) {
                 const num = e[i];
                 column.push(num,num);
