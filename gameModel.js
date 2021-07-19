@@ -31,18 +31,13 @@ class Arkanoid {
 		coordinate = [0, -1, 0];
 		uniform = {
 			u_color: [185 / 255, 122 / 255, 87 / 255, 1],
-			u_world: function(){
-				return utils.multiplyMatrices(
-					utils.MakeTranslateMatrix(game.bar.center[0], game.bar.center[1], 0),
-					utils.MakeScaleNuMatrix(game.bar.dimensions[0], game.bar.dimensions[1], game.bar.dimensions[2])
-				)
-			},
-			u_colorTex: {
+			u_world: [],
+			u_diffuseTexture: {
 				texture: setup.textures.bar_and_blocks,
 				sampler: setup.samplers.nearest,
 			}
 		};
-		newObj = setup.newObject("Bar",coordinate,dimensions,uniform, setup.shaders.justTexture, setup.geometries.bar);
+		newObj = setup.newObject("Bar",coordinate,dimensions,uniform, setup.shaders.lightTexture, setup.geometries.bar);
 		newObj.move = 0;
 		newObj.updateLocal = function () {
 			this.uniforms.u_world = utils.multiplyMatrices(
