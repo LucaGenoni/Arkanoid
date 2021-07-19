@@ -11,10 +11,12 @@ $(document).ready(function(){
         //"1" pressed during the gameplay: the camera parameters can be modified
         else if (evt.key === "1"){
             document.getElementById('camera').style.display = "inline-block";
+            document.getElementById('lights').style.display = "none";
         }
         //"2" pressed during the gameplay: the lights parameters can be modified
         else if (evt.key === "2"){
             document.getElementById('lights').style.display = "inline-block";
+            document.getElementById('camera').style.display = "none";
         }
         //"0" pressed during the gameplay: if camera and/or lights changes were enabled, they are disabled
         else if (evt.key === "0" && ($("#lights").css("display") !== "none" || $("#camera").css("display") !== "none")){
@@ -32,7 +34,7 @@ $(document).ready(function(){
     //Click on "Resume": close the "Menu" screen
     $("#resume").click(function(){
         document.getElementById('menu').style.display = "none";
-        game.resume()
+        game.resume();
     });
 
     //Click on Settings while in "Menu" screen: show the "Settings" screen and hide the "Menu" one
@@ -50,6 +52,7 @@ $(document).ready(function(){
     //Click on Quit while in "Menu" screen: exit from the menu
     $("#quit-menu").click(function(){
         document.getElementById('menu').style.display = "none";
+        game.resume();
     });
     
     $(".restart-game").click(function(){
