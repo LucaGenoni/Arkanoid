@@ -27,17 +27,22 @@ class Arkanoid {
 		var dimensions, coordinate, uniform, newObj, name, uv, geometry;
 
 		// CREATE BAR
-		dimensions = [0.3, 0.025, 0.1];
+		dimensions = [0.2, 0.07, 0.05];
 		coordinate = [0, -1, 0];
 		uniform = {
 			u_color: [185 / 255, 122 / 255, 87 / 255, 1],
-			u_world: [],
-			u_diffuseTexture: {
-				texture: setup.textures.diffuseBlocks,
+			u_world: function(){
+				return utils.multiplyMatrices(
+					utils.MakeTranslateMatrix(game.bar.center[0], game.bar.center[1], 0),
+					utils.MakeScaleNuMatrix(game.bar.dimensions[0], game.bar.dimensions[1], game.bar.dimensions[2])
+				)
+			},
+			u_colorTex: {
+				texture: setup.textures.bar_and_blocks,
 				sampler: setup.samplers.nearest,
 			}
 		};
-		newObj = setup.newObject("Bar",coordinate,dimensions,uniform, setup.shaders.lightTexture, setup.geometries.cube );
+		newObj = setup.newObject("Bar",coordinate,dimensions,uniform, setup.shaders.justTexture, setup.geometries.bar);
 		newObj.move = 0;
 		newObj.updateLocal = function () {
 			this.uniforms.u_world = utils.multiplyMatrices(
@@ -46,7 +51,7 @@ class Arkanoid {
 			)
 		};
 		this.bar = newObj;
-
+		
 		// CREATE EDGES
 		this.sponde = [];
 		for (x = 0; x < 3; x++) {
@@ -222,9 +227,10 @@ class Arkanoid {
 		for (x = 0; x < this.sponde.length; x++) this.updateSpigoliObject(this.sponde[x]);
 	}
 
-
-	keyDown(e) {
-        switch (e.code) {
+	
+	 keyDown(e) {
+		switch (e.code) {
+			// starting position bar to right
 			case "Escape":
 				game.changeState("Pause");
 				break;
