@@ -27,7 +27,7 @@ class Arkanoid {
 		var dimensions, coordinate, uniform, newObj, name, uv, geometry;
 
 		// CREATE BAR
-		dimensions = [0.2, 0.07, 0.03];
+		dimensions = [0.2, 0.07, 0.05];
 		coordinate = [0, -1, 0];
 		uniform = {
 			u_color: [185 / 255, 122 / 255, 87 / 255, 1],
