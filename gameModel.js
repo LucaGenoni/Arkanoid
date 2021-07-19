@@ -291,7 +291,7 @@ class Arkanoid {
 		switch (game.state) {
 			case "Starting":
 				// update position of the bar
-				if (game.bar.move!=0){
+				if (game.bar.move !== 0){
 					var tempChange = game.bar.center[0] + game.bar.move * game.velocityBar;
 					if (tempChange <= -1 + game.bar.dimensions[0]) tempChange = -1 + game.bar.dimensions[0];
 					if (tempChange >= 1 - game.bar.dimensions[0]) tempChange = 1 - game.bar.dimensions[0];
@@ -301,7 +301,7 @@ class Arkanoid {
 					game.arrow.updateLocal();
 					
 				}
-				if (game.arrow.move!=0){
+				if (game.arrow.move !== 0){
 					var tempChange = game.ballAngle + game.arrow.move;
 					if (20<tempChange && tempChange<160) game.ballAngle = tempChange;
 					game.arrow.updateLocal();
@@ -312,7 +312,7 @@ class Arkanoid {
 				break;
 			case "Playing":
 				// update position of the bar
-				if (game.bar.move!=0){
+				if (game.bar.move !== 0){
 					var tempChange = game.bar.center[0] + game.bar.move * game.velocityBar;
 					if (tempChange <= -1 + game.bar.dimensions[0]) tempChange = -1 + game.bar.dimensions[0];
 					if (tempChange >= 1 - game.bar.dimensions[0]) tempChange = 1 - game.bar.dimensions[0];
@@ -325,7 +325,7 @@ class Arkanoid {
 					var correction = 0.04;
 					if (Math.abs(angle - Math.PI/2) < correction || angle<correction || angle>Math.PI-correction) {
 						console.log("correction",angle);
-						game.ballAngle = angle + correction - (Math.random()>0.5? correction*2:0);
+						game.ballAngle = angle + correction - (Math.random() > 0.5 ? correction*2 : 0);
 						game.ball.direction = normalizeVector([Math.cos(game.ballAngle), Math.sin(game.ballAngle), 0]);
 						game.collisionsCounter=0
 					}
@@ -356,7 +356,8 @@ class Arkanoid {
 						if (game.ball.direction[1]<0) game.ball.direction[1] = -game.ball.direction[1];
 					}
 					game.checkMultipleCollisions = true;
-				}else{
+				} 
+				else {
 					game.checkMultipleCollisions = false;
 					for (let i = 0; i < game.sponde.length; i++) game.collisionsCounter += game.collision(ball0,ball1,game.sponde[i]);
 					for (let i = 0; i < game.block.length; i++) {
@@ -405,12 +406,23 @@ class Arkanoid {
 			var distance = Math.sqrt((x - ball0) ** 2 + (y - ball1) ** 2);
 			
 			if (distance < game.ball.radius) {
-				var bounce 
-				if (distance==0) bounce = normalizeVector([x - game.ball.center[0], y - game.ball.center[1], 0]);
+				var bounce;
+				if (distance === 0) bounce = normalizeVector([x - game.ball.center[0], y - game.ball.center[1], 0]);
 				else bounce = normalizeVector([x - ball0, y - ball1, 0]);
 				game.ball.direction = normalizeVector(
 					subVector(game.ball.direction,
 						scalarVector(2 * dotProductVector(bounce, game.ball.direction) / dotProductVector(bounce, bounce), bounce)));
+				//if the obj it collides with is the Bar, special treatment is needed
+				if (obj.name === "Bar"){
+					//if the ball hits the right side of the bar, it will always bounce right
+					if (ball0 >= obj.center[0] ){
+						game.ball.direction[0] = Math.abs(game.ball.direction[0]);
+					}
+					//instead if the ball hits the left side of the bar, it will always bounce left
+					else {
+						game.ball.direction[0] = -Math.abs(game.ball.direction[0]);
+					}
+				}
 				return 1;
 			}
 		}
@@ -418,8 +430,8 @@ class Arkanoid {
 	}
 	
 	powerUpCollision(powerUp){
-		var xDistance = Math.abs(powerUp.center[0] - game.bar.center[0]) - powerUp.dimensions[0];;
-		var yDistance = Math.abs(powerUp.center[1] - game.bar.center[1]) - powerUp.dimensions[1];;
+		var xDistance = Math.abs(powerUp.center[0] - game.bar.center[0]) - powerUp.dimensions[0];
+		var yDistance = Math.abs(powerUp.center[1] - game.bar.center[1]) - powerUp.dimensions[1];
 		
 		if (yDistance <= game.bar.dimensions[1]){
 			// it may be a collision
@@ -513,9 +525,9 @@ class Arkanoid {
 			"color": [1, 0.749019608, 0, 1],
 			"effect":"Bigger bar",
 			apply: function(){
-				var newDimension = 0.4
+				var newDimension = 0.4;
 				if (!(game.bar.center[0] > -1 + newDimension)) game.bar.center[0] = -1 + newDimension;
-				game.bar.dimensions[0] = 0.4
+				game.bar.dimensions[0] = 0.4;
 				game.updateSpigoliObject(game.bar);
 			},
 			texture: {
