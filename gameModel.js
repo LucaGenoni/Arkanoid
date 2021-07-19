@@ -159,14 +159,14 @@ class Arkanoid {
 			this.localMatrix = utils.multiplyMatrices(utils.multiplyMatrices(utils.multiplyMatrices(
 				utils.MakeTranslateMatrix(game.ball.center[0], game.ball.center[1], 0),
 				utils.MakeRotateZMatrix(game.ballAngle)),
-				utils.MakeTranslateMatrix(this.dimensions[0], this.dimensions[1], 0)),
+				utils.MakeTranslateMatrix(this.dimensions[0], 0, 0)),
 				utils.MakeScaleNuMatrix(this.dimensions[0], this.dimensions[1], this.dimensions[2])
 			)
 		};
 		newObj.localMatrix = utils.multiplyMatrices(utils.multiplyMatrices(utils.multiplyMatrices(
 			utils.MakeTranslateMatrix(this.ball.center[0], this.ball.center[1], 0),
 			utils.MakeRotateZMatrix(this.ballAngle)),
-			utils.MakeTranslateMatrix(dimensions[0], dimensions[1], 0)),
+			utils.MakeTranslateMatrix(dimensions[0], 0, 0)),
 			utils.MakeScaleNuMatrix(dimensions[0], dimensions[1], dimensions[2])
 		);
 		this.arrow = newObj;
