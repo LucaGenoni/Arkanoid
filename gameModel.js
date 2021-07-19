@@ -366,8 +366,8 @@ class Arkanoid {
 						game.updateScore();
 					}
 				}
-				game.ball.center[0] = ball0;
-				game.ball.center[1] = ball1;
+				game.ball.center[0] = game.ball.center[0] + game.ball.direction[0] * game.velocityBall;;
+				game.ball.center[1] = game.ball.center[1] + game.ball.direction[1] * game.velocityBall;;
 				var VP = space.getVP();
 				game.drawGame(VP);
 				break;
