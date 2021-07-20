@@ -345,7 +345,7 @@ class Arkanoid {
 					game.updateSpigoliObject(game.bar);
 				}
 
-				if(game.collisionsCounter>1){
+				if(game.collisionsCounter > 1){
 					var angle = Math.acos(game.ball.direction[0]);
 					var correction = 0.04;
 					if (Math.abs(angle - Math.PI/2) < correction || angle<correction || angle>Math.PI-correction) {
@@ -439,13 +439,14 @@ class Arkanoid {
 						scalarVector(2 * dotProductVector(bounce, game.ball.direction) / dotProductVector(bounce, bounce), bounce)));
 				//if the Ball collides with the Bar, special treatment is needed
 				if (obj.name === "Bar"){
+					var center_dist = Math.abs(ball0 - obj.center[0]);
 					//if the ball hits the right side of the bar, it will always bounce right
 					if (ball0 >= obj.center[0] ){
-						game.ball.direction[0] = Math.abs(game.ball.direction[0]);
+						game.ball.direction[0] = Math.abs(game.ball.direction[0] + center_dist);
 					}
 					//instead if the ball hits the left side of the bar, it will always bounce left
 					else {
-						game.ball.direction[0] = -Math.abs(game.ball.direction[0]);
+						game.ball.direction[0] = -Math.abs(game.ball.direction[0] + center_dist);
 					}
 				}
 				return 1;
