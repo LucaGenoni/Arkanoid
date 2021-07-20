@@ -230,8 +230,8 @@ class Arkanoid {
 						
 					};
 					newObj = setup.newObject("Block " + this.block.length, coordinate, dimensions, uniform, setup.shaders.lightTextureNormal, setup.geometries.cube );
-					newObj.hasPowerUp = power,
-					newObj.powerUpType = Math.floor(4* Math.random()) + 1, //identifies the upgrade (possible values: 1, 2, 3, 4),
+					newObj.hasPowerUp = power;
+					newObj.powerUpType = Math.floor(4* Math.random()) + 1; //identifies the upgrade (possible values: 1, 2, 3, 4),
 					this.block.push(newObj);
 				}
 			}
@@ -434,6 +434,21 @@ class Arkanoid {
 				var bounce;
 				if (distance === 0) bounce = normalizeVector([x - game.ball.center[0], y - game.ball.center[1], 0]);
 				else bounce = normalizeVector([x - ball0, y - ball1, 0]);
+				//applying small randomization to the bounce components to avoid loops between ball and barriers, plus
+				//if/else needed to avoid any change of sign (for small values of any direction) due to the randomization 
+				if (bounce[0] >= 0){
+					bounce[0] = bounce[0] + (Math.random() * 0.03);
+				}
+				else {
+					bounce[0] = bounce[0] - (Math.random() * 0.03);
+				}
+				if (bounce[1] >= 0){
+					bounce[1] = bounce[1] + (Math.random() * 0.03);
+				}
+				else {
+					bounce[1] = bounce[1] - (Math.random() * 0.03);
+				}
+				console.log("Ball entry direction: " + game.ball.direction, "Bounce: " + bounce);
 				game.ball.direction = normalizeVector(
 					subVector(game.ball.direction,
 						scalarVector(2 * dotProductVector(bounce, game.ball.direction) / dotProductVector(bounce, bounce), bounce)));
@@ -442,13 +457,14 @@ class Arkanoid {
 					var center_dist = Math.abs(ball0 - obj.center[0]);
 					//if the ball hits the right side of the bar, it will always bounce right
 					if (ball0 >= obj.center[0] ){
-						game.ball.direction[0] = Math.abs(game.ball.direction[0] + center_dist);
+						game.ball.direction[0] = Math.abs(game.ball.direction[0]) + 1.1 * center_dist;
 					}
 					//instead if the ball hits the left side of the bar, it will always bounce left
 					else {
-						game.ball.direction[0] = -Math.abs(game.ball.direction[0] + center_dist);
+						game.ball.direction[0] = -Math.abs(game.ball.direction[0]) - 1.1 * center_dist;
 					}
 				}
+				console.log("Ball exit direction: " + game.ball.direction);
 				return 1;
 			}
 		}
@@ -523,7 +539,7 @@ class Arkanoid {
 	}
 
 	drawSingleObject(VP,item) {
-		item.updateLocal()
+		item.updateLocal();
 		item.uniforms.u_matrix = utils.transposeMatrix(utils.multiplyMatrices( VP, item.uniforms.u_world));
 		item.uniforms.n_matrix = utils.invertMatrix(utils.transposeMatrix( item.uniforms.u_world));
 		item.uniforms = {...item.uniforms,...setup.globalsLight};
