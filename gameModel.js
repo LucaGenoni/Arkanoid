@@ -7,6 +7,7 @@ class Arkanoid {
 		this.state = "Starting";
 		this.ballAngle = 90;
 
+		this.totalBlocks = 0;
 		this.score = 0;
 		this.lives = 3;
 		this.pity = 0;
@@ -236,7 +237,7 @@ class Arkanoid {
 				}
 			}
 		}
-		
+		this.totalBlocks = this.block.length;
 		// create attributes for collision detection
 		this.updateSpigoliObject(this.bar);
 		for (x = 0; x < this.block.length; x++) this.updateSpigoliObject(this.block[x]);
@@ -624,7 +625,7 @@ class Arkanoid {
 		if (this.block.length === 0) {
 			this.gameEnd = Date.now() / 1000;
 			var gameDuration = this.gameEnd - this.gameStart;
-			var finalScore = this.score + Math.round(2000 / gameDuration);
+			var finalScore = this.score + Math.round(250 * this.totalBlocks / gameDuration);
 			game.changeState("Won");
 			$("#victory-score").text("Your score: " + finalScore);
 			document.getElementById('victory-screen').style.display = "block";
