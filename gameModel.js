@@ -489,6 +489,7 @@ class Arkanoid {
 	
 	drawGame(VP) {
 		for (let i = 0; i < game.ball.center.length; i++) setup.globalsLight.l_ball_pos[i] = game.ball.center[i];
+		for (let i = 0; i < game.ball.direction.length; i++) setup.globalsLight.l_ball_dir[i] = game.ball.direction[i];
 
 		game.block.forEach(e => {
 			e.uniforms.u_matrix = utils.transposeMatrix(utils.multiplyMatrices(VP, e.uniforms.u_world));
