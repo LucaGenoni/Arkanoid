@@ -24,6 +24,16 @@ $(document).ready(function(){
             document.getElementById('lights').style.display = "none";
         }
     });
+
+    //handling the Camera Toolbox appearance / disappearance
+    $("#camera-button").click(function(){
+        if ($("#camera-toolbox").css("display") === "none"){
+            document.getElementById('camera-toolbox').style.display = "flex";
+        }
+        else {
+            document.getElementById('camera-toolbox').style.display = "none";
+        }
+    });
     
     //The "gear" icon has been pressed during the gameplay: the "Menu" screen is opened
     $("#menu-gear").click(function(){

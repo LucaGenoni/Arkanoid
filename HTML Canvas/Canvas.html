@@ -3,11 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined">
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <link rel="stylesheet" href="Canvas.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script src="./../lib/m4.js"></script>
     <script src="./../lib/twgl-full.min4.js"></script>
     <script src="./../lib/utils.js"></script>
@@ -78,6 +80,32 @@
                     <span id="life-3" class="material-icons-outlined">&#xe87d;</span>
                 </p>
             </div>
+            
+            <div id="camera-container">
+                <ul id="camera-toolbox" class="list-group">
+                    <li class="list-group-item">
+                        <p class="value-title">Camera X:</p>
+                        <a type="button" class="btn btn-primary btn-sm"> < </a>
+                        <span id="camera-x-value" class="value-index"> 0 </span>
+                        <a type="button" class="btn btn-primary btn-sm"> > </a>
+                    </li>
+                    
+                    <li class="list-group-item">
+                        <p class="value-title">Camera Y:</p>
+                        <a type="button" class="btn btn-primary btn-sm"> < </a>
+                        <span id="camera-y-value" class="value-index"> 0 </span>
+                        <a type="button" class="btn btn-primary btn-sm"> > </a>
+                    </li>
+
+                    <li class="list-group-item">
+                        <p class="value-title">Camera Z:</p>
+                        <a type="button" class="btn btn-primary btn-sm"> < </a>
+                        <span id="camera-Z-value" class="value-index"> 0 </span>
+                        <a type="button" class="btn btn-primary btn-sm"> > </a>
+                    </li>
+                </ul>
+                <a id="camera-button" type="button" class="btn btn-primary">Camera</a>
+            </div>
 
             <div id="menu" class="container-fluid">
                 <p class="menu-text"><a id="resume" href="#">Resume</a></p>
@@ -101,7 +129,6 @@
                 <p class="menu-text"><a class="restart-game" href="#">Play again</a></p>
             </div>
         </div>
-        
     </div>
 </body>
 </html>

@@ -1,4 +1,6 @@
-﻿.container-fluid {
+﻿/*<--------------- Fundamental Containers + Canvas --------------->*/
+
+.container-fluid {
     position: fixed;
     padding: 0 0 0 0;
     max-width: 100%;
@@ -14,6 +16,15 @@
     max-width: 100%;
     height: inherit;
 }
+
+#arkanoid-canvas {
+    background-size: 100% 100%;
+    background-color: black;
+    min-width: 100%;
+    height: inherit;
+}
+
+/*<--------------- Upper Toolbox + UI --------------->*/
 
 #toolbox {
     position: absolute;
@@ -31,6 +42,10 @@
     font-size: 2rem;
 }
 
+#menu-gear:hover {
+    color: gainsboro;
+}
+
 #camera {
     display: none;
     color: white;
@@ -41,10 +56,6 @@
     display: none;
     color: white;
     font-size: 2rem;
-}
-
-#menu-gear:hover {
-    color: gainsboro;
 }
 
 #ui-container {
@@ -81,57 +92,54 @@
     color: crimson;
 }
 
-#arkanoid-canvas {
-    background-size: 100% 100%;
-    background-color: black;
-    min-width: 100%;
-    height: inherit;
+/*<--------------- Lower Toolboxes (Camera + Lights) --------------->*/
+
+.btn-sm {
+    background-color: blue!important;
+    border-color: blue!important;
+    display: inline-block;
 }
+
+.value-title {
+    display: inline-block;
+    margin-left: 0.3rem;
+    margin-right: 0.3rem;
+    margin-bottom: 0.3rem;
+}
+
+.value-index {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+}
+
+#camera-container {
+    min-width: 10%;
+    position: absolute;
+    text-align : left;
+    bottom: 1%;
+    left: 0.5%;
+    margin-bottom: 0;
+    z-index: 1;
+}
+
+#camera-toolbox {
+    display: none;
+    max-width: 100%;
+    background-color: white;
+}
+
+.list-group-item {
+    padding: 6px 6px 6px 6px;
+}
+
+#camera-button {
+    background-color: blue!important;
+    border-color: blue!important;
+}
+
+/*<--------------- Menu and correlated screens / elements --------------->*/
 
 #menu {
-    display: none;
-    position: fixed;
-    text-align: center;
-    padding: 0 0 0 0;
-    top: 0;
-    max-width: 100%;
-    height: 100%;
-    background-color: #2c222a;
-    opacity: 0.8;
-    z-index: 2;
-}
-
-#settings-screen {
-    display: none;
-    position: fixed;
-    text-align: center;
-    padding: 0 0 0 0;
-    top: 0;
-    max-width: 100%;
-    height: 100%;
-    background-color: #2c222a;
-    opacity: 0.8;
-    z-index: 2;
-}
-
-#victory-screen {
-    display: none;
-    position: fixed;
-    text-align: center;
-    padding: 0 0 0 0;
-    top: 0;
-    max-width: 100%;
-    height: 100%;
-    background-color: #2c222a;
-    opacity: 0.8;
-    z-index: 2;
-}
-
-#victory-score {
-    margin-bottom: 2%;
-}
-
-#lost-screen {
     display: none;
     position: fixed;
     text-align: center;
@@ -166,6 +174,19 @@
     color: gainsboro;
 }
 
+#settings-screen {
+    display: none;
+    position: fixed;
+    text-align: center;
+    padding: 0 0 0 0;
+    top: 0;
+    max-width: 100%;
+    height: 100%;
+    background-color: #2c222a;
+    opacity: 0.8;
+    z-index: 2;
+}
+
 .settings-title {
     font-size: 3rem;
     font-family: "Courier New", monospace;
@@ -174,6 +195,36 @@
     color: white;
     opacity: 1;
     margin-top: 3%;
+}
+
+#victory-screen {
+    display: none;
+    position: fixed;
+    text-align: center;
+    padding: 0 0 0 0;
+    top: 0;
+    max-width: 100%;
+    height: 100%;
+    background-color: #2c222a;
+    opacity: 0.8;
+    z-index: 2;
+}
+
+#victory-score {
+    margin-bottom: 2%;
+}
+
+#lost-screen {
+    display: none;
+    position: fixed;
+    text-align: center;
+    padding: 0 0 0 0;
+    top: 0;
+    max-width: 100%;
+    height: 100%;
+    background-color: #2c222a;
+    opacity: 0.8;
+    z-index: 2;
 }
 
 .result-msg {
