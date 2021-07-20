@@ -19,10 +19,10 @@ class Arkanoid {
 	
 		// CREATE SHADERS
 		
-		this.programInfo = twgl.createProgramInfo(gl, [vs, fs]);
-		this.programInfoBLOCK = twgl.createProgramInfo(gl, [vsBLOCK, fsBLOCK]);
-		twgl.setAttributePrefix("a_");
-		var colors = [[1, 0.250980392, 0, 1], [1, 0.501960784, 0, 1], [1, 0.749019608, 0, 1], [1, 1, 0, 1], [0.749019608, 1, 0, 1], [0.501960784, 1, 0, 1], [0.250980392, 1, 0, 1], [0, 1, 0, 1], [0, 1, 0.250980392, 1], [0, 1, 0.501960784, 1], [0, 1, 0.749019608, 1], [0, 1, 1, 1], [0, 0.749019608, 1, 1], [0, 0.501960784, 1, 1], [0, 0.250980392, 1, 1], [0, 0, 1, 1], [0.250980392, 0, 1, 1], [0.501960784, 0, 1, 1], [0.749019608, 0, 1, 1], [1, 0, 1, 1], [1, 0, 0.749019608, 1], [1, 0, 0.501960784, 1], [1, 0, 0.250980392, 1], [1, 0, 0, 1],];
+		// this.programInfo = twgl.createProgramInfo(gl, [vs, fs]);
+		// this.programInfoBLOCK = twgl.createProgramInfo(gl, [vsBLOCK, fsBLOCK]);
+		// twgl.setAttributePrefix("a_");
+		// var colors = [[1, 0.250980392, 0, 1], [1, 0.501960784, 0, 1], [1, 0.749019608, 0, 1], [1, 1, 0, 1], [0.749019608, 1, 0, 1], [0.501960784, 1, 0, 1], [0.250980392, 1, 0, 1], [0, 1, 0, 1], [0, 1, 0.250980392, 1], [0, 1, 0.501960784, 1], [0, 1, 0.749019608, 1], [0, 1, 1, 1], [0, 0.749019608, 1, 1], [0, 0.501960784, 1, 1], [0, 0.250980392, 1, 1], [0, 0, 1, 1], [0.250980392, 0, 1, 1], [0.501960784, 0, 1, 1], [0.749019608, 0, 1, 1], [1, 0, 1, 1], [1, 0, 0.749019608, 1], [1, 0, 0.501960784, 1], [1, 0, 0.250980392, 1], [1, 0, 0, 1],];
 
 		var dimensions, coordinate, uniform, newObj, name, uv, geometry;
 
@@ -72,11 +72,15 @@ class Arkanoid {
 						u_diffuseTexture: {
 							texture: setup.textures.sponde,
 							sampler: setup.samplers.nearest,
+						},
+						u_normalTexture: {
+							texture: setup.textures.sponde_norm,
+							sampler: setup.samplers.nearest,
 						}
 					};
 					// create barriers
 					dimensions = [dimensions[1], dimensions[0], dimensions[2]]; //updated dimensions after the transformations
-					newObj = setup.newObject(name,coordinate,dimensions,uniform, setup.shaders.lightTexture, geometry );
+					newObj = setup.newObject(name,coordinate,dimensions,uniform, setup.shaders.lightTextureNormal, geometry );
 					break;
 				case 1:
 					name = "TOP Barrier";
@@ -93,10 +97,14 @@ class Arkanoid {
 						u_diffuseTexture: {
 							texture: setup.textures.sponde,
 							sampler: setup.samplers.nearest,
+						},
+						u_normalTexture: {
+							texture: setup.textures.sponde_norm,
+							sampler: setup.samplers.nearest,
 						}
 					};
 					// create barriers
-					newObj = setup.newObject(name,coordinate,dimensions,uniform, setup.shaders.lightTexture, geometry );
+					newObj = setup.newObject(name,coordinate,dimensions,uniform, setup.shaders.lightTextureNormal, geometry );
 					break;
 				case 2:
 					name = "RIGHT Barrier";
@@ -114,11 +122,15 @@ class Arkanoid {
 						u_diffuseTexture: {
 							texture: setup.textures.sponde,
 							sampler: setup.samplers.nearest,
+						},
+						u_normalTexture: {
+							texture: setup.textures.sponde_norm,
+							sampler: setup.samplers.nearest,
 						}
 					};
 					// create barriers
 					dimensions = [dimensions[1], dimensions[0], dimensions[2]]; //updated dimensions after the transformations
-					newObj = setup.newObject(name,coordinate,dimensions,uniform, setup.shaders.lightTexture, geometry );
+					newObj = setup.newObject(name,coordinate,dimensions,uniform, setup.shaders.lightTextureNormal, geometry );
 					break;
 				default:
 					break;
@@ -175,7 +187,7 @@ class Arkanoid {
 		var power;
 		var powerUpsCount = 0;
 		for (var x = 0; x < mapBlocks.length; x++) {
-			color = colors[Math.floor(Math.random() * colors.length)];
+			color = setup.colors[Math.floor(Math.random() * setup.colors.length)];
 			for (var y = 0; y < mapBlocks[x].length; y++) {
 				var typeBlock = mapBlocks[x][y];
 				if (typeBlock !== 0) { //to add different typeblock make more cases with 1,2,3 block
@@ -210,9 +222,14 @@ class Arkanoid {
 						u_diffuseTexture: {
 							texture: setup.textures.diffuseBlocks,
 							sampler: setup.samplers.nearest,
+						},
+						u_normalTexture: {
+							texture: setup.textures.block_neon_norm,
+							sampler: setup.samplers.nearest,
 						}
+						
 					};
-					newObj = setup.newObject("Block " + this.block.length, coordinate, dimensions, uniform, setup.shaders.lightTexture, setup.geometries.cube );
+					newObj = setup.newObject("Block " + this.block.length, coordinate, dimensions, uniform, setup.shaders.lightTextureNormal, setup.geometries.cube );
 					newObj.hasPowerUp = power,
 					newObj.powerUpType = Math.floor(4* Math.random()) + 1, //identifies the upgrade (possible values: 1, 2, 3, 4),
 					this.block.push(newObj);
@@ -471,6 +488,7 @@ class Arkanoid {
 	}
 	
 	drawGame(VP) {
+		for (let i = 0; i < game.ball.center.length; i++) setup.globalsLight.l_ball_pos[i] = game.ball.center[i];
 
 		game.block.forEach(e => {
 			e.uniforms.u_matrix = utils.transposeMatrix(utils.multiplyMatrices(VP, e.uniforms.u_world));
