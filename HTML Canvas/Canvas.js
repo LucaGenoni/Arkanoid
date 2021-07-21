@@ -113,4 +113,131 @@ $(document).ready(function(){
         game = new Arkanoid(map3);
         game.play();
     });
+
+    //substitute the default values of camera/lights menus with the actual values used
+    $("#camera-x-value").html(space._pos_cam[0]);
+    $("#camera-y-value").html(space._pos_cam[1]);
+    $("#camera-z-value").html(space._pos_cam[2]);
+    $("#fovy-value").html(space._fovy);
+    $("#elev-value").html(space._elev);
+    $("#angle-value").html(space._ang);
+    $("#w-value").html(space._w);
+    $("#h-value").html(space._h);
+    $("#n-value").html(space._n);
+    $("#f-value").html(space._f);
+
+    //handling the pressure of each button in the camera/lights menus (when the pressure of one < or > button happens,
+    //we check which parameter the button influences, and then depending from whether the button was < or > we change
+    //the value accordingly both in the js file and in the camera/lights menu.
+    $(".btn-sm").click(function(){
+        if ($(this).siblings("p").text() === "Camera X :"){
+            if ($(this).text() === " < "){
+                space._pos_cam[0] = space._pos_cam[0] - 1;
+                $("#camera-x-value").html(space._pos_cam[0]);
+            }
+            else if ($(this).text() === " > "){
+                space._pos_cam[0] = space._pos_cam[0] + 1;
+                $("#camera-x-value").html(space._pos_cam[0]);
+            }
+        }
+        
+        if ($(this).siblings("p").text() === "Camera Y :"){
+            if ($(this).text() === " < "){
+                space._pos_cam[1] = space._pos_cam[1] - 1;
+                $("#camera-y-value").html(space._pos_cam[1]);
+            }
+            else if ($(this).text() === " > "){
+                space._pos_cam[1] = space._pos_cam[1] + 1;
+                $("#camera-y-value").html(space._pos_cam[1]);
+            }
+        }
+
+        if ($(this).siblings("p").text() === "Camera Z :"){
+            if ($(this).text() === " < "){
+                space._pos_cam[2] = space._pos_cam[2] - 1;
+                $("#camera-z-value").html(space._pos_cam[2]);
+            }
+            else if ($(this).text() === " > "){
+                space._pos_cam[2] = space._pos_cam[2] + 1;
+                $("#camera-z-value").html(space._pos_cam[2]);
+            }
+        }
+
+        if ($(this).siblings("p").text() === "Fov-Y :"){
+            if ($(this).text() === " < "){
+                space._fovy = space._fovy - 1;
+                $("#fovy-value").html(space._fovy);
+            }
+            else if ($(this).text() === " > "){
+                space._fovy = space._fovy + 1;
+                $("#fovy-value").html(space._fovy);
+            }
+        }
+
+        if ($(this).siblings("p").text() === "Elevation :"){
+            if ($(this).text() === " < "){
+                space._elev = space._elev - 1;
+                $("#elev-value").html(space._elev);
+            }
+            else if ($(this).text() === " > "){
+                space._elev = space._elev + 1;
+                $("#elev-value").html(space._elev);
+            }
+        }
+
+        if ($(this).siblings("p").text() === "Angle :"){
+            if ($(this).text() === " < "){
+                space._ang = space._ang - 1;
+                $("#angle-value").html(space._ang);
+            }
+            else if ($(this).text() === " > "){
+                space._ang = space._ang + 1;
+                $("#angle-value").html(space._ang);
+            }
+        }
+
+        if ($(this).siblings("p").text() === "w :"){
+            if ($(this).text() === " < "){
+                space._w = space._w - 1;
+                $("#w-value").html(space._w);
+            }
+            else if ($(this).text() === " > "){
+                space._w = space._w + 1;
+                $("#w-value").html(space._w);
+            }
+        }
+
+        if ($(this).siblings("p").text() === "h :"){
+            if ($(this).text() === " < "){
+                space._h = space._h - 1;
+                $("#h-value").html(space._h);
+            }
+            else if ($(this).text() === " > "){
+                space._h = space._h + 1;
+                $("#h-value").html(space._h);
+            }
+        }
+
+        if ($(this).siblings("p").text() === "n :"){
+            if ($(this).text() === " < "){
+                space._n = space._n - 1;
+                $("#n-value").html(space._n);
+            }
+            else if ($(this).text() === " > "){
+                space._n = space._n + 1;
+                $("#n-value").html(space._n);
+            }
+        }
+
+        if ($(this).siblings("p").text() === "f :"){
+            if ($(this).text() === " < "){
+                space._f = space._f - 1;
+                $("#f-value").html(space._f);
+            }
+            else if ($(this).text() === " > "){
+                space._f = space._f + 1;
+                $("#f-value").html(space._f);
+            }
+        }
+    });
 });
