@@ -4,7 +4,7 @@ $(document).ready(function(){
     $(document).on('keydown', function(evt){
         //Esc pressed during the gameplay: the "Menu" screen is opened
         if (evt.key === "Escape" || evt.key === "Esc"){
-            if ($("#menu").css("display") === "none" && $("#settings-screen").css("display") === "none"){
+            if ($("#menu").css("display") === "none"){
                 document.getElementById('menu').style.display = "block";
             }
         }
@@ -34,6 +34,16 @@ $(document).ready(function(){
             document.getElementById('camera-toolbox').style.display = "none";
         }
     });
+
+    //handling the Lights Toolbox appearance / disappearance
+    $("#lights-button").click(function(){
+        if ($("#lights-toolbox").css("display") === "none"){
+            document.getElementById('lights-toolbox').style.display = "flex";
+        }
+        else {
+            document.getElementById('lights-toolbox').style.display = "none";
+        }
+    });
     
     //The "gear" icon has been pressed during the gameplay: the "Menu" screen is opened
     $("#menu-gear").click(function(){
@@ -45,18 +55,6 @@ $(document).ready(function(){
     $("#resume").click(function(){
         document.getElementById('menu').style.display = "none";
         game.resume();
-    });
-
-    //Click on Settings while in "Menu" screen: show the "Settings" screen and hide the "Menu" one
-    $("#settings").click(function(){
-        document.getElementById('settings-screen').style.display = "block";
-        document.getElementById('menu').style.display = "none";
-    });
-
-    //Click on Quit while in "Settings" screen: hide the "Settings" screen and show the "Menu" one
-    $("#back-to-menu").click(function(){
-        document.getElementById('menu').style.display = "block";
-        document.getElementById('settings-screen').style.display = "none";
     });
 
     //Click on Quit while in "Menu" screen: exit from the menu
@@ -115,6 +113,8 @@ $(document).ready(function(){
     });
 
     //substitute the default values of camera/lights menus with the actual values used
+    
+    /*<-------- Camera -------->*/
     $("#camera-x-value").html(space._pos_cam[0]);
     $("#camera-y-value").html(space._pos_cam[1]);
     $("#camera-z-value").html(space._pos_cam[2]);
@@ -125,11 +125,24 @@ $(document).ready(function(){
     $("#h-value").html(space._h);
     $("#n-value").html(space._n);
     $("#f-value").html(space._f);
-
+    
+    /*<-------- Lights -------->*/
+    $("#l_pos-x-value").html(setup.globalsLight.l_pos[0]);
+    $("#l_pos-y-value").html(setup.globalsLight.l_pos[1]);
+    $("#l_pos-z-value").html(setup.globalsLight.l_pos[2]);
+    $("#l_dir-x-value").html(setup.globalsLight.l_dir[0]);
+    $("#l_dir-y-value").html(setup.globalsLight.l_dir[1]);
+    $("#l_dir-z-value").html(setup.globalsLight.l_dir[2]);
+    $("#l_ball_pos-x-value").html(setup.globalsLight.l_ball_pos[0]);
+    $("#l_ball_pos-y-value").html(setup.globalsLight.l_ball_pos[1]);
+    $("#l_ball_pos-z-value").html(setup.globalsLight.l_ball_pos[2]);
+    
     //handling the pressure of each button in the camera/lights menus (when the pressure of one < or > button happens,
     //we check which parameter the button influences, and then depending from whether the button was < or > we change
     //the value accordingly both in the js file and in the camera/lights menu.
     $(".btn-sm").click(function(){
+
+        /*<-------- Camera -------->*/
         if ($(this).siblings("p").text() === "Camera X :"){
             if ($(this).text() === " < "){
                 space._pos_cam[0] = space._pos_cam[0] - 1;
@@ -237,6 +250,107 @@ $(document).ready(function(){
             else if ($(this).text() === " > "){
                 space._f = space._f + 1;
                 $("#f-value").html(space._f);
+            }
+        }
+
+        /*<-------- Lights -------->*/
+
+        if ($(this).siblings("p").text() === "Light Pos X :"){
+            if ($(this).text() === " < "){
+                setup.globalsLight.l_pos[0] = setup.globalsLight.l_pos[0] - 0.1;
+                $("#l_pos-x-value").html(setup.globalsLight.l_pos[0]);
+            }
+            else if ($(this).text() === " > "){
+                setup.globalsLight.l_pos[0] = setup.globalsLight.l_pos[0] + 0.1;
+                $("#l_pos-x-value").html(setup.globalsLight.l_pos[0]);
+            }
+        }
+
+        if ($(this).siblings("p").text() === "Light Pos Y :"){
+            if ($(this).text() === " < "){
+                setup.globalsLight.l_pos[1] = setup.globalsLight.l_pos[1] - 0.1;
+                $("#l_pos-y-value").html(setup.globalsLight.l_pos[1]);
+            }
+            else if ($(this).text() === " > "){
+                setup.globalsLight.l_pos[1] = setup.globalsLight.l_pos[1] + 0.1;
+                $("#l_pos-y-value").html(setup.globalsLight.l_pos[1]);
+            }
+        }
+
+        if ($(this).siblings("p").text() === "Light Pos Z :"){
+            if ($(this).text() === " < "){
+                setup.globalsLight.l_pos[2] = setup.globalsLight.l_pos[2] - 0.1;
+                $("#l_pos-z-value").html(setup.globalsLight.l_pos[2]);
+            }
+            else if ($(this).text() === " > "){
+                setup.globalsLight.l_pos[2] = setup.globalsLight.l_pos[2] + 0.1;
+                $("#l_pos-z-value").html(setup.globalsLight.l_pos[2]);
+            }
+        }
+
+        if ($(this).siblings("p").text() === "Light Dir X :"){
+            if ($(this).text() === " < "){
+                setup.globalsLight.l_dir[0] = setup.globalsLight.l_dir[0] - 0.1;
+                $("#l_dir-x-value").html(setup.globalsLight.l_dir[0]);
+            }
+            else if ($(this).text() === " > "){
+                setup.globalsLight.l_dir[0] = setup.globalsLight.l_dir[0] + 0.1;
+                $("#l_dir-x-value").html(setup.globalsLight.l_dir[0]);
+            }
+        }
+
+        if ($(this).siblings("p").text() === "Light Dir Y :"){
+            if ($(this).text() === " < "){
+                setup.globalsLight.l_dir[1] = setup.globalsLight.l_dir[1] - 0.1;
+                $("#l_dir-y-value").html(setup.globalsLight.l_dir[1]);
+            }
+            else if ($(this).text() === " > "){
+                setup.globalsLight.l_dir[1] = setup.globalsLight.l_dir[1] + 0.1;
+                $("#l_dir-y-value").html(setup.globalsLight.l_dir[1]);
+            }
+        }
+
+        if ($(this).siblings("p").text() === "Light Dir Z :"){
+            if ($(this).text() === " < "){
+                setup.globalsLight.l_dir[2] = setup.globalsLight.l_dir[2] - 0.1;
+                $("#l_dir-z-value").html(setup.globalsLight.l_dir[2]);
+            }
+            else if ($(this).text() === " > "){
+                setup.globalsLight.l_dir[2] = setup.globalsLight.l_dir[2] + 0.1;
+                $("#l_dir-z-value").html(setup.globalsLight.l_dir[2]);
+            }
+        }
+
+        if ($(this).siblings("p").text() === "Ball Light Pos X :"){
+            if ($(this).text() === " < "){
+                setup.globalsLight.l_ball_pos[0] = setup.globalsLight.l_ball_pos[0] - 0.1;
+                $("#l_ball_pos-x-value").html(setup.globalsLight.l_ball_pos[0]);
+            }
+            else if ($(this).text() === " > "){
+                setup.globalsLight.l_ball_pos[0] = setup.globalsLight.l_ball_pos[0] + 0.1;
+                $("#l_ball_pos-x-value").html(setup.globalsLight.l_ball_pos[0]);
+            }
+        }
+
+        if ($(this).siblings("p").text() === "Ball Light Pos Y :"){
+            if ($(this).text() === " < "){
+                setup.globalsLight.l_ball_pos[1] = setup.globalsLight.l_ball_pos[1] - 0.1;
+                $("#l_ball_pos-y-value").html(setup.globalsLight.l_ball_pos[1]);
+            }
+            else if ($(this).text() === " > "){
+                setup.globalsLight.l_ball_pos[1] = setup.globalsLight.l_ball_pos[1] + 0.1;
+                $("#l_ball_pos-y-value").html(setup.globalsLight.l_ball_pos[1]);
+            }
+        }
+
+        if ($(this).siblings("p").text() === "Ball Light Pos Z :"){
+            if ($(this).text() === " < "){
+                setup.globalsLight.l_ball_pos[2] = setup.globalsLight.l_ball_pos[2] - 0.1;
+                $("#l_ball_pos-z-value").html(setup.globalsLight.l_ball_pos[2]);
+            }
+            else if ($(this).text() === " > "){
+                setup.globalsLight.l_ball_pos[2] = setup.globalsLight.l_ball_pos[2] + 0.1;
+                $("#l_ball_pos-z-value").html(setup.globalsLight.l_ball_pos[2]);
             }
         }
     });
