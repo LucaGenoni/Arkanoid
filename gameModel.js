@@ -521,10 +521,11 @@ class Arkanoid {
 	
 	drawGame(VP) {
 		for (let i = 0; i < game.ball.center.length; i++) setup.globalsLight.l_ball_pos[i] = game.ball.center[i];
-		var directionSpot = normalizeVector(game.ball.direction);
-		for (let i = 0; i < directionSpot.length; i++) setup.globalsLight.l_ball_dir[i] = directionSpot[i];
+		// var directionSpot = normalizeVector(scalarVector(-1,game.ball.direction));
+		// for (let i = 0; i < directionSpot.length; i++) setup.globalsLight.l_ball_dir[i] = -directionSpot[i];
 		// setup.globalsLight.l_ball_dir[2] = directionSpot[0];
 		// setup.globalsLight.l_ball_dir[0] = directionSpot[2];
+		setup.globalsLight.l_ball_dir = normalizeVector(game.ball.direction);
 
 		game.block.forEach(e => {
 			e.uniforms.u_matrix = utils.transposeMatrix(utils.multiplyMatrices(VP, e.uniforms.u_world));
