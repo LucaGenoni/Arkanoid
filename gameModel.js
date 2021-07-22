@@ -42,7 +42,7 @@ class Arkanoid {
 				sampler: setup.samplers.nearest,
 			}
 		};
-		newObj = setup.newObject("Bar",coordinate,dimensions,uniform, setup.shaders.lightTextureNormal, setup.geometries.cube);
+		newObj = setup.newObject("Bar",coordinate,dimensions,uniform, setup.shaders.lightTextureNormal, setup.geometries.bar);
 		newObj.move = 0;
 		newObj.letGo = true;
 		newObj.updateLocal = function () {
