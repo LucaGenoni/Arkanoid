@@ -137,10 +137,15 @@
     border-color: blue!important;
 }
 
+#dropdownMenuButton {
+    background-color: blue!important;
+    border-color: blue!important;
+}
+
 #lights-container {
     min-width: 10%;
     position: absolute;
-    text-align : right;
+    text-align: right;
     bottom: 1%;
     right: 0.5%;
     margin-bottom: 0;
@@ -158,6 +163,10 @@
     right: 0.5%;
     background-color: blue!important;
     border-color: blue!important;
+}
+
+#ball-lights-p {
+    margin-bottom: 0;
 }
 
 /*<--------------- Menu and correlated screens / elements --------------->*/
