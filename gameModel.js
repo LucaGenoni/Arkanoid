@@ -54,31 +54,6 @@ class Arkanoid {
 		this.bar = newObj;
 		
 
-		geometry = {...setup.geometries.barrier};
-		name = "Floor";
-		coordinate = [0, -1, -.1];
-		dimensions = [1, 0, 2];
-
-		//uniforms for LEFT Barrier
-		uniform = {
-			u_color: [1,1,1,1],
-			u_world: utils.multiplyMatrices(utils.multiplyMatrices(
-				utils.MakeTranslateMatrix(coordinate[0], coordinate[1], coordinate[2]),
-				utils.MakeRotateXMatrix(-90)),				
-				utils.MakeScaleNuMatrix(dimensions[0], dimensions[1], dimensions[2])),
-			u_diffuseTexture: {
-				texture: setup.textures.sponde,
-				sampler: setup.samplers.nearest,
-			},
-			u_normalTexture: {
-				texture: setup.textures.sponde_norm,
-				sampler: setup.samplers.nearest,
-			}
-		};
-		// create barriers
-		dimensions = [dimensions[1], dimensions[0], dimensions[2]]; //updated dimensions after the transformations
-		newObj = setup.newObject(name,coordinate,dimensions,uniform, setup.shaders.lightTextureNormal, geometry );
-		this.floorGame = newObj;
 
 		// CREATE EDGES
 		this.sponde = [];
@@ -494,19 +469,19 @@ class Arkanoid {
 				bounce = normalizeVector(bounce);
 				//applying small randomization to the bounce components to avoid loops between ball and barriers, plus
 				// if/else needed to avoid any change of sign (for small values of any direction) due to the randomization 
-				// if (bounce[0] >= 0){
-				// 	bounce[0] = bounce[0] + (Math.random() * 0.03);
-				// }
-				// else {
-				// 	bounce[0] = bounce[0] - (Math.random() * 0.03);
-				// }
-				// if (bounce[1] >= 0){
-				// 	bounce[1] = bounce[1] + (Math.random() * 0.03);
-				// }
-				// else {
-				// 	bounce[1] = bounce[1] - (Math.random() * 0.03);
-				// }
-				// bounce = normalizeVector(bounce);
+				if (bounce[0] >= 0){
+					bounce[0] = bounce[0] + (Math.random() * 0.03);
+				}
+				else {
+					bounce[0] = bounce[0] - (Math.random() * 0.03);
+				}
+				if (bounce[1] >= 0){
+					bounce[1] = bounce[1] + (Math.random() * 0.03);
+				}
+				else {
+					bounce[1] = bounce[1] - (Math.random() * 0.03);
+				}
+				bounce = normalizeVector(bounce);
 				console.log("Ball entry direction: " + game.ball.direction,"Distance",distance-game.ball.radius, "Bounce: " + bounce);
 				game.ball.direction = normalizeVector(
 					subVector(game.ball.direction,
@@ -545,21 +520,22 @@ class Arkanoid {
 				utils.MakeTranslateMatrix(blockCenter[0], blockCenter[1], 0),
 				utils.MakeScaleNuMatrix(dimensions[0], dimensions[1], dimensions[2])
 			)),
-			u_colorTex : game.POWERUPS[powerUpType].texture,
+			u_diffuseTexture: game.POWERUPS[powerUpType].texture,
+			u_normalTexture: game.POWERUPS[powerUpType].normaltexture,
 		};
-		var newObj = setup.newObject("PowerUP " +powerUpType, blockCenter, dimensions, uniform, setup.shaders.justTexture, setup.geometries.cube );
+		var newObj = setup.newObject("PowerUP " +powerUpType, blockCenter, dimensions, uniform, setup.shaders.lightTextureNormal, setup.geometries.cube );
 		newObj.powerUpType = powerUpType;  
 		this.powerup.push(newObj);
 	}
 	
 	drawGame(VP) {
-        setup.angleLight += .3
-		if(setup.angleLight>360) setup.angleLight -= 360
-		z = Math.cos(utils.degToRad(setup.angleLight))
-		if(z<0) setup.angleLight+=1
-		setup.globalsLight.l_dir = normalizeVector([Math.sin(utils.degToRad(setup.angleLight)),0, z]);
-		console.log(setup.angleLight);
-		// setup.globalsLight.l_dir = [0,Math.sin(utils.degToRad(setup.angleLight)), Math.cos(utils.degToRad(setup.angleLight))];
+        setup.angleLight += .3;
+		if(setup.angleLight>360) setup.angleLight -= 360;
+		x = Math.sin(utils.degToRad(setup.angleLight));
+		z = Math.cos(utils.degToRad(setup.angleLight));
+		if(x>0) setup.angleLight+=1;
+		setup.globalsLight.l_dir = normalizeVector([z, 0, x]);
+
 		game.block.forEach(e => {
 			e.uniforms.u_matrix = utils.transposeMatrix(utils.multiplyMatrices(VP, e.uniforms.u_world));
 			e.uniforms.n_matrix = utils.invertMatrix(utils.transposeMatrix(e.uniforms.u_world));
@@ -584,7 +560,6 @@ class Arkanoid {
 		
 		game.drawSingleObject(VP,game.bar);
 		game.drawSingleObject(VP,game.ball);
-		game.drawSingleObject(VP,game.floorGame);
 		twgl.drawObjectList(gl, game.sponde);
 		twgl.drawObjectList(gl, game.block);
 		twgl.drawObjectList(gl, game.powerup);
@@ -632,6 +607,10 @@ class Arkanoid {
 			texture: {
 				texture:setup.textures.enlarge,
 				sampler:setup.samplers.nearest,
+			},
+			normaltexture:{
+				texture:setup.textures.normalenlarge,
+				sampler:setup.samplers.nearest,
 			}
 		},
 		"2": {
@@ -642,6 +621,10 @@ class Arkanoid {
 			},
 			texture: {
 				texture:setup.textures.restrict,
+				sampler:setup.samplers.nearest,
+			},
+			normaltexture:{
+				texture:setup.textures.normalrestrict,
 				sampler:setup.samplers.nearest,
 			}
 		},
@@ -654,6 +637,10 @@ class Arkanoid {
 			texture: {
 				texture: setup.textures.fast,
 				sampler: setup.samplers.nearest,
+			},
+			normaltexture:{
+				texture:setup.textures.normalfast,
+				sampler:setup.samplers.nearest,
 			}
 		},
 		"4": {
@@ -665,6 +652,10 @@ class Arkanoid {
 			texture: {
 				texture: setup.textures.slow,
 				sampler: setup.samplers.nearest,
+			},
+			normaltexture:{
+				texture:setup.textures.normalslow,
+				sampler:setup.samplers.nearest,
 			}
 		}
 	};
