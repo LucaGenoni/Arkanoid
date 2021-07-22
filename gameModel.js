@@ -460,20 +460,21 @@ class Arkanoid {
 				var bounce;
 				if (distance === 0) bounce = [ball0 - game.ball.center[0], ball1 - game.ball.center[1], 0];
 				else bounce = [x - ball0, y - ball1, 0];
+				bounce = normalizeVector(bounce);
 				//applying small randomization to the bounce components to avoid loops between ball and barriers, plus
-				//if/else needed to avoid any change of sign (for small values of any direction) due to the randomization 
-				// if (bounce[0] >= 0){
-				// 	bounce[0] = bounce[0] + (Math.random() * 0.03);
-				// }
-				// else {
-				// 	bounce[0] = bounce[0] - (Math.random() * 0.03);
-				// }
-				// if (bounce[1] >= 0){
-				// 	bounce[1] = bounce[1] + (Math.random() * 0.03);
-				// }
-				// else {
-				// 	bounce[1] = bounce[1] - (Math.random() * 0.03);
-				// }
+				// if/else needed to avoid any change of sign (for small values of any direction) due to the randomization 
+				if (bounce[0] >= 0){
+					bounce[0] = bounce[0] + (Math.random() * 0.03);
+				}
+				else {
+					bounce[0] = bounce[0] - (Math.random() * 0.03);
+				}
+				if (bounce[1] >= 0){
+					bounce[1] = bounce[1] + (Math.random() * 0.03);
+				}
+				else {
+					bounce[1] = bounce[1] - (Math.random() * 0.03);
+				}
 				bounce = normalizeVector(bounce);
 				console.log("Ball entry direction: " + game.ball.direction,"Distance",distance-game.ball.radius, "Bounce: " + bounce);
 				game.ball.direction = normalizeVector(
@@ -522,7 +523,6 @@ class Arkanoid {
 	
 	drawGame(VP) {
 		for (let i = 0; i < game.ball.center.length; i++) setup.globalsLight.l_ball_pos[i] = game.ball.center[i];
-		// setup.globalsLight.l_ball_pos[2]=2;
 		for (let i = 0; i < game.ball.direction.length; i++) setup.globalsLight.l_ball_dir[i] = game.ball.direction[i];
 
 		game.block.forEach(e => {

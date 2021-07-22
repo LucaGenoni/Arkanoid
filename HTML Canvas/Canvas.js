@@ -141,9 +141,8 @@ $(document).ready(function(){
     //we check which parameter the button influences, and then depending from whether the button was < or > we change
     //the value accordingly both in the js file and in the camera/lights menu.
     $(".dropdown-item").click(function(){
-        console.log(this);
-        if ($(this).text() === "Parallel") space._type = $(this).text();
-        if ($(this).text() === "Prespective") space._type = $(this).text();
+        space._type = $(this).text();
+        space._init = true;
     });
     $(".btn-sm").click(function(){
 
@@ -338,14 +337,25 @@ $(document).ready(function(){
             }
         }
 
-        if ($(this).siblings("p").text() === "Ball Light Pos Z :"){
+        if ($(this).siblings("p").text() === "Ball Light Target :"){
             if ($(this).text() === " < "){
-                setup.globalsLight.l_ball_pos[2] = setup.globalsLight.l_ball_pos[2] - 0.1;
-                $("#l_ball_pos-z-value").html(Math.floor(10*setup.globalsLight.l_ball_pos[2])/10);
+                setup.globalsLight.l_ball_target = setup.globalsLight.l_ball_target - 0.1;
+                $("#l_ball_target-value").html(Math.floor(10*setup.globalsLight.l_ball_target)/10);
             }
             else if ($(this).text() === " > "){
-                setup.globalsLight.l_ball_pos[2] = setup.globalsLight.l_ball_pos[2] + 0.1;
-                $("#l_ball_pos-z-value").html(Math.floor(10*setup.globalsLight.l_ball_pos[2])/10);
+                setup.globalsLight.l_ball_target = setup.globalsLight.l_ball_target + 0.1;
+                $("#l_ball_target-value").html(Math.floor(10*setup.globalsLight.l_ball_target)/10);
+            }
+        }
+
+        if ($(this).siblings("p").text() === "Ball Light Decay :"){
+            if ($(this).text() === " < " && setup.globalsLight.l_ball_decay>0){
+                setup.globalsLight.l_ball_decay = setup.globalsLight.l_ball_decay - 1;
+                $("#l_ball_decay-value").html(Math.floor(10*setup.globalsLight.l_ball_decay)/10);
+            }
+            else if ($(this).text() === " > " && setup.globalsLight.l_ball_decay<2){
+                setup.globalsLight.l_ball_decay = setup.globalsLight.l_ball_decay + 1;
+                $("#l_ball_decay-value").html(Math.floor(10*setup.globalsLight.l_ball_decay)/10);
             }
         }
     });
