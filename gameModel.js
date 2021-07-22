@@ -272,10 +272,7 @@ class Arkanoid {
 				break;
 			// start game
 			case "Space":
-				if (game.state === "Starting") {
-					game.ball.direction = normalizeVector([Math.cos(utils.degToRad(game.ballAngle)), Math.sin(utils.degToRad(game.ballAngle)), 0]);
-					game.changeState("Playing")
-				}
+				if (game.state === "Starting") game.changeState("Playing")
 				break;
         }
 	}
@@ -331,6 +328,7 @@ class Arkanoid {
 					var tempChange = game.ballAngle + game.arrow.move;
 					if (20 < tempChange && tempChange < 160) game.ballAngle = tempChange;
 					game.arrow.updateLocal();
+					game.ball.direction = normalizeVector([Math.cos(utils.degToRad(game.ballAngle)), Math.sin(utils.degToRad(game.ballAngle)), 0]);
 				}
 				var VP = space.getVP();
 				game.drawSingleObject(VP,game.arrow);
@@ -463,19 +461,19 @@ class Arkanoid {
 				bounce = normalizeVector(bounce);
 				//applying small randomization to the bounce components to avoid loops between ball and barriers, plus
 				// if/else needed to avoid any change of sign (for small values of any direction) due to the randomization 
-				if (bounce[0] >= 0){
-					bounce[0] = bounce[0] + (Math.random() * 0.03);
-				}
-				else {
-					bounce[0] = bounce[0] - (Math.random() * 0.03);
-				}
-				if (bounce[1] >= 0){
-					bounce[1] = bounce[1] + (Math.random() * 0.03);
-				}
-				else {
-					bounce[1] = bounce[1] - (Math.random() * 0.03);
-				}
-				bounce = normalizeVector(bounce);
+				// if (bounce[0] >= 0){
+				// 	bounce[0] = bounce[0] + (Math.random() * 0.03);
+				// }
+				// else {
+				// 	bounce[0] = bounce[0] - (Math.random() * 0.03);
+				// }
+				// if (bounce[1] >= 0){
+				// 	bounce[1] = bounce[1] + (Math.random() * 0.03);
+				// }
+				// else {
+				// 	bounce[1] = bounce[1] - (Math.random() * 0.03);
+				// }
+				// bounce = normalizeVector(bounce);
 				console.log("Ball entry direction: " + game.ball.direction,"Distance",distance-game.ball.radius, "Bounce: " + bounce);
 				game.ball.direction = normalizeVector(
 					subVector(game.ball.direction,
@@ -523,7 +521,10 @@ class Arkanoid {
 	
 	drawGame(VP) {
 		for (let i = 0; i < game.ball.center.length; i++) setup.globalsLight.l_ball_pos[i] = game.ball.center[i];
-		for (let i = 0; i < game.ball.direction.length; i++) setup.globalsLight.l_ball_dir[i] = game.ball.direction[i];
+		var directionSpot = normalizeVector(game.ball.direction);
+		for (let i = 0; i < directionSpot.length; i++) setup.globalsLight.l_ball_dir[i] = directionSpot[i];
+		// setup.globalsLight.l_ball_dir[2] = directionSpot[0];
+		// setup.globalsLight.l_ball_dir[0] = directionSpot[2];
 
 		game.block.forEach(e => {
 			e.uniforms.u_matrix = utils.transposeMatrix(utils.multiplyMatrices(VP, e.uniforms.u_world));
