@@ -29,7 +29,7 @@ class Arkanoid {
 
 		// CREATE BAR
 		dimensions = [0.2, 0.07, 0.05];
-		coordinate = [0, -1, 0];
+		coordinate = [0, -1+dimensions[1], 0];
 		uniform = {
 			u_color: [185 / 255, 122 / 255, 87 / 255, 1],
 			u_world: [],
