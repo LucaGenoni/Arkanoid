@@ -256,50 +256,6 @@ $(document).ready(function(){
 
         /*<-------- Lights -------->*/
 
-        if ($(this).siblings("p").text() === "Light Pos X :"){
-            if ($(this).text() === " < "){
-                setup.globalsLight.l_pos[0] = setup.globalsLight.l_pos[0] - 0.1;
-                $("#l_pos-x-value").html(Math.floor(10*setup.globalsLight.l_pos[0])/10);
-            }
-            else if ($(this).text() === " > "){
-                setup.globalsLight.l_pos[0] = setup.globalsLight.l_pos[0] + 0.1;
-                $("#l_pos-x-value").html(Math.floor(10*setup.globalsLight.l_pos[0])/10);
-            }
-        }
-
-        if ($(this).siblings("p").text() === "Light Pos Y :"){
-            if ($(this).text() === " < "){
-                setup.globalsLight.l_pos[1] = setup.globalsLight.l_pos[1] - 0.1;
-                $("#l_pos-y-value").html(Math.floor(10*setup.globalsLight.l_pos[1])/10);
-            }
-            else if ($(this).text() === " > "){
-                setup.globalsLight.l_pos[1] = setup.globalsLight.l_pos[1] + 0.1;
-                $("#l_pos-y-value").html(Math.floor(10*setup.globalsLight.l_pos[1])/10);
-            }
-        }
-
-        if ($(this).siblings("p").text() === "Light Pos Z :"){
-            if ($(this).text() === " < "){
-                setup.globalsLight.l_pos[2] = setup.globalsLight.l_pos[2] - 0.1;
-                $("#l_pos-z-value").html(Math.floor(10*setup.globalsLight.l_pos[2])/10);
-            }
-            else if ($(this).text() === " > "){
-                setup.globalsLight.l_pos[2] = setup.globalsLight.l_pos[2] + 0.1;
-                $("#l_pos-z-value").html(Math.floor(10*setup.globalsLight.l_pos[2])/10);
-            }
-        }
-
-        if ($(this).siblings("p").text() === "Light Dir X :"){
-            if ($(this).text() === " < "){
-                setup.globalsLight.l_dir[0] = setup.globalsLight.l_dir[0] - 0.1;
-                $("#l_dir-x-value").html(Math.floor(10*setup.globalsLight.l_dir[0])/10);
-            }
-            else if ($(this).text() === " > "){
-                setup.globalsLight.l_dir[0] = setup.globalsLight.l_dir[0] + 0.1;
-                $("#l_dir-x-value").html(Math.floor(10*setup.globalsLight.l_dir[0])/10);
-            }
-        }
-
         if ($(this).siblings("p").text() === "Light Dir Y :"){
             if ($(this).text() === " < "){
                 setup.globalsLight.l_dir[1] = setup.globalsLight.l_dir[1] - 0.1;
@@ -311,16 +267,6 @@ $(document).ready(function(){
             }
         }
 
-        if ($(this).siblings("p").text() === "Light Dir Z :"){
-            if ($(this).text() === " < "){
-                setup.globalsLight.l_dir[2] = setup.globalsLight.l_dir[2] - 0.1;
-                $("#l_dir-z-value").html(Math.floor(10*setup.globalsLight.l_dir[2])/10);
-            }
-            else if ($(this).text() === " > "){
-                setup.globalsLight.l_dir[2] = setup.globalsLight.l_dir[2] + 0.1;
-                $("#l_dir-z-value").html(Math.floor(10*setup.globalsLight.l_dir[2])/10);
-            }
-        }
 
     });
 });

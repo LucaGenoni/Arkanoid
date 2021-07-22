@@ -534,8 +534,9 @@ class Arkanoid {
 		x = Math.sin(utils.degToRad(setup.angleLight));
 		z = Math.cos(utils.degToRad(setup.angleLight));
 		if(x>0) setup.angleLight+=1;
-		setup.globalsLight.l_dir = normalizeVector([z, 0, x]);
-
+		setup.globalsLight.l_dir[0] = z;
+		setup.globalsLight.l_dir[2] = x;
+		
 		game.block.forEach(e => {
 			e.uniforms.u_matrix = utils.transposeMatrix(utils.multiplyMatrices(VP, e.uniforms.u_world));
 			e.uniforms.n_matrix = utils.invertMatrix(utils.transposeMatrix(e.uniforms.u_world));

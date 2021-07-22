@@ -171,72 +171,26 @@
 
             <div id="lights-container">
                 <ul id="lights-toolbox" class="list-group">
+                    
                     <li class="list-group-item">
-                        <p class="value-title">Light Pos X :</p>
-                        <a type="button" class="btn btn-primary btn-sm"> < </a>
-                        <span id="l_pos-x-value" class="value-index"> 0 </span>
-                        <a type="button" class="btn btn-primary btn-sm"> > </a>
-                    </li>
-
-                    <li class="list-group-item">
-                        <p class="value-title">Light Pos Y :</p>
-                        <a type="button" class="btn btn-primary btn-sm"> < </a>
-                        <span id="l_pos-y-value" class="value-index"> 0 </span>
-                        <a type="button" class="btn btn-primary btn-sm"> > </a>
-                    </li>
-
-                    <li class="list-group-item">
-                        <p class="value-title">Light Pos Z :</p>
-                        <a type="button" class="btn btn-primary btn-sm"> < </a>
-                        <span id="l_pos-z-value" class="value-index"> 0 </span>
-                        <a type="button" class="btn btn-primary btn-sm"> > </a>
-                    </li>
-
-                    <li class="list-group-item">
-                        <p class="value-title">Light Dir X :</p>
-                        <a type="button" class="btn btn-primary btn-sm"> < </a>
-                        <span id="l_dir-x-value" class="value-index"> 0 </span>
-                        <a type="button" class="btn btn-primary btn-sm"> > </a>
-                    </li>
-
-                    <li class="list-group-item">
-                        <p class="value-title">Light Dir Y :</p>
-                        <a type="button" class="btn btn-primary btn-sm"> < </a>
-                        <span id="l_dir-y-value" class="value-index"> 0 </span>
-                        <a type="button" class="btn btn-primary btn-sm"> > </a>
-                    </li>
-
-                    <li class="list-group-item">
-                        <p class="value-title">Light Dir Z :</p>
-                        <a type="button" class="btn btn-primary btn-sm"> < </a>
-                        <span id="l_dir-z-value" class="value-index"> 0 </span>
-                        <a type="button" class="btn btn-primary btn-sm"> > </a>
+                        <p class="value-title">Ambient color :</p>
+                        <input type="color" id="Ambientcolorpicker" value="#ffffff" onchange="
+                            var color = hexToRgb(this.value);
+                            setup.globalsLight.l_ambient = RgbTo01([color.r,color.b,color.g,255]);
+                        ">
                     </li>
                     <li class="list-group-item">
-                        <p class="value-title">Ball Light Color :</p>
-                        <input type="color" id="colorpicker" value="#ffffff" onchange="
+                        <p class="value-title">Light Dir Color :</p>
+                        <input type="color" id="Dircolorpicker" value="#ffffff" onchange="
                             var color = hexToRgb(this.value);
                             setup.globalsLight.l_color = RgbTo01([color.r,color.b,color.g,255]);
                         ">
                     </li>
                     <li class="list-group-item">
-                        <p class="value-title">Ball Light Target :</p>
+                        <p class="value-title">Light Dir Y :</p>
                         <a type="button" class="btn btn-primary btn-sm"> < </a>
-                        <span id="l_target-value" class="value-index"> 0 </span>
+                        <span id="l_dir-y-value" class="value-index"> 0 </span>
                         <a type="button" class="btn btn-primary btn-sm"> > </a>
-                    </li>
-                    <li class="list-group-item">
-                        <p class="value-title">Ball Light Decay :</p>
-                        <a type="button" class="btn btn-primary btn-sm"> < </a>
-                        <span id="l_decay-value" class="value-index"> 0 </span>
-                        <a type="button" class="btn btn-primary btn-sm"> > </a>
-                    </li>
-                    <li class="list-group-item">
-                        <p class="value-title">Ambient color :</p>
-                        <input type="color" id="colorpicker" value="#ffffff" onchange="
-                            var color = hexToRgb(this.value);
-                            setup.globalsLight.l_ambient = RgbTo01([color.r,color.b,color.g,255]);
-                        ">
                     </li>
                 </ul>
                 <a id="lights-button" type="button" class="btn btn-primary">Lights</a>
