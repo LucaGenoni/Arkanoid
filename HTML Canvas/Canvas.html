@@ -83,6 +83,18 @@
             
             <div id="camera-container">
                 <ul id="camera-toolbox" class="list-group">
+                    
+                    <li class="list-group-item">
+                        <div class="dropdown">
+                            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                              Camera type
+                            </button>
+                            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                              <a class="dropdown-item btn btn-primary" >Parallel</a>
+                              <a class="dropdown-item btn btn-primary" >Prespective 1</a>
+                            </div>
+                          </div>
+                    </li>
                     <li class="list-group-item">
                         <p class="value-title">Camera X :</p>
                         <a type="button" class="btn btn-primary btn-sm"> < </a>
@@ -201,23 +213,21 @@
                     </li>
 
                     <li class="list-group-item">
-                        <p class="value-title">Ball Light Pos X :</p>
-                        <a type="button" class="btn btn-primary btn-sm"> < </a>
-                        <span id="l_ball_pos-x-value" class="value-index"> 0 </span>
-                        <a type="button" class="btn btn-primary btn-sm"> > </a>
-                    </li>
-
-                    <li class="list-group-item">
-                        <p class="value-title">Ball Light Pos Y :</p>
-                        <a type="button" class="btn btn-primary btn-sm"> < </a>
-                        <span id="l_ball_pos-y-value" class="value-index"> 0 </span>
-                        <a type="button" class="btn btn-primary btn-sm"> > </a>
-                    </li>
-
-                    <li class="list-group-item">
                         <p class="value-title">Ball Light Pos Z :</p>
                         <a type="button" class="btn btn-primary btn-sm"> < </a>
                         <span id="l_ball_pos-z-value" class="value-index"> 0 </span>
+                        <a type="button" class="btn btn-primary btn-sm"> > </a>
+                    </li>
+                    <li class="list-group-item">
+                        <p class="value-title">Ball Light Target :</p>
+                        <a type="button" class="btn btn-primary btn-sm"> < </a>
+                        <span id="l_ball_target-value" class="value-index"> 0 </span>
+                        <a type="button" class="btn btn-primary btn-sm"> > </a>
+                    </li>
+                    <li class="list-group-item">
+                        <p class="value-title">Ball Light Decay :</p>
+                        <a type="button" class="btn btn-primary btn-sm"> < </a>
+                        <span id="l_ball_decay-value" class="value-index"> 0 </span>
                         <a type="button" class="btn btn-primary btn-sm"> > </a>
                     </li>
                 </ul>

@@ -115,141 +115,146 @@ $(document).ready(function(){
     //substitute the default values of camera/lights menus with the actual values used
     
     /*<-------- Camera -------->*/
-    $("#camera-x-value").html(space._pos_cam[0]);
-    $("#camera-y-value").html(space._pos_cam[1]);
-    $("#camera-z-value").html(space._pos_cam[2]);
-    $("#fovy-value").html(space._fovy);
-    $("#elev-value").html(space._elev);
-    $("#angle-value").html(space._ang);
-    $("#w-value").html(space._w);
-    $("#h-value").html(space._h);
-    $("#n-value").html(space._n);
-    $("#f-value").html(space._f);
+    $("#camera-x-value").html(Math.floor(10*space._pos_cam[0])/10);
+    $("#camera-y-value").html(Math.floor(10*space._pos_cam[1])/10);
+    $("#camera-z-value").html(Math.floor(10*space._pos_cam[2])/10);
+    $("#fovy-value").html(Math.floor(10*space._fovy)/10);
+    $("#elev-value").html(Math.floor(10*space._elev)/10);
+    $("#angle-value").html(Math.floor(10*space._ang)/10);
+    $("#w-value").html(Math.floor(10*space._w)/10);
+    $("#h-value").html(Math.floor(10*space._h)/10);
+    $("#n-value").html(Math.floor(10*space._n)/10);
+    $("#f-value").html(Math.floor(10*space._f)/10);
     
     /*<-------- Lights -------->*/
-    $("#l_pos-x-value").html(setup.globalsLight.l_pos[0]);
-    $("#l_pos-y-value").html(setup.globalsLight.l_pos[1]);
-    $("#l_pos-z-value").html(setup.globalsLight.l_pos[2]);
-    $("#l_dir-x-value").html(setup.globalsLight.l_dir[0]);
-    $("#l_dir-y-value").html(setup.globalsLight.l_dir[1]);
-    $("#l_dir-z-value").html(setup.globalsLight.l_dir[2]);
-    $("#l_ball_pos-x-value").html(setup.globalsLight.l_ball_pos[0]);
-    $("#l_ball_pos-y-value").html(setup.globalsLight.l_ball_pos[1]);
-    $("#l_ball_pos-z-value").html(setup.globalsLight.l_ball_pos[2]);
+    $("#l_pos-x-value").html(Math.floor(10*setup.globalsLight.l_pos[0])/10);
+    $("#l_pos-y-value").html(Math.floor(10*setup.globalsLight.l_pos[1])/10);
+    $("#l_pos-z-value").html(Math.floor(10*setup.globalsLight.l_pos[2])/10);
+    $("#l_dir-x-value").html(Math.floor(10*setup.globalsLight.l_dir[0])/10);
+    $("#l_dir-y-value").html(Math.floor(10*setup.globalsLight.l_dir[1])/10);
+    $("#l_dir-z-value").html(Math.floor(10*setup.globalsLight.l_dir[2])/10);
+    $("#l_ball_pos-x-value").html(Math.floor(10*setup.globalsLight.l_ball_pos[0])/10);
+    $("#l_ball_pos-y-value").html(Math.floor(10*setup.globalsLight.l_ball_pos[1])/10);
+    $("#l_ball_pos-z-value").html(Math.floor(10*setup.globalsLight.l_ball_pos[2])/10);
     
     //handling the pressure of each button in the camera/lights menus (when the pressure of one < or > button happens,
     //we check which parameter the button influences, and then depending from whether the button was < or > we change
     //the value accordingly both in the js file and in the camera/lights menu.
+    $(".dropdown-item").click(function(){
+        console.log(this);
+        if ($(this).text() === "Parallel") space._type = $(this).text();
+        if ($(this).text() === "Prespective") space._type = $(this).text();
+    });
     $(".btn-sm").click(function(){
 
         /*<-------- Camera -------->*/
         if ($(this).siblings("p").text() === "Camera X :"){
             if ($(this).text() === " < "){
-                space._pos_cam[0] = space._pos_cam[0] - 1;
-                $("#camera-x-value").html(space._pos_cam[0]);
+                space._pos_cam[0] = space._pos_cam[0] - .1;
+                $("#camera-x-value").html(Math.floor(10*space._pos_cam[0])/10);
             }
             else if ($(this).text() === " > "){
-                space._pos_cam[0] = space._pos_cam[0] + 1;
-                $("#camera-x-value").html(space._pos_cam[0]);
+                space._pos_cam[0] = space._pos_cam[0] + .1;
+                $("#camera-x-value").html(Math.floor(10*space._pos_cam[0])/10);
             }
         }
         
         if ($(this).siblings("p").text() === "Camera Y :"){
             if ($(this).text() === " < "){
-                space._pos_cam[1] = space._pos_cam[1] - 1;
-                $("#camera-y-value").html(space._pos_cam[1]);
+                space._pos_cam[1] = space._pos_cam[1] - .1;
+                $("#camera-y-value").html(Math.floor(10*space._pos_cam[1])/10);
             }
             else if ($(this).text() === " > "){
-                space._pos_cam[1] = space._pos_cam[1] + 1;
-                $("#camera-y-value").html(space._pos_cam[1]);
+                space._pos_cam[1] = space._pos_cam[1] + .1;
+                $("#camera-y-value").html(Math.floor(10*space._pos_cam[1])/10);
             }
         }
 
         if ($(this).siblings("p").text() === "Camera Z :"){
             if ($(this).text() === " < "){
-                space._pos_cam[2] = space._pos_cam[2] - 1;
-                $("#camera-z-value").html(space._pos_cam[2]);
+                space._pos_cam[2] = space._pos_cam[2] - .1;
+                $("#camera-z-value").html(Math.floor(10*space._pos_cam[2])/10);
             }
             else if ($(this).text() === " > "){
-                space._pos_cam[2] = space._pos_cam[2] + 1;
-                $("#camera-z-value").html(space._pos_cam[2]);
+                space._pos_cam[2] = space._pos_cam[2] + .1;
+                $("#camera-z-value").html(Math.floor(10*space._pos_cam[2])/10);
             }
         }
 
         if ($(this).siblings("p").text() === "Fov-Y :"){
             if ($(this).text() === " < "){
-                space._fovy = space._fovy - 1;
-                $("#fovy-value").html(space._fovy);
+                space._fovy = space._fovy - .1;
+                $("#fovy-value").html(Math.floor(10*space._fovy)/10);
             }
             else if ($(this).text() === " > "){
-                space._fovy = space._fovy + 1;
-                $("#fovy-value").html(space._fovy);
+                space._fovy = space._fovy + .1;
+                $("#fovy-value").html(Math.floor(10*space._fovy)/10);
             }
         }
 
         if ($(this).siblings("p").text() === "Elevation :"){
             if ($(this).text() === " < "){
-                space._elev = space._elev - 1;
-                $("#elev-value").html(space._elev);
+                space._elev = space._elev - .1;
+                $("#elev-value").html(Math.floor(10*space._elev)/10);
             }
             else if ($(this).text() === " > "){
-                space._elev = space._elev + 1;
-                $("#elev-value").html(space._elev);
+                space._elev = space._elev + .1;
+                $("#elev-value").html(Math.floor(10*space._elev)/10);
             }
         }
 
         if ($(this).siblings("p").text() === "Angle :"){
             if ($(this).text() === " < "){
-                space._ang = space._ang - 1;
-                $("#angle-value").html(space._ang);
+                space._ang = space._ang - .1;
+                $("#angle-value").html(Math.floor(10*space._ang)/10);
             }
             else if ($(this).text() === " > "){
-                space._ang = space._ang + 1;
-                $("#angle-value").html(space._ang);
+                space._ang = space._ang + .1;
+                $("#angle-value").html(Math.floor(10*space._ang)/10);
             }
         }
 
         if ($(this).siblings("p").text() === "w :"){
             if ($(this).text() === " < "){
-                space._w = space._w - 1;
-                $("#w-value").html(space._w);
+                space._w = space._w - .1;
+                $("#w-value").html(Math.floor(10*space._w)/10);
             }
             else if ($(this).text() === " > "){
-                space._w = space._w + 1;
-                $("#w-value").html(space._w);
+                space._w = space._w + .1;
+                $("#w-value").html(Math.floor(10*space._w)/10);
             }
         }
 
         if ($(this).siblings("p").text() === "h :"){
             if ($(this).text() === " < "){
-                space._h = space._h - 1;
-                $("#h-value").html(space._h);
+                space._h = space._h - .1;
+                $("#h-value").html(Math.floor(10*space._h)/10);
             }
             else if ($(this).text() === " > "){
-                space._h = space._h + 1;
-                $("#h-value").html(space._h);
+                space._h = space._h + .1;
+                $("#h-value").html(Math.floor(10*space._h)/10);
             }
         }
 
         if ($(this).siblings("p").text() === "n :"){
             if ($(this).text() === " < "){
-                space._n = space._n - 1;
-                $("#n-value").html(space._n);
+                space._n = space._n - .1;
+                $("#n-value").html(Math.floor(10*space._n)/10);
             }
             else if ($(this).text() === " > "){
-                space._n = space._n + 1;
-                $("#n-value").html(space._n);
+                space._n = space._n + .1;
+                $("#n-value").html(Math.floor(10*space._n)/10);
             }
         }
 
         if ($(this).siblings("p").text() === "f :"){
             if ($(this).text() === " < "){
-                space._f = space._f - 1;
-                $("#f-value").html(space._f);
+                space._f = space._f - .1;
+                $("#f-value").html(Math.floor(10*space._f)/10);
             }
             else if ($(this).text() === " > "){
-                space._f = space._f + 1;
-                $("#f-value").html(space._f);
+                space._f = space._f + .1;
+                $("#f-value").html(Math.floor(10*space._f)/10);
             }
         }
 
@@ -258,99 +263,89 @@ $(document).ready(function(){
         if ($(this).siblings("p").text() === "Light Pos X :"){
             if ($(this).text() === " < "){
                 setup.globalsLight.l_pos[0] = setup.globalsLight.l_pos[0] - 0.1;
-                $("#l_pos-x-value").html(setup.globalsLight.l_pos[0]);
+                $("#l_pos-x-value").html(Math.floor(10*setup.globalsLight.l_pos[0])/10);
             }
             else if ($(this).text() === " > "){
                 setup.globalsLight.l_pos[0] = setup.globalsLight.l_pos[0] + 0.1;
-                $("#l_pos-x-value").html(setup.globalsLight.l_pos[0]);
+                $("#l_pos-x-value").html(Math.floor(10*setup.globalsLight.l_pos[0])/10);
             }
         }
 
         if ($(this).siblings("p").text() === "Light Pos Y :"){
             if ($(this).text() === " < "){
                 setup.globalsLight.l_pos[1] = setup.globalsLight.l_pos[1] - 0.1;
-                $("#l_pos-y-value").html(setup.globalsLight.l_pos[1]);
+                $("#l_pos-y-value").html(Math.floor(10*setup.globalsLight.l_pos[1])/10);
             }
             else if ($(this).text() === " > "){
                 setup.globalsLight.l_pos[1] = setup.globalsLight.l_pos[1] + 0.1;
-                $("#l_pos-y-value").html(setup.globalsLight.l_pos[1]);
+                $("#l_pos-y-value").html(Math.floor(10*setup.globalsLight.l_pos[1])/10);
             }
         }
 
         if ($(this).siblings("p").text() === "Light Pos Z :"){
             if ($(this).text() === " < "){
                 setup.globalsLight.l_pos[2] = setup.globalsLight.l_pos[2] - 0.1;
-                $("#l_pos-z-value").html(setup.globalsLight.l_pos[2]);
+                $("#l_pos-z-value").html(Math.floor(10*setup.globalsLight.l_pos[2])/10);
             }
             else if ($(this).text() === " > "){
                 setup.globalsLight.l_pos[2] = setup.globalsLight.l_pos[2] + 0.1;
-                $("#l_pos-z-value").html(setup.globalsLight.l_pos[2]);
+                $("#l_pos-z-value").html(Math.floor(10*setup.globalsLight.l_pos[2])/10);
             }
         }
 
         if ($(this).siblings("p").text() === "Light Dir X :"){
             if ($(this).text() === " < "){
                 setup.globalsLight.l_dir[0] = setup.globalsLight.l_dir[0] - 0.1;
-                $("#l_dir-x-value").html(setup.globalsLight.l_dir[0]);
+                $("#l_dir-x-value").html(Math.floor(10*setup.globalsLight.l_dir[0])/10);
             }
             else if ($(this).text() === " > "){
                 setup.globalsLight.l_dir[0] = setup.globalsLight.l_dir[0] + 0.1;
-                $("#l_dir-x-value").html(setup.globalsLight.l_dir[0]);
+                $("#l_dir-x-value").html(Math.floor(10*setup.globalsLight.l_dir[0])/10);
             }
         }
 
         if ($(this).siblings("p").text() === "Light Dir Y :"){
             if ($(this).text() === " < "){
                 setup.globalsLight.l_dir[1] = setup.globalsLight.l_dir[1] - 0.1;
-                $("#l_dir-y-value").html(setup.globalsLight.l_dir[1]);
+                $("#l_dir-y-value").html(Math.floor(10*setup.globalsLight.l_dir[1])/10);
             }
             else if ($(this).text() === " > "){
                 setup.globalsLight.l_dir[1] = setup.globalsLight.l_dir[1] + 0.1;
-                $("#l_dir-y-value").html(setup.globalsLight.l_dir[1]);
+                $("#l_dir-y-value").html(Math.floor(10*setup.globalsLight.l_dir[1])/10);
             }
         }
 
         if ($(this).siblings("p").text() === "Light Dir Z :"){
             if ($(this).text() === " < "){
                 setup.globalsLight.l_dir[2] = setup.globalsLight.l_dir[2] - 0.1;
-                $("#l_dir-z-value").html(setup.globalsLight.l_dir[2]);
+                $("#l_dir-z-value").html(Math.floor(10*setup.globalsLight.l_dir[2])/10);
             }
             else if ($(this).text() === " > "){
                 setup.globalsLight.l_dir[2] = setup.globalsLight.l_dir[2] + 0.1;
-                $("#l_dir-z-value").html(setup.globalsLight.l_dir[2]);
+                $("#l_dir-z-value").html(Math.floor(10*setup.globalsLight.l_dir[2])/10);
             }
         }
 
-        if ($(this).siblings("p").text() === "Ball Light Pos X :"){
-            if ($(this).text() === " < "){
-                setup.globalsLight.l_ball_pos[0] = setup.globalsLight.l_ball_pos[0] - 0.1;
-                $("#l_ball_pos-x-value").html(setup.globalsLight.l_ball_pos[0]);
-            }
-            else if ($(this).text() === " > "){
-                setup.globalsLight.l_ball_pos[0] = setup.globalsLight.l_ball_pos[0] + 0.1;
-                $("#l_ball_pos-x-value").html(setup.globalsLight.l_ball_pos[0]);
-            }
-        }
 
-        if ($(this).siblings("p").text() === "Ball Light Pos Y :"){
+        if ($(this).siblings("p").text() === "Ball Light Pos Z :"){
             if ($(this).text() === " < "){
-                setup.globalsLight.l_ball_pos[1] = setup.globalsLight.l_ball_pos[1] - 0.1;
-                $("#l_ball_pos-y-value").html(setup.globalsLight.l_ball_pos[1]);
+                setup.globalsLight.l_ball_pos[2] = setup.globalsLight.l_ball_pos[2] - 0.1;
+                $("#l_ball_pos-z-value").html(Math.floor(10*setup.globalsLight.l_ball_pos[2])/10);
             }
             else if ($(this).text() === " > "){
-                setup.globalsLight.l_ball_pos[1] = setup.globalsLight.l_ball_pos[1] + 0.1;
-                $("#l_ball_pos-y-value").html(setup.globalsLight.l_ball_pos[1]);
+                setup.globalsLight.l_ball_pos[2] = setup.globalsLight.l_ball_pos[2] + 0.1;
+                $("#l_ball_pos-z-value").html(Math.floor(10*setup.globalsLight.l_ball_pos[2])/10);
             }
         }
 
         if ($(this).siblings("p").text() === "Ball Light Pos Z :"){
             if ($(this).text() === " < "){
                 setup.globalsLight.l_ball_pos[2] = setup.globalsLight.l_ball_pos[2] - 0.1;
-                $("#l_ball_pos-z-value").html(setup.globalsLight.l_ball_pos[2]);
+                $("#l_ball_pos-z-value").html(Math.floor(10*setup.globalsLight.l_ball_pos[2])/10);
             }
             else if ($(this).text() === " > "){
                 setup.globalsLight.l_ball_pos[2] = setup.globalsLight.l_ball_pos[2] + 0.1;
-                $("#l_ball_pos-z-value").html(setup.globalsLight.l_ball_pos[2]);
+                $("#l_ball_pos-z-value").html(Math.floor(10*setup.globalsLight.l_ball_pos[2])/10);
             }
         }
     });

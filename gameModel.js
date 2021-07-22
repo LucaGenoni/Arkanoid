@@ -44,6 +44,7 @@ class Arkanoid {
 		};
 		newObj = setup.newObject("Bar",coordinate,dimensions,uniform, setup.shaders.lightTextureNormal, setup.geometries.cube);
 		newObj.move = 0;
+		newObj.letGo = true;
 		newObj.updateLocal = function () {
 			this.uniforms.u_world = utils.multiplyMatrices(
 				utils.MakeTranslateMatrix(this.center[0], this.center[1], 0),
@@ -317,7 +318,7 @@ class Arkanoid {
 		switch (game.state) {
 			case "Starting":
 				// update position of the bar
-				if (game.bar.move !== 0){
+				if (game.bar.move !== 0 && !game.bar.checkMultipleCollisions){
 					var tempChange = game.bar.center[0] + game.bar.move * game.velocityBar;
 					if (tempChange <= -1 + game.bar.dimensions[0]) tempChange = -1 + game.bar.dimensions[0];
 					if (tempChange >= 1 - game.bar.dimensions[0]) tempChange = 1 - game.bar.dimensions[0];
@@ -325,7 +326,6 @@ class Arkanoid {
 					game.updateSpigoliObject(game.bar);
 					game.ball.center[0] = game.bar.center[0];
 					game.arrow.updateLocal();
-					
 				}
 				if (game.arrow.move !== 0){
 					var tempChange = game.ballAngle + game.arrow.move;
@@ -339,11 +339,16 @@ class Arkanoid {
 			case "Playing":
 				// update position of the bar
 				if (game.bar.move !== 0){
+					var previous = game.bar.center[0]
 					var tempChange = game.bar.center[0] + game.bar.move * game.velocityBar;
 					if (tempChange <= -1 + game.bar.dimensions[0]) tempChange = -1 + game.bar.dimensions[0];
 					if (tempChange >= 1 - game.bar.dimensions[0]) tempChange = 1 - game.bar.dimensions[0];
 					game.bar.center[0] = tempChange;
 					game.updateSpigoliObject(game.bar);
+					if(game.collision(ball0,ball1,game.bar)){
+						game.bar.center[0] = previous;
+						game.updateSpigoliObject(game.bar);
+					}
 				}
 
 				if(game.collisionsCounter > 1){
@@ -369,21 +374,39 @@ class Arkanoid {
 				}
 
 				// check lost condition
-				if (ball1 < -1 - game.ball.radius*3) {
+				if (ball1 < -1 - game.ball.radius*3 || Math.abs(ball0)>1) {
 					game.handleLifeLoss();
 					return;
 				}
 				// collisions with objects
 				if (game.collision(ball0,ball1,game.bar) > 0) {
+					
+					var center_dist = Math.abs(ball0 - game.bar.center[0]);
+					//if the ball hits the right side of the bar, it will always bounce right
+					if (ball0 >= game.bar.center[0] ) game.ball.direction[0] = Math.abs(game.ball.direction[0]) + 1.1 * center_dist;
+					//instead if the ball hits the left side of the bar, it will always bounce left
+					else game.ball.direction[0] = -Math.abs(game.ball.direction[0]) - 1.1 * center_dist;
 					game.collisionsCounter += 1;
 					if (game.checkMultipleCollisions) {
 						console.log("multiple collsion with bar detected");
+						game.bar.letGo = false;
 						game.collisionsCounter -= 1;
-						if (game.ball.direction[1]<0) game.ball.direction[1] = -game.ball.direction[1];
+						if(game.ball.center[0] < game.bar.center[0]) game.ball.center[0] = game.bar.center[0] - game.bar.dimensions[0] - game.ball.radius
+						else game.ball.center[0] = game.bar.center[0] + game.bar.dimensions[0] + game.ball.radius
+						// if (game.ball.direction[1]<0) game.ball.direction[1] = -game.ball.direction[1];
+						while(game.collision(ball0,ball1,game.bar)){
+							var increment = scalarVector(game.velocityBall,game.ball.direction);
+							game.ball.center[0] = game.ball.center[0] + increment[0] ;
+							game.ball.center[1] = game.ball.center[1] + increment[1] ;
+							ball0 = game.ball.center[0] + game.ball.direction[0] * game.velocityBall;
+							ball1 = game.ball.center[1] + game.ball.direction[1] * game.velocityBall;
+							// game.changeState("Pause");
+						}
 					}
 					game.checkMultipleCollisions = true;
 				} 
 				else {
+					game.bar.letGo = true;
 					game.checkMultipleCollisions = false;
 					for (let i = 0; i < game.sponde.length; i++) game.collisionsCounter += game.collision(ball0,ball1,game.sponde[i]);
 					for (let i = 0; i < game.block.length; i++) {
@@ -394,6 +417,7 @@ class Arkanoid {
 							}
 							game.block.splice(i, 1);
 							game.updateScore();
+							break;
 						}
 					}
 				}
@@ -432,39 +456,30 @@ class Arkanoid {
 			var distance = Math.sqrt((x - ball0) ** 2 + (y - ball1) ** 2);
 			
 			if (distance < game.ball.radius) {
+				console.log(obj.name);
 				var bounce;
-				if (distance === 0) bounce = normalizeVector([x - game.ball.center[0], y - game.ball.center[1], 0]);
-				else bounce = normalizeVector([x - ball0, y - ball1, 0]);
+				if (distance === 0) bounce = [ball0 - game.ball.center[0], ball1 - game.ball.center[1], 0];
+				else bounce = [x - ball0, y - ball1, 0];
 				//applying small randomization to the bounce components to avoid loops between ball and barriers, plus
 				//if/else needed to avoid any change of sign (for small values of any direction) due to the randomization 
-				if (bounce[0] >= 0){
-					bounce[0] = bounce[0] + (Math.random() * 0.03);
-				}
-				else {
-					bounce[0] = bounce[0] - (Math.random() * 0.03);
-				}
-				if (bounce[1] >= 0){
-					bounce[1] = bounce[1] + (Math.random() * 0.03);
-				}
-				else {
-					bounce[1] = bounce[1] - (Math.random() * 0.03);
-				}
-				console.log("Ball entry direction: " + game.ball.direction, "Bounce: " + bounce);
+				// if (bounce[0] >= 0){
+				// 	bounce[0] = bounce[0] + (Math.random() * 0.03);
+				// }
+				// else {
+				// 	bounce[0] = bounce[0] - (Math.random() * 0.03);
+				// }
+				// if (bounce[1] >= 0){
+				// 	bounce[1] = bounce[1] + (Math.random() * 0.03);
+				// }
+				// else {
+				// 	bounce[1] = bounce[1] - (Math.random() * 0.03);
+				// }
+				bounce = normalizeVector(bounce);
+				console.log("Ball entry direction: " + game.ball.direction,"Distance",distance-game.ball.radius, "Bounce: " + bounce);
 				game.ball.direction = normalizeVector(
 					subVector(game.ball.direction,
-						scalarVector(2 * dotProductVector(bounce, game.ball.direction) / dotProductVector(bounce, bounce), bounce)));
+					scalarVector(2 * dotProductVector(bounce, game.ball.direction) / dotProductVector(bounce, bounce), bounce)));
 				//if the Ball collides with the Bar, special treatment is needed
-				if (obj.name === "Bar"){
-					var center_dist = Math.abs(ball0 - obj.center[0]);
-					//if the ball hits the right side of the bar, it will always bounce right
-					if (ball0 >= obj.center[0] ){
-						game.ball.direction[0] = Math.abs(game.ball.direction[0]) + 1.1 * center_dist;
-					}
-					//instead if the ball hits the left side of the bar, it will always bounce left
-					else {
-						game.ball.direction[0] = -Math.abs(game.ball.direction[0]) - 1.1 * center_dist;
-					}
-				}
 				console.log("Ball exit direction: " + game.ball.direction);
 				return 1;
 			}
@@ -507,6 +522,7 @@ class Arkanoid {
 	
 	drawGame(VP) {
 		for (let i = 0; i < game.ball.center.length; i++) setup.globalsLight.l_ball_pos[i] = game.ball.center[i];
+		// setup.globalsLight.l_ball_pos[2]=2;
 		for (let i = 0; i < game.ball.direction.length; i++) setup.globalsLight.l_ball_dir[i] = game.ball.direction[i];
 
 		game.block.forEach(e => {
