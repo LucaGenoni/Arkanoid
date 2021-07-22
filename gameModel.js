@@ -536,7 +536,7 @@ class Arkanoid {
 		if(x>0) setup.angleLight+=1;
 		setup.globalsLight.l_dir[0] = z;
 		setup.globalsLight.l_dir[2] = x;
-		
+
 		game.block.forEach(e => {
 			e.uniforms.u_matrix = utils.transposeMatrix(utils.multiplyMatrices(VP, e.uniforms.u_world));
 			e.uniforms.n_matrix = utils.invertMatrix(utils.transposeMatrix(e.uniforms.u_world));
@@ -699,7 +699,8 @@ class Arkanoid {
 		//handling case where the player has no lives left: LOSS
 		else if (this.lives + 1 === 1) {
 			document.getElementById('life-1').style.display = "none";
-			document.getElementById('lost-screen').style.display = "block";
+			if(this.score==0) document.getElementById('lost-screen-schifo').style.display = "block";
+			else document.getElementById('lost-screen').style.display = "block";
 		}
 	}
 }
