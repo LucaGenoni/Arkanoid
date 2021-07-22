@@ -53,6 +53,33 @@ class Arkanoid {
 		};
 		this.bar = newObj;
 		
+
+		geometry = {...setup.geometries.barrier};
+		name = "Floor";
+		coordinate = [0, -1, -.1];
+		dimensions = [1, 0, 2];
+
+		//uniforms for LEFT Barrier
+		uniform = {
+			u_color: [1,1,1,1],
+			u_world: utils.multiplyMatrices(utils.multiplyMatrices(
+				utils.MakeTranslateMatrix(coordinate[0], coordinate[1], coordinate[2]),
+				utils.MakeRotateXMatrix(-90)),				
+				utils.MakeScaleNuMatrix(dimensions[0], dimensions[1], dimensions[2])),
+			u_diffuseTexture: {
+				texture: setup.textures.sponde,
+				sampler: setup.samplers.nearest,
+			},
+			u_normalTexture: {
+				texture: setup.textures.sponde_norm,
+				sampler: setup.samplers.nearest,
+			}
+		};
+		// create barriers
+		dimensions = [dimensions[1], dimensions[0], dimensions[2]]; //updated dimensions after the transformations
+		newObj = setup.newObject(name,coordinate,dimensions,uniform, setup.shaders.lightTextureNormal, geometry );
+		this.floorGame = newObj;
+
 		// CREATE EDGES
 		this.sponde = [];
 		for (x = 0; x < 3; x++) {
@@ -60,14 +87,14 @@ class Arkanoid {
 			switch (x) {
 				case 0:
 					name = "LEFT Barrier";
-					coordinate = [-1, 0, 0];
+					coordinate = [-1, 0, -.1];
 					dimensions = [1, 0.01, 0.5];
 
 					//uniforms for LEFT Barrier
 					uniform = {
 						u_color: [1,1,1,1],
 						u_world: utils.multiplyMatrices(
-							utils.MakeTranslateMatrix(coordinate[0], coordinate[1], 0),
+							utils.MakeTranslateMatrix(coordinate[0], coordinate[1], coordinate[2]),
 							utils.multiplyMatrices(utils.MakeRotateZMatrix(90),
 								utils.MakeScaleNuMatrix(dimensions[0], dimensions[1], dimensions[2]))
 						),
@@ -86,14 +113,14 @@ class Arkanoid {
 					break;
 				case 1:
 					name = "TOP Barrier";
-					coordinate = [0, 1, 0];
+					coordinate = [0, 1, -.1];
 					dimensions = [1, 0.01, 0.5];
 					
 					//uniforms for TOP Barrier 
 					uniform = {
 						u_color: [1,1,1,1],
 						u_world: utils.multiplyMatrices(
-							utils.MakeTranslateMatrix(coordinate[0], coordinate[1], 0),
+							utils.MakeTranslateMatrix(coordinate[0], coordinate[1], coordinate[2]),
 							utils.MakeScaleNuMatrix(dimensions[0], dimensions[1], dimensions[2])
 						),
 						u_diffuseTexture: {
@@ -110,14 +137,14 @@ class Arkanoid {
 					break;
 				case 2:
 					name = "RIGHT Barrier";
-					coordinate = [1, 0, 0];
+					coordinate = [1, 0, -.1];
 					dimensions = [1, 0.01, 0.5];
 					
 					//uniforms for RIGHT Barrier
 					uniform = {
 						u_color: [1,1,1,1],
 						u_world: utils.multiplyMatrices(
-							utils.MakeTranslateMatrix(coordinate[0], coordinate[1], 0),
+							utils.MakeTranslateMatrix(coordinate[0], coordinate[1], coordinate[2]),
 							utils.multiplyMatrices(utils.MakeRotateZMatrix(-90),
 								utils.MakeScaleNuMatrix(dimensions[0], dimensions[1], dimensions[2]))
 						),
@@ -219,7 +246,7 @@ class Arkanoid {
 						u_color: color,
 						u_world: utils.multiplyMatrices(
 							utils.MakeTranslateMatrix(coordinate[0], coordinate[1], 0),
-							utils.MakeScaleNuMatrix( dimensions[0], dimensions[1], dimensions[2])
+							utils.MakeScaleNuMatrix( dimensions[0], dimensions[1], dimensions[2]),
 						),
 						u_diffuseTexture: {
 							texture: setup.textures.diffuseBlocks,
@@ -445,6 +472,12 @@ class Arkanoid {
 		var yaxis = Math.abs(ball1 - obj.center[1]) - obj.dimensions[1];
 
 		if (xaxis <= game.ball.radius && yaxis <= game.ball.radius) {
+			if(obj.name.indexOf("Barrier")>0){
+				if(obj.name==="RIGHT Barrier") game.ball.direction[0] = -Math.abs(game.ball.direction[0]);
+				else if(obj.name==="LEFT Barrier") game.ball.direction[0] = Math.abs(game.ball.direction[0]);
+				else if(obj.name ==="TOP Barrier") game.ball.direction[1] = -Math.abs(game.ball.direction[1]);
+				return 1;
+			}
 			// collision detected
 			var x = Math.max(obj.min[0], Math.min(ball0, obj.max[0]));
 			var y = Math.max(obj.min[1], Math.min(ball1, obj.max[1]));
@@ -456,7 +489,7 @@ class Arkanoid {
 			if (distance < game.ball.radius) {
 				console.log(obj.name);
 				var bounce;
-				if (distance === 0) bounce = [ball0 - game.ball.center[0], ball1 - game.ball.center[1], 0];
+				if (distance === 0) bounce = [game.ball.center[0] - ball0, game.ball.center[1] - ball1, 0];
 				else bounce = [x - ball0, y - ball1, 0];
 				bounce = normalizeVector(bounce);
 				//applying small randomization to the bounce components to avoid loops between ball and barriers, plus
@@ -520,20 +553,22 @@ class Arkanoid {
 	}
 	
 	drawGame(VP) {
-		for (let i = 0; i < game.ball.center.length; i++) setup.globalsLight.l_ball_pos[i] = game.ball.center[i];
-		// var directionSpot = normalizeVector(scalarVector(-1,game.ball.direction));
-		// for (let i = 0; i < directionSpot.length; i++) setup.globalsLight.l_ball_dir[i] = -directionSpot[i];
-		// setup.globalsLight.l_ball_dir[2] = directionSpot[0];
-		// setup.globalsLight.l_ball_dir[0] = directionSpot[2];
-		setup.globalsLight.l_ball_dir = normalizeVector(game.ball.direction);
-
+        setup.angleLight += .3
+		if(setup.angleLight>360) setup.angleLight -= 360
+		z = Math.cos(utils.degToRad(setup.angleLight))
+		if(z<0) setup.angleLight+=1
+		setup.globalsLight.l_dir = normalizeVector([Math.sin(utils.degToRad(setup.angleLight)),0, z]);
+		console.log(setup.angleLight);
+		// setup.globalsLight.l_dir = [0,Math.sin(utils.degToRad(setup.angleLight)), Math.cos(utils.degToRad(setup.angleLight))];
 		game.block.forEach(e => {
 			e.uniforms.u_matrix = utils.transposeMatrix(utils.multiplyMatrices(VP, e.uniforms.u_world));
 			e.uniforms.n_matrix = utils.invertMatrix(utils.transposeMatrix(e.uniforms.u_world));
+			e.uniforms.c_eyePos = space._pos_cam;
 			e.uniforms = {...e.uniforms,...setup.globalsLight};
 		});
 		
 		game.powerup.forEach(p => {
+			p.uniforms.c_eyePos = space._pos_cam;
 			p.uniforms.u_matrix = utils.transposeMatrix(utils.multiplyMatrices(
 				VP, utils.multiplyMatrices(
 					utils.MakeTranslateMatrix(p.center[0], p.center[1], 0),
@@ -542,16 +577,15 @@ class Arkanoid {
 		});
 		
 		game.sponde.forEach(e => {
+			e.uniforms.c_eyePos = space._pos_cam;
+			e.uniforms.n_matrix = utils.invertMatrix(utils.transposeMatrix(e.uniforms.u_world));
 			e.uniforms.u_matrix = utils.transposeMatrix(utils.multiplyMatrices(VP, e.uniforms.u_world))
 		});
 		
-		for (let i = 0; i < game.sponde.length; i++) {
-			const e = game.sponde[i];
-			this.drawSingleObject(VP,e)
-		}
-		game.bar.uniforms.c_eyePos = space._pos_cam;
 		game.drawSingleObject(VP,game.bar);
 		game.drawSingleObject(VP,game.ball);
+		game.drawSingleObject(VP,game.floorGame);
+		twgl.drawObjectList(gl, game.sponde);
 		twgl.drawObjectList(gl, game.block);
 		twgl.drawObjectList(gl, game.powerup);
 		requestAnimationFrame(game.play);
@@ -561,6 +595,7 @@ class Arkanoid {
 		item.updateLocal();
 		item.uniforms.u_matrix = utils.transposeMatrix(utils.multiplyMatrices( VP, item.uniforms.u_world));
 		item.uniforms.n_matrix = utils.invertMatrix(utils.transposeMatrix( item.uniforms.u_world));
+		item.uniforms.c_eyePos = space._pos_cam;
 		item.uniforms = {...item.uniforms,...setup.globalsLight};
 		gl.useProgram(item.programInfo.program);
 		twgl.setBuffersAndAttributes(gl, item.programInfo, item.bufferInfo);
