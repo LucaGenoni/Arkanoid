@@ -690,8 +690,9 @@ class Arkanoid {
 			this.ballAngle = 90;
 			this.bar.center = [0, -1];
 			this.ball.center = [0.0, this.bar.center[1] + this.ball.radius + this.bar.dimensions[1]];
+			this.ball.direction = [Math.cos(utils.degToRad(this.ballAngle)), Math.sin(utils.degToRad(this.ballAngle)), 0];
 			this.arrow.updateLocal();
-			console.log(this.ball.center,this.arrow.center);
+			console.log(this.ball.center,this.ball.direction);
 			this.changeState("Starting");
 			this.play();
 		}
